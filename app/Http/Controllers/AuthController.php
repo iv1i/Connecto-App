@@ -9,9 +9,11 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Laravel\Sanctum\HasApiTokens;
 
 class AuthController extends Controller
 {
+    use HasApiTokens;
     public function register(RegisterRequest $request): JsonResponse
     {
         $user = User::create([
@@ -19,8 +21,6 @@ class AuthController extends Controller
             'email' => $request->email,
             'password' => Hash::make($request->password),
         ]);
-
-        Auth::login($user); // Добавляем автоматический вход после регистрации
 
         return response()->json([
             'user' => $user,
@@ -45,12 +45,13 @@ class AuthController extends Controller
 
     public function logout(Request $request): JsonResponse
     {
-        // Удаляем текущий токен
-        $request->user()->currentAccessToken()->delete();
+        $user = $request->user();
 
-        // Выход из системы
-        Auth::logout();
+        // Удаляем токен (если API)
+        if ($user && method_exists($user->currentAccessToken(), 'delete')) {
+            $user->currentAccessToken()->delete();
+        }
 
-        return response()->json(['message' => 'Logged out']);
+        return response()->json(['message' => 'Вы успешно вышли из системы']);
     }
 }

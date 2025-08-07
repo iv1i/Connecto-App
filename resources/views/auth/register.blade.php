@@ -49,13 +49,20 @@
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
             const password_confirmation = document.getElementById('password_confirmation').value;
-
+            function getCookie(name) {
+                const value = `; ${document.cookie}`;
+                const parts = value.split(`; ${name}=`);
+                if (parts.length === 2) return parts.pop().split(';').shift();
+            }
             try {
+                const encodedToken = getCookie('XSRF-TOKEN');
+                const decodedToken = decodeURIComponent(encodedToken);
                 const response = await fetch('/api/register', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Accept': 'application/json'
+                        'Accept': 'application/json',
+                        'X-XSRF-TOKEN': decodedToken
                     },
                     body: JSON.stringify({ name, email, password, password_confirmation })
                 });

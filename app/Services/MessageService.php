@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Events\MessageSent;
 use App\Http\Requests\MessageRequest;
 use App\Models\ChatRoom;
 use App\Models\Message;
@@ -10,7 +11,7 @@ use Illuminate\Pagination\LengthAwarePaginator;
 
 class MessageService
 {
-    public function sendMessage(MessageRequest $request, User $user): array
+    public function sendMessage(MessageRequest $request, User $user): Message
     {
         $data = $request->validated();
         $data['user_id'] = $user->id;
@@ -27,7 +28,8 @@ class MessageService
                 ],
             ]
         ];
-        return $arr;
+        MessageSent::dispatch($message);
+        return $message->load('user');
     }
 
     public function deleteMessage(Message $message): void

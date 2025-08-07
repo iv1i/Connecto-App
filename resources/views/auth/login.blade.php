@@ -8,6 +8,7 @@
             </div>
 
             <form id="loginForm" class="space-y-4">
+                @csrf
                 <div class="form-group">
                     <label for="email" class="label">Email</label>
                     <input type="email" id="email" name="email" required class="input">
@@ -43,7 +44,8 @@
                 },
                 body: JSON.stringify({
                     email: document.getElementById('email').value,
-                    password: document.getElementById('password').value
+                    password: document.getElementById('password').value,
+                    _token: "{{ csrf_token() }}"
                 })
             });
 

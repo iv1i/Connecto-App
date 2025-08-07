@@ -15,10 +15,8 @@ class Authenticate
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (! $request->expectsJson()) {
-            if (! $request->user()) {
-                return redirect('/login');
-            }
+        if ($request->cookie('token') !== null) {
+            $token = $request->cookie('token');
         }
     }
 }

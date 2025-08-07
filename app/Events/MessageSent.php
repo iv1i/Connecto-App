@@ -19,12 +19,12 @@ class MessageSent implements ShouldBroadcast
 
     public function __construct(Message $message)
     {
-        $this->message = $message;
+        $this->message = $message->load('user');
     }
 
     public function broadcastOn(): Channel
     {
-        return new PresenceChannel('room.' . $this->message->chat_room_id);
+        return new PrivateChannel('room.' . $this->message->chat_room_id);
     }
 
     public function broadcastWith(): array
