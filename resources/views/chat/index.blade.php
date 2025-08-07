@@ -1,57 +1,55 @@
 @extends('layouts.app')
 
 @section('content')
-    <div class="flex h-screen bg-gray-100">
+    <div class="chat-layout">
         <!-- Sidebar -->
-        <div class="w-64 bg-white shadow-md">
-            <div class="p-4 border-b">
-                <h2 class="text-xl font-semibold">Chat Rooms</h2>
-                <button id="createRoomBtn" class="mt-2 w-full bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700">
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <h2>Chat Rooms</h2>
+                <button id="createRoomBtn" class="btn btn-primary w-full mt-2">
                     Create Room
                 </button>
             </div>
 
-            <div class="p-4">
-                <input type="text" id="roomSearch" placeholder="Search rooms..."
-                       class="w-full px-3 py-2 border border-gray-300 rounded-md mb-4">
+            <div class="sidebar-content">
+                <input type="text" id="roomSearch" placeholder="Search rooms..." class="input mb-4">
 
                 <div id="roomList" class="space-y-2">
                     <!-- Rooms will be loaded here -->
                 </div>
             </div>
 
-            <div class="p-4 border-t">
-                <div class="flex items-center space-x-2">
-                    <img src="https://ui-avatars.com/api/?name={{ auth()->user()->name }}"
-                         alt="User" class="w-8 h-8 rounded-full">
+            <div class="sidebar-footer">
+                <div class="flex items-center gap-2">
+                    <div class="message-avatar">
+                        {{ substr(auth()->user()->name, 0, 1) }}
+                    </div>
                     <span>{{ auth()->user()->name }}</span>
                 </div>
-                <button id="logoutBtn" class="mt-2 text-sm text-red-600 hover:text-red-800">Logout</button>
+                <button id="logoutBtn" class="btn-link text-sm mt-2">Logout</button>
             </div>
         </div>
 
-        <!-- Main Content -->
-        <div class="flex-1 flex flex-col">
+        <!-- Main Chat Area -->
+        <div class="chat-area">
             <!-- Room Header -->
-            <div id="roomHeader" class="p-4 bg-white shadow-sm border-b">
-                <h2 id="roomName" class="text-xl font-semibold">Select a room</h2>
-                <p id="roomDescription" class="text-gray-600"></p>
+            <div class="chat-header">
+                <h2 id="roomName">Select a room</h2>
+                <p id="roomDescription" class="text-light"></p>
             </div>
 
             <!-- Messages -->
-            <div id="messagesContainer" class="flex-1 p-4 overflow-y-auto">
+            <div class="messages-container">
                 <div id="messages" class="space-y-4">
                     <!-- Messages will be loaded here -->
                 </div>
             </div>
 
             <!-- Message Input -->
-            <div id="messageInputContainer" class="p-4 bg-white border-t" style="display: none;">
-                <form id="messageForm" class="flex space-x-2">
-                    <input type="text" id="messageInput" placeholder="Type a message..."
-                           class="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
-                    <button type="submit"
-                            class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700">
+            <div id="messageInputContainer" class="message-input-container hidden">
+                <form id="messageForm" class="flex gap-2">
+                    <input type="text" id="messageInput" placeholder="Type a message..." class="input flex-grow">
+                    <button type="submit" class="btn btn-primary">
                         Send
                     </button>
                 </form>
@@ -59,45 +57,42 @@
         </div>
 
         <!-- Create Room Modal -->
-        <div id="createRoomModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden">
-            <div class="bg-white p-6 rounded-lg w-full max-w-md">
-                <h2 class="text-xl font-semibold mb-4">Create New Room</h2>
+        <div id="createRoomModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>Create New Room</h2>
+                </div>
+
                 <form id="createRoomForm">
-                    <div class="mb-4">
-                        <label for="roomNameInput" class="block text-sm font-medium text-gray-700">Room Name</label>
-                        <input type="text" id="roomNameInput" name="name" required
-                               class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                    <div class="form-group">
+                        <label for="roomNameInput" class="label">Room Name</label>
+                        <input type="text" id="roomNameInput" name="name" required class="input w-full">
                     </div>
 
-                    <div class="mb-4">
-                        <label for="roomDescriptionInput" class="block text-sm font-medium text-gray-700">Description</label>
-                        <textarea id="roomDescriptionInput" name="description" rows="3"
-                                  class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"></textarea>
+                    <div class="form-group">
+                        <label for="roomDescriptionInput" class="label">Description</label>
+                        <textarea id="roomDescriptionInput" name="description" rows="3" class="input w-full"></textarea>
                     </div>
 
-                    <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700">Room Type</label>
-                        <div class="mt-2 space-y-2">
-                            <div class="flex items-center">
-                                <input id="publicRoom" name="type" type="radio" value="public" checked
-                                       class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300">
-                                <label for="publicRoom" class="ml-2 block text-sm text-gray-700">Public</label>
-                            </div>
-                            <div class="flex items-center">
-                                <input id="privateRoom" name="type" type="radio" value="private"
-                                       class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300">
-                                <label for="privateRoom" class="ml-2 block text-sm text-gray-700">Private</label>
-                            </div>
+                    <div class="form-group">
+                        <label class="label">Room Type</label>
+                        <div class="radio-group">
+                            <label class="radio-item">
+                                <input type="radio" name="type" value="public" checked class="radio-input">
+                                <span>Public</span>
+                            </label>
+                            <label class="radio-item">
+                                <input type="radio" name="type" value="private" class="radio-input">
+                                <span>Private</span>
+                            </label>
                         </div>
                     </div>
 
-                    <div class="flex justify-end space-x-2">
-                        <button type="button" id="cancelCreateRoom"
-                                class="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50">
+                    <div class="modal-footer">
+                        <button type="button" id="cancelCreateRoom" class="btn btn-secondary">
                             Cancel
                         </button>
-                        <button type="submit"
-                                class="px-4 py-2 bg-indigo-600 text-white rounded-md shadow-sm text-sm font-medium hover:bg-indigo-700">
+                        <button type="submit" class="btn btn-primary">
                             Create
                         </button>
                     </div>
@@ -105,7 +100,6 @@
             </div>
         </div>
     </div>
-
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const token = localStorage.getItem('token');
