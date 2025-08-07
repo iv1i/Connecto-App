@@ -9,6 +9,11 @@ use Illuminate\Support\Facades\Hash;
 
 class UserService
 {
+
+    public function getProfile(): User
+    {
+        return auth()->user();
+    }
     public function updateUser(UpdateUserRequest $request, User $user): User
     {
         $data = $request->validated();

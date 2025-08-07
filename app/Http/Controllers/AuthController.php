@@ -6,6 +6,7 @@ use App\Http\Requests\LoginRequest;
 use App\Http\Requests\RegisterRequest;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 
@@ -19,11 +20,11 @@ class AuthController extends Controller
             'password' => Hash::make($request->password),
         ]);
 
-        $token = $user->createToken('auth_token')->plainTextToken;
+        Auth::login($user); // Добавляем автоматический вход после регистрации
 
         return response()->json([
             'user' => $user,
-            'token' => $token,
+            'token' => $user->createToken('auth_token')->plainTextToken,
         ]);
     }
 
@@ -33,7 +34,7 @@ class AuthController extends Controller
             return response()->json(['message' => 'Invalid credentials'], 401);
         }
 
-        $user = User::where('email', $request->email)->firstOrFail();
+        $user = Auth::user();
         $token = $user->createToken('auth_token')->plainTextToken;
 
         return response()->json([
@@ -42,9 +43,14 @@ class AuthController extends Controller
         ]);
     }
 
-    public function logout(): JsonResponse
+    public function logout(Request $request): JsonResponse
     {
-        auth()->user()->tokens()->delete();
+        // Удаляем текущий токен
+        $request->user()->currentAccessToken()->delete();
+
+        // Выход из системы
+        Auth::logout();
+
         return response()->json(['message' => 'Logged out']);
     }
 }

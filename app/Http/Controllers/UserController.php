@@ -13,6 +13,12 @@ class UserController extends Controller
     {
     }
 
+    public function profile(): JsonResponse
+    {
+        $user = $this->userService->getProfile();
+        return response()->json($user);
+    }
+
     public function index(): JsonResponse
     {
         $users = $this->userService->getAllUsers();

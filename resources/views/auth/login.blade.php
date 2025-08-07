@@ -35,30 +35,29 @@
         document.getElementById('loginForm').addEventListener('submit', async function(e) {
             e.preventDefault();
 
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
+            const response = await fetch('/api/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({
+                    email: document.getElementById('email').value,
+                    password: document.getElementById('password').value
+                })
+            });
 
-            try {
-                const response = await fetch('/api/login', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json'
-                    },
-                    body: JSON.stringify({ email, password })
-                });
+            if (response.ok) {
+                const { token } = await response.json();
 
-                const data = await response.json();
+                // Сохраняем токен
+                localStorage.setItem('token', token);
+                document.cookie = `token=${token}; path=/; max-age=${60 * 60 * 24}`;
 
-                if (response.ok) {
-                    localStorage.setItem('token', data.token);
-                    window.location.href = '/chat';
-                } else {
-                    alert(data.message || 'Login failed');
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                alert('An error occurred');
+                // Перенаправляем
+                window.location.href = '/chat';
+            } else {
+                alert('Login failed');
             }
         });
     </script>

@@ -30,6 +30,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/messages/{message}/react/{reaction}', [MessageController::class, 'addReaction']);
 
     // Users
+    Route::get('/profile', [UserController::class, 'profile']);
     Route::get('/users', [UserController::class, 'index']);
     Route::get('/users/{user}', [UserController::class, 'show']);
     Route::put('/users/{user}', [UserController::class, 'update']);

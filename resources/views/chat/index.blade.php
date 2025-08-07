@@ -22,9 +22,9 @@
             <div class="sidebar-footer">
                 <div class="flex items-center gap-2">
                     <div class="message-avatar">
-                        {{ substr(auth()->user()->name, 0, 1) }}
+                        {{ auth()->user() ? substr(auth()->user()->name, 0, 1) : '?' }}
                     </div>
-                    <span>{{ auth()->user()->name }}</span>
+                    <span>{{ auth()->user()->name ?? 'Guest' }}</span>
                 </div>
                 <button id="logoutBtn" class="btn-link text-sm mt-2">Logout</button>
             </div>
@@ -109,20 +109,6 @@
             }
 
             let currentRoomId = null;
-
-            // Initialize Echo
-            window.Echo = new Echo({
-                broadcaster: 'pusher',
-                key: '{{ env('PUSHER_APP_KEY') }}',
-                cluster: '{{ env('PUSHER_APP_CLUSTER') }}',
-                forceTLS: true,
-                auth: {
-                    headers: {
-                        'Authorization': 'Bearer ' + token
-                    }
-                }
-            });
-
             // Load rooms
             async function loadRooms() {
                 try {
