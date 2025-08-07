@@ -195,7 +195,7 @@
             // Инициализация приложения
             initApp();
 
-            Echo.channel(`room.${currentRoom}`).listen('MessageSent', (e) => {
+            Echo.channel(`room`).listen('MessageSent', (e) => {
                 if (e.message.user.id !== userData.id){
                     addMessageToUI(e.message);
                     messageInput.value = '';

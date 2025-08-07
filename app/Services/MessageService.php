@@ -16,20 +16,9 @@ class MessageService
         $data = $request->validated();
         $data['user_id'] = $user->id;
         $message = Message::create($data);
-        $arr = [
-            'success' => true,
-            'data' => [
-                'id' => $message->id,
-                'content' => $message->content,
-                'created_at' => $message->created_at,
-                'user' => [
-                    'id' => $user->id,
-                    'name' => $user->name,
-                ],
-            ]
-        ];
-        MessageSent::dispatch($message);
-        return $message->load('user');
+        $msg = $message->load('user');
+        MessageSent::dispatch($msg);
+        return $msg;
     }
 
     public function deleteMessage(Message $message): void
