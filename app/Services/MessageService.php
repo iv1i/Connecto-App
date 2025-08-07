@@ -10,12 +10,24 @@ use Illuminate\Pagination\LengthAwarePaginator;
 
 class MessageService
 {
-    public function sendMessage(MessageRequest $request, User $user): Message
+    public function sendMessage(MessageRequest $request, User $user): array
     {
         $data = $request->validated();
         $data['user_id'] = $user->id;
-
-        return Message::create($data);
+        $message = Message::create($data);
+        $arr = [
+            'success' => true,
+            'data' => [
+                'id' => $message->id,
+                'content' => $message->content,
+                'created_at' => $message->created_at,
+                'user' => [
+                    'id' => $user->id,
+                    'name' => $user->name,
+                ],
+            ]
+        ];
+        return $arr;
     }
 
     public function deleteMessage(Message $message): void
@@ -31,13 +43,16 @@ class MessageService
             ->paginate(20);
     }
 
-    public function addReaction(Message $message, string $reaction, User $user): Message
+    public function addReaction(Message $message, string $reaction, User $user): array
     {
         $reactions = $message->reactions ?? [];
         $reactions[$reaction] = ($reactions[$reaction] ?? 0) + 1;
         $message->reactions = $reactions;
         $message->save();
 
-        return $message;
+        return [
+            'success' => true,
+            'reactions' => $reactions,
+        ];
     }
 }

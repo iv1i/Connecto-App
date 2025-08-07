@@ -35,6 +35,11 @@ class ChatRoomService
 
     public function getPublicRooms(): LengthAwarePaginator
     {
+        if (auth('api')->check()) {
+            return ChatRoom::with('creator')
+                ->withCount('messages')
+                ->paginate(10);
+        }
         return ChatRoom::where('type', ChatRoom::TYPE_PUBLIC)
             ->withCount('messages')
             ->paginate(10);

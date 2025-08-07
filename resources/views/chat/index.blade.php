@@ -21,10 +21,9 @@
 
             <div class="sidebar-footer">
                 <div class="flex items-center gap-2">
-                    <div class="message-avatar">
-                        {{ auth()->user() ? substr(auth()->user()->name, 0, 1) : '?' }}
+                    <div id="userAvatar" class="message-avatar">
                     </div>
-                    <span>{{ auth()->user()->name ?? 'Guest' }}</span>
+                    <span id="userName"></span>
                 </div>
                 <button id="logoutBtn" class="btn-link text-sm mt-2">Logout</button>
             </div>
@@ -101,11 +100,16 @@
         </div>
     </div>
     <script>
+
         document.addEventListener('DOMContentLoaded', function() {
             const token = localStorage.getItem('token');
+            const currentRoom = localStorage.getItem('roomId');
             if (!token) {
                 window.location.href = '/login';
                 return;
+            }
+            if (currentRoom) {
+                joinRoom(currentRoom);
             }
 
             let currentRoomId = null;
@@ -145,6 +149,8 @@
             // Join room
             async function joinRoom(roomId) {
                 try {
+                    const messagesContainer = document.getElementById('messages');
+                    messagesContainer.innerHTML = '<div class="loading">Loading messages...</div>';
                     const response = await fetch(`/api/rooms/${roomId}`, {
                         headers: {
                             'Authorization': 'Bearer ' + token,
@@ -155,101 +161,73 @@
                     const room = await response.json();
 
                     if (response.ok) {
+                        allMessages = [];
                         currentRoomId = roomId;
-
+                        localStorage.setItem('roomId', roomId);
                         // Update UI
                         document.getElementById('roomName').textContent = room.name;
                         document.getElementById('roomDescription').textContent = room.description || 'No description';
                         document.getElementById('messageInputContainer').style.display = 'block';
 
                         // Load messages
-                        loadMessages(roomId);
+                        await loadMessages(roomId);
 
-                        // Join Echo channel
-                        window.Echo.leaveAll();
-                        window.Echo.join(`room.${roomId}`)
-                            .here(users => {
-                                console.log('Users in room:', users);
-                            })
-                            .joining(user => {
-                                console.log('User joined:', user);
-                            })
-                            .leaving(user => {
-                                console.log('User left:', user);
-                            })
-                            .listen('MessageSent', (data) => {
-                                addMessageToUI(data.message);
-                            });
                     }
                 } catch (error) {
                     console.error('Error joining room:', error);
                 }
             }
 
-            // Load messages
-            async function loadMessages(roomId) {
+            // load User
+            async function loadUser() {
                 try {
-                    const response = await fetch(`/api/rooms/${roomId}/messages`, {
+                    const response = await fetch('/api/profile', {
                         headers: {
                             'Authorization': 'Bearer ' + token,
                             'Accept': 'application/json'
                         }
                     });
-
                     const data = await response.json();
-
                     if (response.ok) {
-                        const messagesContainer = document.getElementById('messages');
-                        messagesContainer.innerHTML = '';
-
-                        data.data.forEach(message => {
-                            addMessageToUI(message);
-                        });
-
-                        // Scroll to bottom
-                        setTimeout(() => {
-                            const container = document.getElementById('messagesContainer');
-                            container.scrollTop = container.scrollHeight;
-                        }, 100);
+                        document.getElementById('userAvatar').textContent = data.name.charAt(0).toUpperCase();
+                        document.getElementById('userName').textContent = data.name;
                     }
                 } catch (error) {
-                    console.error('Error loading messages:', error);
+                    console.error('Error loading user:', error);
+                    this.logout();
                 }
             }
 
-            // Add message to UI
-            function addMessageToUI(message) {
+            // Хранилище всех сообщений
+            let allMessages = [];
+
+            function addMessageToUI(message, prepend = false) {
                 const messagesContainer = document.getElementById('messages');
 
                 const messageElement = document.createElement('div');
-                messageElement.className = 'flex space-x-3';
+                messageElement.className = 'flex space-x-3 mb-4';
+                messageElement.id = `message-id-${message.id}`;
                 messageElement.innerHTML = `
-            <div class="flex-shrink-0">
-                <img src="https://ui-avatars.com/api/?name=${message.user.name}"
-                     alt="${message.user.name}" class="w-8 h-8 rounded-full">
+        <div class="message-avatar">${message.user.name.charAt(0).toUpperCase()}</div>
+        <div class="message-content">
+            <div class="message-header">
+                <span class="message-username">${message.user.name}</span>
+                <span class="message-time">${new Date(message.created_at).toLocaleString()}</span>
             </div>
-            <div>
-                <div class="flex items-center space-x-1">
-                    <span class="font-medium">${message.user.name}</span>
-                    <span class="text-xs text-gray-500">${new Date(message.created_at).toLocaleString()}</span>
-                </div>
-                <p class="text-gray-800">${message.content}</p>
-                <div class="flex space-x-2 mt-1">
-                    <button class="text-xs text-gray-500 hover:text-indigo-600"
-                            onclick="addReaction(${message.id}, 'like')">👍 Like</button>
-                    <button class="text-xs text-gray-500 hover:text-indigo-600"
-                            onclick="addReaction(${message.id}, 'love')">❤️ Love</button>
-                    <button class="text-xs text-gray-500 hover:text-indigo-600"
-                            onclick="addReaction(${message.id}, 'laugh')">😆 Laugh</button>
-                </div>
+            <p class="message-text">${message.content}</p>
+            <div class="message-reactions">
+                <button class="reaction-btn" onclick="addReaction(${message.id}, 'like')">${message.reactions?.like || ''}👍</button>
+                <button class="reaction-btn" onclick="addReaction(${message.id}, 'love')">${message.reactions?.love || ''}❤️</button>
+                <button class="reaction-btn" onclick="addReaction(${message.id}, 'laugh')">${message.reactions?.laugh || ''}😆</button>
             </div>
-        `;
+        </div>
+    `;
 
-                messagesContainer.appendChild(messageElement);
-
-                // Scroll to bottom
-                const container = document.getElementById('messagesContainer');
-                container.scrollTop = container.scrollHeight;
+                if (prepend) {
+                    messagesContainer.prepend(messageElement);
+                } else {
+                    messagesContainer.appendChild(messageElement);
+                }
             }
 
             // Search rooms
@@ -297,7 +275,6 @@
                 e.preventDefault();
 
                 const content = document.getElementById('messageInput').value;
-
                 if (!content.trim() || !currentRoomId) return;
 
                 try {
@@ -315,7 +292,14 @@
                     });
 
                     if (response.ok) {
+                        const newMessage = await response.json();
                         document.getElementById('messageInput').value = '';
+
+                        // Добавляем новое сообщение в UI
+                        addMessageToUI(newMessage.data);
+
+                        // Обновляем счетчик сообщений в списке комнат
+                        updateRoomMessageCount(currentRoomId);
                     } else {
                         const error = await response.json();
                         alert(error.message || 'Failed to send message');
@@ -326,13 +310,60 @@
                 }
             });
 
+            // Load messages
+            async function loadMessages(roomId) {
+                try {
+                    const messagesContainer = document.getElementById('messages');
+                    messagesContainer.innerHTML = '<div class="loading">Loading messages...</div>';
+
+                    const response = await fetch(`/api/rooms/${roomId}/messages`, {
+                        method: 'GET',
+                        headers: {
+                            'Authorization': 'Bearer ' + token,
+                            'Accept': 'application/json'
+                        }
+                    });
+
+                    const data = await response.json();
+
+                    if (response.ok) {
+                        messagesContainer.innerHTML = '';
+                        allMessages = data.data;
+
+                        // Сортируем сообщения по дате (новые внизу)
+                        allMessages.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+
+                        // Добавляем сообщения
+                        allMessages.forEach(message => {
+                            addMessageToUI(message);
+                        });
+
+                    }
+                } catch (error) {
+                    console.error('Error loading messages:', error);
+                }
+            }
+
+            async function updateRoomMessageCount(roomId) {
+                const roomElements = document.querySelectorAll('#roomList > div');
+                roomElements.forEach(el => {
+                    if (el.getAttribute('data-room-id') === roomId.toString()) {
+                        const countEl = el.querySelector('p');
+                        if (countEl) {
+                            const currentCount = parseInt(countEl.textContent) || 0;
+                            countEl.textContent = `${currentCount + 1} messages`;
+                        }
+                    }
+                });
+            }
+
             // Create room modal
             document.getElementById('createRoomBtn').addEventListener('click', function() {
-                document.getElementById('createRoomModal').classList.remove('hidden');
+                document.getElementById('createRoomModal').classList.add('active');
             });
 
             document.getElementById('cancelCreateRoom').addEventListener('click', function() {
-                document.getElementById('createRoomModal').classList.add('hidden');
+                document.getElementById('createRoomModal').classList.remove('active');
             });
 
             // Create room form
@@ -359,7 +390,7 @@
                     if (response.ok) {
                         document.getElementById('createRoomModal').classList.add('hidden');
                         document.getElementById('createRoomForm').reset();
-                        loadRooms();
+                        await loadRooms();
                     } else {
                         const error = await response.json();
                         alert(error.message || 'Failed to create room');
@@ -393,6 +424,19 @@
             // Global function for reactions
             window.addReaction = async function(messageId, reaction) {
                 try {
+                    // Находим элемент сообщения
+                    const messageElement = document.getElementById(`message-id-${messageId}`);
+                    if (!messageElement) return;
+
+                    // Находим кнопку реакции
+                    const reactionBtn = messageElement.querySelector(`.reaction-btn[onclick*="${reaction}"]`);
+                    if (!reactionBtn) return;
+
+                    // Визуально обновляем реакцию (временно)
+                    const oldText = reactionBtn.textContent;
+                    reactionBtn.textContent = '...'; // Показываем загрузку
+
+                    // Отправляем запрос
                     const response = await fetch(`/api/messages/${messageId}/react/${reaction}`, {
                         method: 'POST',
                         headers: {
@@ -401,7 +445,22 @@
                         }
                     });
 
-                    if (!response.ok) {
+                    if (response.ok) {
+                        const data = await response.json();
+
+                        // Обновляем только нужные реакции в UI
+                        const reactions = data.reactions || {};
+                        reactionBtn.textContent = `${reactions[reaction] || ''}${getReactionEmoji(reaction)}`;
+
+                        // Обновляем другие реакции этого сообщения
+                        Object.keys(reactions).forEach(r => {
+                            const btn = messageElement.querySelector(`.reaction-btn[onclick*="${r}"]`);
+                            if (btn) {
+                                btn.textContent = `${reactions[r] || ''}${getReactionEmoji(r)}`;
+                            }
+                        });
+                    } else {
+                        reactionBtn.textContent = oldText; // Возвращаем старое значение при ошибке
                         const error = await response.json();
                         console.error('Error adding reaction:', error);
                     }
@@ -410,8 +469,19 @@
                 }
             };
 
+// Вспомогательная функция для получения эмодзи по типу реакции
+            function getReactionEmoji(reaction) {
+                const emojis = {
+                    'like': '👍',
+                    'love': '❤️',
+                    'laugh': '😆'
+                };
+                return emojis[reaction] || '';
+            }
+
             // Initial load
             loadRooms();
+            loadUser();
         });
     </script>
 @endsection

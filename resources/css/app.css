@@ -304,9 +304,24 @@ h3 {
 
 .messages-container {
     flex-grow: 1;
-    padding: 1.5rem;
     overflow-y: auto;
-    background-color: var(--bg);
+    display: flex;
+    flex-direction: column-reverse; /* Новые сообщения появляются снизу */
+    scrollbar-width: none; /* Для Firefox */
+    -ms-overflow-style: none; /* Для IE и Edge */
+}
+
+.messages-container::-webkit-scrollbar {
+    display: none; /* Для Chrome, Safari и Opera */
+}
+
+#messages {
+    width: 100%;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end; /* Сообщения прижимаются к низу */
+    min-height: min-content; /* Минимальная высота по содержимому */
 }
 
 .message-input-container {
@@ -562,4 +577,11 @@ h3 {
 
 @keyframes spin {
     to { transform: rotate(360deg); }
+}
+
+.reaction-btn {
+    transition: all 0.2s ease;
+}
+.reaction-btn:active {
+    transform: scale(1.2);
 }
