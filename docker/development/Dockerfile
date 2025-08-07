@@ -69,3 +69,7 @@ RUN chmod +x /usr/local/bin/start-container
 
 EXPOSE 80/tcp
 ENTRYPOINT ["start-container"]
+#CMD ["php", "/app/artisan", "reverb:start", "--host=0.0.0.0", "--port=8080"]
+#CMD ["bash", "-c", "php-fpm -D && php /app/artisan reverb:start --host=0.0.0.0 --port=8080"]
+#CMD ["bash", "-c", "chmod 777 /app && nohup php -d variables_order=EGPCS /app/artisan serve --host=0.0.0.0 --port=80 > server.log 2>&1 & php /app/artisan reverb:start --host=0.0.0.0 --port=8080"]
+
