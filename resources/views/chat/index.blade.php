@@ -5,12 +5,12 @@
         <!-- Sidebar -->
         <div class="sidebar">
             <div class="sidebar-header">
-                <h2>Chat Rooms</h2>
+                <h2><i class="fi fi-br-cube"></i>Chat Rooms</h2>
                 <button id="createRoomBtn" class="btn btn-primary w-full mt-2">
-                    Create Room
+                    <i class="fi fi-br-magic-wand"></i> Create Room
                 </button>
                 <button id="joinRoomBtn" class="btn btn-secondary w-full mt-2">
-                    Join Room
+                    <i class="fi fi-br-add"></i>Join Room
                 </button>
             </div>
 
@@ -28,7 +28,10 @@
                     </div>
                     <span id="userName"></span>
                 </div>
-                <button id="logoutBtn" class="btn-link text-sm mt-2">Logout</button>
+                <button id="logoutBtn" class="logout-button">
+                    <i class="fi fi-br-sign-out-alt"></i>
+                    <span>Logout</span>
+                </button>
             </div>
         </div>
 
@@ -172,10 +175,6 @@
             const encodedToken = getCookie('XSRF-TOKEN');
             const decodedToken = decodeURIComponent(encodedToken);
             const currentRoom = localStorage.getItem('roomId');
-            if (!token) {
-                window.location.href = '/login';
-                return;
-            }
 
             // Инициализация
             let currentRoomId = null;
@@ -389,6 +388,10 @@
                 roomDescriptionElement.textContent = room.description || 'No description';
                 room.is_owner = room.created_by !== userData.id ? false : true;
 
+                const inviteUsersBtn = document.getElementById('inviteUsersBtn');
+                if (room.type === 'public'){
+                    inviteUsersBtn.classList.add('hidden');
+                }
                 const inviteLink = document.getElementById('inviteLinkInput').value = `${room.invite_code}`;
                 const roomActions = document.getElementById('roomActions');
                 if (room.is_owner) {
@@ -659,6 +662,7 @@
                         const room = await response.json();
                         hideJoinRoomModal();
                         await joinRoom(room.id);
+                        await loadRooms();
                     } else {
                         const error = await response.json();
                         alert(error.message || 'Failed to join room');
@@ -777,7 +781,7 @@
             // Выход
             async function logout() {
                 try {
-                    const response = await fetch('/api/logout', {
+                    const response = await fetch('/logout', {
                         method: 'POST',
                         headers: {
                             'Authorization': 'Bearer ' + token,

@@ -1,14 +1,15 @@
 <?php
 
-use App\Http\Controllers\AuthController;
-use App\Http\Controllers\ChatRoomController;
-use App\Http\Controllers\MessageController;
-use App\Http\Controllers\UserController;
+use App\Http\Controllers\API\AuthController;
+use App\Http\Controllers\API\ChatRoomController;
+use App\Http\Controllers\API\MessageController;
+use App\Http\Controllers\API\UserController;
 use Illuminate\Support\Facades\Route;
 
 // Public routes
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
+Route::get('/login', function () {return response()->json(['message' => 'Unauthenticated'], 403);})->name('api.login');
 Route::get('/rooms', [ChatRoomController::class, 'index']);
 Route::get('/rooms/search', [ChatRoomController::class, 'search']);
 Route::get('/rooms/{room}', [ChatRoomController::class, 'show']);

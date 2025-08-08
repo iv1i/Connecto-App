@@ -36,7 +36,7 @@
         document.getElementById('loginForm').addEventListener('submit', async function(e) {
             e.preventDefault();
 
-            const response = await fetch('/api/login', {
+            const response = await fetch('/login', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -50,11 +50,10 @@
             });
 
             if (response.ok) {
-                const { token } = await response.json();
 
                 // Сохраняем токен
-                localStorage.setItem('token', token);
-                document.cookie = `token=${token}; path=/; max-age=${60 * 60 * 24}`;
+                //localStorage.setItem('token', token);
+                //document.cookie = `token=${token}; path=/; max-age=${60 * 60 * 24}`;
 
                 // Перенаправляем
                 window.location.href = '/chat';

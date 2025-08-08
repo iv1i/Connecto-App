@@ -1,13 +1,14 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\API;
 
+use App\Http\Controllers\Controller;
 use App\Http\Requests\LoginRequest;
 use App\Http\Requests\RegisterRequest;
+use App\Models\Author;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Laravel\Sanctum\HasApiTokens;
 
@@ -30,12 +31,14 @@ class AuthController extends Controller
 
     public function login(LoginRequest $request): JsonResponse
     {
-        if (!Auth::attempt($request->only('email', 'password'))) {
+
+        $user = User::where('email', $request->email)->first();
+
+        if (!$user || !Hash::check($request->password, $user->password)) {
             return response()->json(['message' => 'Invalid credentials'], 401);
         }
 
-        $user = Auth::user();
-        $token = $user->createToken('auth_token')->plainTextToken;
+        $token = $user->createToken('auth_token_'.$user->name)->plainTextToken;
 
         return response()->json([
             'user' => $user,
@@ -48,10 +51,8 @@ class AuthController extends Controller
         $user = $request->user();
 
         // Удаляем токен (если API)
-        if ($user && method_exists($user->currentAccessToken(), 'delete')) {
-            $user->currentAccessToken()->delete();
-        }
+        $user->currentAccessToken()->delete();
 
-        return response()->json(['message' => 'Вы успешно вышли из системы']);
+        return response()->json(['message' => 'logged out']);
     }
 }

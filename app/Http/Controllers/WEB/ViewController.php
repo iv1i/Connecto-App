@@ -1,24 +1,19 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\WEB;
 
+use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 
 class ViewController extends Controller
 {
     public function loginView(Request $request)
     {
-        if ($request->user()){
-            return redirect('/chat');
-        }
         return view('auth.login');
     }
 
     public function registerView(Request $request)
     {
-        if ($request->user()){
-            return redirect('/chat');
-        }
         return view('auth.register');
     }
 

@@ -13,6 +13,12 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        $middleware->redirectGuestsTo(function ($request) {
+            if ($request->expectsJson() || str_starts_with($request->path(), 'api/')) {
+                return route('api.login');
+            }
+            return route('login');
+        });
         $middleware->statefulApi();
         $middleware->alias([
             'admin' => \App\Http\Middleware\AdminMiddleware::class,
