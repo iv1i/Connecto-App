@@ -26,12 +26,15 @@
                 <div class="flex items-center gap-2">
                     <div id="userAvatar" class="message-avatar">
                     </div>
-                    <span id="userName"></span>
+                    <div class="UserData">
+                        <span id="userName"></span>
+                        <span id="userLink"></span>
+                    </div>
+                    <button id="logoutBtn" class="logout-button">
+                        <i class="fi fi-br-sign-out-alt"></i>
+                        <span>Logout</span>
+                    </button>
                 </div>
-                <button id="logoutBtn" class="logout-button">
-                    <i class="fi fi-br-sign-out-alt"></i>
-                    <span>Logout</span>
-                </button>
             </div>
         </div>
 
@@ -192,14 +195,36 @@
             // Инициализация приложения
             initApp();
 
-            Echo.channel(`room`).listen('MessageSentEvent', (e) => {
+            Echo.private(`room`).listen('MessageSentEvent', (e) => {
                 if (e.message.user.id !== userData.id){
-                    addMessageToUI(e.message);
-                    messageInput.value = '';
-                    updateRoomMessageCount(currentRoomId, 1);
+                    loadRooms();
+                    if (String(e.message.chat_room_id) === localStorage.getItem('roomId')){
+                        addMessageToUI(e.message);
+                    }
+                    document.title = "Connecto-app (*)";
                     console.log('new message!')
                 }
             });
+
+            Echo.private(`deleted-message`).listen('MessageDellEvent', (e) => {
+                if (e.message.user.id !== userData.id){
+                    loadRooms();
+                    if (String(e.message.chat_room_id) === currentRoom){
+                        document.getElementById(`message-${e.message.id}`).remove();
+                    }
+                    console.log('delete message!')
+                }
+            });
+
+            Echo.private(`reaction-add`).listen('ReactionEvent', (e) => {
+                    if (String(e.message.chat_room_id) === currentRoom){
+                        const reactBtn = document.querySelector(`.reaction-btn[data-message-id="${e.message.id}"][data-reaction="${e.message.reaction}"]`);
+                        const count = e.message.reactions?.[e.message.reaction] || 0;
+                        reactBtn.textContent = `${count > 0 ? count : ''}${getReactionEmoji(e.message.reaction)}`;
+                    }
+                    console.log('add reaction!')
+            });
+
             async function initApp() {
                 await loadUser();
                 await loadRooms();
@@ -261,12 +286,12 @@
                         userData = await response.json();
                         document.getElementById('userAvatar').textContent = userData.name.charAt(0).toUpperCase();
                         document.getElementById('userName').textContent = userData.name;
+                        document.getElementById('userLink').textContent = userData.link_name;
                     } else {
                         throw new Error('Failed to load user data');
                     }
                 } catch (error) {
                     console.error('Error loading user:', error);
-                    logout();
                 }
             }
 
@@ -340,7 +365,7 @@
             async function joinRoom(roomId) {
                 try {
                     showLoadingMessages();
-
+                    document.title = "Connecto-app";
                     const [roomResponse, messagesResponse] = await Promise.all([
                         fetch(`/api/rooms/${roomId}`, {
                             headers: {
@@ -388,10 +413,14 @@
                 roomDescriptionElement.textContent = room.description || 'No description';
                 room.is_owner = room.created_by !== userData.id ? false : true;
 
+
                 const inviteUsersBtn = document.getElementById('inviteUsersBtn');
+                inviteUsersBtn.classList.remove('hidden');
+
                 if (room.type === 'public'){
                     inviteUsersBtn.classList.add('hidden');
                 }
+
                 const inviteLink = document.getElementById('inviteLinkInput').value = `${room.invite_code}`;
                 const roomActions = document.getElementById('roomActions');
                 if (room.is_owner) {
@@ -426,7 +455,7 @@
                     <span class="message-username">${message.user.name}</span>
                     <span class="message-time">${formatDate(message.created_at)}</span>
                     ${message.user_id === userData.id ?
-                    `<button class="delete-message-btn" data-message-id="${message.id}">×</button>` : ''}
+                    `<button class="delete-message-btn" data-message-id="${message.id}"><i class="fi fi-br-trash"></i></button>` : ''}
                 </div>
                 <p class="message-text">${message.content}</p>
                 <div class="message-reactions">

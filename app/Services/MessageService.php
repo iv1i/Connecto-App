@@ -2,7 +2,9 @@
 
 namespace App\Services;
 
+use App\Events\MessageDellEvent;
 use App\Events\MessageSentEvent;
+use App\Events\ReactionEvent;
 use App\Http\Requests\MessageRequest;
 use App\Models\ChatRoom;
 use App\Models\Message;
@@ -23,6 +25,14 @@ class MessageService
 
     public function deleteMessage(Message $message): void
     {
+        $msg = [
+            'id' => $message->id,
+            'chat_room_id' => $message->chat_room_id,
+            'user' => [
+                'id' => $message->user_id,
+            ]
+        ];
+        MessageDellEvent::dispatch($msg);
         $message->delete();
     }
 
@@ -40,7 +50,9 @@ class MessageService
         $reactions[$reaction] = ($reactions[$reaction] ?? 0) + 1;
         $message->reactions = $reactions;
         $message->save();
-
+        $message->load('user');
+        $message['reaction'] = $reaction;
+        ReactionEvent::dispatch($message);
         return [
             'success' => true,
             'reactions' => $reactions,

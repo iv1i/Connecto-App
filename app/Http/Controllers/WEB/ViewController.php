@@ -9,11 +9,17 @@ class ViewController extends Controller
 {
     public function loginView(Request $request)
     {
+        if (auth()->check()) {
+            return redirect()->route('chat.index');
+        }
         return view('auth.login');
     }
 
     public function registerView(Request $request)
     {
+        if (auth()->check()) {
+            return redirect()->route('chat.index');
+        }
         return view('auth.register');
     }
 

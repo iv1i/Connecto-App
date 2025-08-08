@@ -10,12 +10,12 @@
             <form id="loginForm" class="space-y-4">
                 @csrf
                 <div class="form-group">
-                    <label for="email" class="label">Email</label>
+                    <label for="email" class="label"><i class="fi fi-br-at"></i>Email</label>
                     <input type="email" id="email" name="email" required class="input">
                 </div>
 
                 <div class="form-group">
-                    <label for="password" class="label">Password</label>
+                    <label for="password" class="label"><i class="fi fi-br-lock"></i>Password</label>
                     <input type="password" id="password" name="password" required class="input">
                 </div>
 

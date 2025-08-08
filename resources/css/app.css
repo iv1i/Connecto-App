@@ -228,6 +228,8 @@ h3 {
     padding: 0;
 }
 
+
+
 /* Auth pages */
 .auth-container {
     display: flex;
@@ -855,7 +857,7 @@ h3 {
 
 .logout-button {
     display: inline-flex;
-    margin-top: 5px;
+    margin-left: auto;
     gap: 10px;
     padding: 4px 10px;
     background: transparent;
@@ -884,6 +886,7 @@ h3 {
 
 .logout-button .fi {
     font-size: 16px;
+    color: #4b5563;
     transition: transform 0.2s ease;
 }
 
@@ -897,3 +900,10 @@ h3 {
     outline-offset: 2px;
 }
 
+.UserData {
+    display: grid;
+}
+#userLink {
+    font-size: small;
+    color: #9ca3af;
+}

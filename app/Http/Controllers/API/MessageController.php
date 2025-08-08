@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\API;
 
+use App\Events\MessageDellEvent;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\MessageRequest;
 use App\Models\ChatRoom;
@@ -37,6 +38,7 @@ class MessageController extends Controller
     public function addReaction(Message $message, string $reaction): JsonResponse
     {
         $message = $this->messageService->addReaction($message, $reaction, Auth::user());
+
         return response()->json($message);
     }
 }
