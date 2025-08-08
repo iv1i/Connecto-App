@@ -36,11 +36,22 @@ class ChatRoomService
     public function getPublicRooms(): LengthAwarePaginator
     {
         if (auth('api')->check()) {
-            return ChatRoom::with('creator')
-                ->withCount('messages')
+            $userId = auth('api')->id();
+
+            return ChatRoom::with('creator') // подгружаем создателя комнаты
+            ->withCount('messages')
+                ->where(function($query) use ($userId) {
+                    $query->where('type', ChatRoom::TYPE_PUBLIC)
+                        ->orWhere(function($q) use ($userId) {
+                            $q->where('type', ChatRoom::TYPE_PRIVATE)
+                                ->where('created_by', $userId); // используем created_by вместо user_id
+                        });
+                })
                 ->paginate(10);
         }
-        return ChatRoom::where('type', ChatRoom::TYPE_PUBLIC)
+
+        return ChatRoom::with('creator') // подгружаем создателя для публичных комнат
+        ->where('type', ChatRoom::TYPE_PUBLIC)
             ->withCount('messages')
             ->paginate(10);
     }

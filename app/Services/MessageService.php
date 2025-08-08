@@ -2,7 +2,7 @@
 
 namespace App\Services;
 
-use App\Events\MessageSent;
+use App\Events\MessageSentEvent;
 use App\Http\Requests\MessageRequest;
 use App\Models\ChatRoom;
 use App\Models\Message;
@@ -17,7 +17,7 @@ class MessageService
         $data['user_id'] = $user->id;
         $message = Message::create($data);
         $msg = $message->load('user');
-        MessageSent::dispatch($msg);
+        MessageSentEvent::dispatch($msg);
         return $msg;
     }
 

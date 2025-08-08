@@ -62,7 +62,7 @@
             <!-- Message Input -->
             <div id="messageInputContainer" class="message-input-container hidden">
                 <form id="messageForm" class="flex gap-2">
-                    <input type="text" id="messageInput" placeholder="Type a message..." class="input flex-grow">
+                    <input type="text" id="messageInput" placeholder="Type a message..." class="input flex-grow" autocomplete="off">
                     <button type="submit" class="btn btn-primary">
                         Send
                     </button>
@@ -70,13 +70,65 @@
             </div>
         </div>
 
+        <div id="joinRoomModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>Join Private Room</h2>
+                </div>
+                <form id="joinRoomForm">
+                    <div class="form-group">
+                        <label for="inviteCodeInput" class="label">Invite Code</label>
+                        <input type="text" id="inviteCodeInput" name="invite_code" required class="input w-full">
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" id="cancelJoinRoom" class="btn btn-secondary">
+                            Cancel
+                        </button>
+                        <button type="submit" class="btn btn-primary">
+                            Join
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <div id="inviteUsersModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>Invite Users to Room</h2>
+                </div>
+                <div class="p-4">
+                    <div class="form-group">
+                        <label class="label">Invite Link</label>
+                        <div class="flex">
+                            <input type="text" id="inviteLinkInput" readonly class="input flex-grow">
+                            <button id="copyInviteLinkBtn" class="btn btn-secondary ml-2">
+                                Copy
+                            </button>
+                        </div>
+                    </div>
+                    <div class="form-group mt-4">
+                        <label class="label">Invite by Username</label>
+                        <div class="flex">
+                            <input type="text" id="usernameInput" placeholder="Enter username" class="input flex-grow">
+                            <button id="inviteUserBtn" class="btn btn-primary ml-2">
+                                Invite
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" id="closeInviteModal" class="btn btn-secondary">
+                        Close
+                    </button>
+                </div>
+            </div>
+        </div>
         <!-- Create Room Modal -->
         <div id="createRoomModal" class="modal">
             <div class="modal-content">
                 <div class="modal-header">
                     <h2>Create New Room</h2>
                 </div>
-
                 <form id="createRoomForm">
                     <div class="form-group">
                         <label for="roomNameInput" class="label">Room Name</label>
@@ -111,60 +163,6 @@
                         </button>
                     </div>
                 </form>
-
-                <div id="joinRoomModal" class="modal">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h2>Join Private Room</h2>
-                        </div>
-                        <form id="joinRoomForm">
-                            <div class="form-group">
-                                <label for="inviteCodeInput" class="label">Invite Code</label>
-                                <input type="text" id="inviteCodeInput" name="invite_code" required class="input w-full">
-                            </div>
-                            <div class="modal-footer">
-                                <button type="button" id="cancelJoinRoom" class="btn btn-secondary">
-                                    Cancel
-                                </button>
-                                <button type="submit" class="btn btn-primary">
-                                    Join
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-
-                <div id="inviteUsersModal" class="modal">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h2>Invite Users to Room</h2>
-                        </div>
-                        <div class="p-4">
-                            <div class="form-group">
-                                <label class="label">Invite Link</label>
-                                <div class="flex">
-                                    <input type="text" id="inviteLinkInput" readonly class="input flex-grow">
-                                    <button id="copyInviteLinkBtn" class="btn btn-secondary ml-2">
-                                        Copy
-                                    </button>
-                                </div>
-                            </div>
-                            <div class="form-group mt-4">
-                                <label class="label">Invite by Username</label>
-                                <div class="flex">
-                                    <input type="text" id="usernameInput" placeholder="Enter username" class="input flex-grow">
-                                    <button id="inviteUserBtn" class="btn btn-primary ml-2">
-                                        Invite
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" id="closeInviteModal" class="btn btn-secondary">
-                                Close
-                            </button>
-                        </div>
-                    </div>
             </div>
         </div>
     </div>
@@ -195,7 +193,7 @@
             // Инициализация приложения
             initApp();
 
-            Echo.channel(`room`).listen('MessageSent', (e) => {
+            Echo.channel(`room`).listen('MessageSentEvent', (e) => {
                 if (e.message.user.id !== userData.id){
                     addMessageToUI(e.message);
                     messageInput.value = '';
@@ -223,6 +221,18 @@
                 document.getElementById('createRoomBtn').addEventListener('click', showCreateRoomModal);
                 document.getElementById('cancelCreateRoom').addEventListener('click', hideCreateRoomModal);
                 document.getElementById('createRoomForm').addEventListener('submit', handleCreateRoom);
+
+                // Присоединение к комнате по коду
+                document.getElementById('joinRoomBtn').addEventListener('click', showJoinRoomModal);
+                document.getElementById('cancelJoinRoom').addEventListener('click', hideJoinRoomModal);
+                document.getElementById('joinRoomForm').addEventListener('submit', handleJoinRoom);
+
+                // Управление комнатой
+                document.getElementById('inviteUsersBtn').addEventListener('click', showInviteUsersModal);
+                document.getElementById('deleteRoomBtn').addEventListener('click', deleteCurrentRoom);
+                document.getElementById('closeInviteModal').addEventListener('click', hideInviteUsersModal);
+                document.getElementById('copyInviteLinkBtn').addEventListener('click', copyInviteLink);
+                document.getElementById('inviteUserBtn').addEventListener('click', inviteUserByUsername);
 
                 // Выход
                 document.getElementById('logoutBtn').addEventListener('click', logout);
@@ -317,9 +327,9 @@
                     roomElement.className = 'p-2 hover:bg-gray-100 rounded-md cursor-pointer';
                     roomElement.dataset.roomId = room.id;
                     roomElement.innerHTML = `
-                <h3 class="font-medium">${room.name}</h3>
+                <h3 class="font-medium">${room.name} ${room.type === 'private' ? '<span class="private-chat">Private</span>' : '<span class="public-chat">Public</span>'}
+</h3>
                 <p class="text-sm text-gray-500">${room.messages_count} messages</p>
-                ${room.is_private ? '<span class="text-xs text-purple-500">Private</span>' : ''}
             `;
 
                     roomElement.addEventListener('click', () => joinRoom(room.id));
@@ -377,6 +387,15 @@
             function updateRoomUI(room) {
                 roomNameElement.textContent = room.name;
                 roomDescriptionElement.textContent = room.description || 'No description';
+                room.is_owner = room.created_by !== userData.id ? false : true;
+
+                const inviteLink = document.getElementById('inviteLinkInput').value = `${room.invite_code}`;
+                const roomActions = document.getElementById('roomActions');
+                if (room.is_owner) {
+                    roomActions.classList.remove('hidden');
+                } else {
+                    roomActions.classList.add('hidden');
+                }
             }
 
             // Отображение сообщений
@@ -601,6 +620,160 @@
                 const parts = value.split(`; ${name}=`);
                 if (parts.length === 2) return parts.pop().split(';').shift();
             }
+            // Добавьте новые функции
+            async function showJoinRoomModal() {
+                document.getElementById('joinRoomModal').classList.add('active');
+                document.getElementById('inviteCodeInput').focus();
+            }
+
+            function hideJoinRoomModal() {
+                document.getElementById('joinRoomModal').classList.remove('active');
+            }
+
+            async function handleJoinRoom(e) {
+                e.preventDefault();
+
+                const inviteCode = document.getElementById('inviteCodeInput').value.trim();
+                console.log(inviteCode);
+                if (!inviteCode) return;
+
+                const submitBtn = e.target.querySelector('button[type="submit"]');
+                submitBtn.disabled = true;
+                submitBtn.textContent = 'Joining...';
+
+                try {
+                    const response = await fetch('/api/rooms/join', {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': 'Bearer ' + token,
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json',
+                            'X-XSRF-TOKEN': decodedToken
+                        },
+                        body: JSON.stringify({
+                            code: inviteCode
+                        })
+                    });
+
+                    if (response.ok) {
+                        const room = await response.json();
+                        hideJoinRoomModal();
+                        await joinRoom(room.id);
+                    } else {
+                        const error = await response.json();
+                        alert(error.message || 'Failed to join room');
+                    }
+                } catch (error) {
+                    console.error('Error joining room:', error);
+                    alert('An error occurred while joining room');
+                } finally {
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'Join';
+                }
+            }
+
+            function showInviteUsersModal() {
+                if (!currentRoomId) return;
+                document.getElementById('inviteUsersModal').classList.add('active');
+            }
+
+            function hideInviteUsersModal() {
+                document.getElementById('inviteUsersModal').classList.remove('active');
+            }
+
+            function copyInviteLink() {
+                const inviteLinkInput = document.getElementById('inviteLinkInput');
+                inviteLinkInput.select();
+                document.execCommand('copy');
+
+                const copyBtn = document.getElementById('copyInviteLinkBtn');
+                copyBtn.textContent = 'Copied!';
+                setTimeout(() => {
+                    copyBtn.textContent = 'Copy';
+                }, 2000);
+            }
+
+            async function inviteUserByUsername() {
+                const username = document.getElementById('usernameInput').value.trim();
+                if (!username || !currentRoomId) return;
+
+                const inviteBtn = document.getElementById('inviteUserBtn');
+                inviteBtn.disabled = true;
+                inviteBtn.textContent = 'Inviting...';
+
+                try {
+                    const response = await fetch('/api/rooms/invite', {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': 'Bearer ' + token,
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json',
+                            'X-XSRF-TOKEN': decodedToken
+                        },
+                        body: JSON.stringify({
+                            room_id: currentRoomId,
+                            username: username
+                        })
+                    });
+
+                    if (response.ok) {
+                        alert('User invited successfully');
+                        document.getElementById('usernameInput').value = '';
+                    } else {
+                        const error = await response.json();
+                        alert(error.message || 'Failed to invite user');
+                    }
+                } catch (error) {
+                    console.error('Error inviting user:', error);
+                    alert('An error occurred while inviting user');
+                } finally {
+                    inviteBtn.disabled = false;
+                    inviteBtn.textContent = 'Invite';
+                }
+            }
+
+            async function deleteCurrentRoom() {
+                if (!currentRoomId || !confirm('Are you sure you want to delete this room? All messages will be lost.')) {
+                    return;
+                }
+
+                const deleteBtn = document.getElementById('deleteRoomBtn');
+                deleteBtn.disabled = true;
+                deleteBtn.textContent = 'Deleting...';
+
+                try {
+                    const response = await fetch(`/api/rooms/${currentRoomId}`, {
+                        method: 'DELETE',
+                        headers: {
+                            'Authorization': 'Bearer ' + token,
+                            'Accept': 'application/json',
+                            'X-XSRF-TOKEN': decodedToken
+                        }
+                    });
+
+                    if (response.ok) {
+                        alert('Room deleted successfully');
+                        currentRoomId = null;
+                        localStorage.removeItem('roomId');
+                        document.getElementById('roomActions').classList.add('hidden');
+                        document.getElementById('messageInputContainer').classList.add('hidden');
+                        document.getElementById('messages').innerHTML = '';
+                        document.getElementById('roomName').textContent = 'Select a room';
+                        document.getElementById('roomDescription').textContent = '';
+                        await loadRooms();
+                    } else {
+                        const error = await response.json();
+                        alert(error.message || 'Failed to delete room');
+                    }
+                } catch (error) {
+                    console.error('Error deleting room:', error);
+                    alert('An error occurred while deleting room');
+                } finally {
+                    deleteBtn.disabled = false;
+                    deleteBtn.textContent = 'Delete Room';
+                }
+            }
+
             // Выход
             async function logout() {
                 try {
