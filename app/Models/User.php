@@ -44,6 +44,13 @@ class User extends Authenticatable
         return $this->role === self::ROLE_ADMIN;
     }
 
+    public function chatRooms()
+    {
+        return $this->belongsToMany(ChatRoom::class)
+            ->withPivot('joined_via', 'joined_at')
+            ->withTimestamps();
+    }
+
     public function isBlocked(): bool
     {
         return $this->is_blocked;

@@ -44,6 +44,13 @@ class ChatRoom extends Model
         return $this->belongsTo(User::class, 'created_by');
     }
 
+    public function members()
+    {
+        return $this->belongsToMany(User::class)
+            ->withPivot('joined_via', 'joined_at')
+            ->withTimestamps();
+    }
+
     public function isPublic(): bool
     {
         return $this->type === self::TYPE_PUBLIC;

@@ -60,6 +60,11 @@ class ChatRoomController extends Controller
             return response()->json(['message' => 'Room not found'], 404);
         }
 
+        // Присоединяем пользователя к комнате
+        auth()->user()->chatRooms()->syncWithoutDetaching([
+            $room->id => ['joined_via' => 'invite_code']
+        ]);
+
         return response()->json($room);
     }
 }

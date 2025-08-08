@@ -38,20 +38,31 @@ class ChatRoomService
         if (auth('api')->check()) {
             $userId = auth('api')->id();
 
-            return ChatRoom::with('creator') // подгружаем создателя комнаты
-            ->withCount('messages')
+            return ChatRoom::with('creator')
+                ->withCount('messages')
                 ->where(function($query) use ($userId) {
+                    // Публичные комнаты
                     $query->where('type', ChatRoom::TYPE_PUBLIC)
+                        // ИЛИ приватные комнаты, созданные пользователем
                         ->orWhere(function($q) use ($userId) {
                             $q->where('type', ChatRoom::TYPE_PRIVATE)
-                                ->where('created_by', $userId); // используем created_by вместо user_id
+                                ->where('created_by', $userId);
+                        })
+                        // ИЛИ приватные комнаты, к которым пользователь присоединился через инвайт-код
+                        ->orWhere(function($q) use ($userId) {
+                            $q->where('type', ChatRoom::TYPE_PRIVATE)
+                                ->whereHas('members', function($memberQuery) use ($userId) {
+                                    $memberQuery->where('user_id', $userId)
+                                        ->where('joined_via', 'invite_code');
+                                });
                         });
                 })
                 ->paginate(10);
         }
 
-        return ChatRoom::with('creator') // подгружаем создателя для публичных комнат
-        ->where('type', ChatRoom::TYPE_PUBLIC)
+        // Для неавторизованных пользователей - только публичные комнаты
+        return ChatRoom::with('creator')
+            ->where('type', ChatRoom::TYPE_PUBLIC)
             ->withCount('messages')
             ->paginate(10);
     }
