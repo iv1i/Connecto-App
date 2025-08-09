@@ -983,18 +983,10 @@
                 }
             }
 
-            function updateMessageReactions(messageId, reactions) {
+            function updateMessageReactions(messageId, reactions, userReactions = []) {
                 const messageElement = document.getElementById(`message-${messageId}`);
                 if (!messageElement) return;
 
-                // Находим сообщение в нашем локальном хранилище
-                const messageIndex = allMessages.findIndex(m => m.id == messageId);
-                if (messageIndex === -1) return;
-
-                // Обновляем реакции в локальном хранилище
-                allMessages[messageIndex].reactions = reactions;
-
-                // Перестраиваем HTML реакций
                 const reactionsContainer = messageElement.querySelector('.message-reactions');
                 if (!reactionsContainer) return;
 
@@ -1007,16 +999,16 @@
                 if (reactions && Object.keys(reactions).length > 0) {
                     Object.entries(reactions).forEach(([type, count]) => {
                         if (count > 0) {
-                            const isUserReaction = allMessages[messageIndex].user_reactions.includes(type);
+                            const isUserReaction = userReactions.includes(type);
                             const badge = document.createElement('span');
                             badge.className = `reaction-badge ${isUserReaction ? 'user-reaction' : ''}`;
                             badge.dataset.reaction = type;
                             badge.dataset.messageId = messageId;
                             badge.textContent = `${getReactionEmoji(type)} ${count > 1 ? count : ''}`;
 
-                            badge.addEventListener('click', (e) => {
+                            badge.addEventListener('click', async (e) => {
                                 e.stopPropagation();
-                                handleReactionClick(messageId, type);
+                                await handleReactionClick(messageId, type);
                             });
 
                             reactionsContainer.appendChild(badge);
@@ -1025,10 +1017,13 @@
                 }
 
                 // Восстанавливаем кнопку удаления для своих сообщений
-                if (allMessages[messageIndex].user_id === userData.id && deleteBtn) {
+                const message = allMessages.find(m => m.id == messageId);
+                if (message && message.user_id === userData.id && deleteBtn) {
                     reactionsContainer.appendChild(deleteBtn);
+                    deleteBtn.addEventListener('click', () => deleteMessage(messageId));
                 }
             }
+
             async function handleReactionClick(messageId, reaction) {
                 try {
                     const response = await fetch(`/api/messages/${messageId}/react/${reaction}`, {
@@ -1042,13 +1037,20 @@
 
                     if (response.ok) {
                         const data = await response.json();
-                        updateMessageReactions(messageId, data.reactions);
+
+                        // Локально обновляем данные сообщения
+                        const messageIndex = allMessages.findIndex(m => m.id == messageId);
+                        if (messageIndex !== -1) {
+                            allMessages[messageIndex].reactions = data.reactions;
+                            allMessages[messageIndex].user_reactions = data.user_reactions;
+                        }
+
+                        updateMessageReactions(messageId, data.reactions, data.user_reactions);
                     }
                 } catch (error) {
                     console.error('Error handling reaction:', error);
                 }
             }
-
             function getReactionEmoji(reaction) {
                 const emojis = {
                     'like': '👍',

@@ -63,7 +63,7 @@ class MessageService
             ];
         }
 
-        // Проверяем, есть ли уже такая реакция от этого пользователя
+        // Проверяем существующую реакцию
         $existingReaction = $user->reactions()
             ->where('message_id', $message->id)
             ->where('reaction', $reaction)
@@ -72,10 +72,9 @@ class MessageService
         $reactions = $message->reactions ?? [];
 
         if ($existingReaction) {
-            // Если реакция уже есть - удаляем ее
+            // Удаляем реакцию
             $existingReaction->delete();
 
-            // Уменьшаем счетчик
             if (isset($reactions[$reaction])) {
                 $reactions[$reaction]--;
                 if ($reactions[$reaction] <= 0) {
@@ -83,30 +82,36 @@ class MessageService
                 }
             }
         } else {
-            // Если реакции нет - добавляем
+            // Добавляем реакцию
             $user->reactions()->create([
                 'message_id' => $message->id,
                 'reaction' => $reaction
             ]);
 
-            // Увеличиваем счетчик
             $reactions[$reaction] = ($reactions[$reaction] ?? 0) + 1;
         }
 
         // Обновляем сообщение
         $message->reactions = $reactions;
         $message->save();
-        $message->load(['user', 'userReactions']);
 
-        ReactionEvent::dispatch($message);
+        // Загружаем свежие данные с пользовательскими реакциями
+        $message->load(['user', 'userReactions' => function($q) use ($user) {
+            $q->where('user_id', $user->id);
+        }]);
+
+        // Добавляем user_reactions в данные сообщения
+        $message->user_reactions = $message->userReactions->pluck('reaction')->toArray();
+
+        ReactionEvent::dispatch($message->fresh());
 
         return [
             'success' => true,
             'reactions' => $reactions,
+            'user_reactions' => $message->user_reactions,
             'action' => $existingReaction ? 'removed' : 'added'
         ];
     }
-
     public function deleteReaction(Message $message, string $reaction, User $user)
     {
         // Удаляем реакцию пользователя
