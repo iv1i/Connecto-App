@@ -481,46 +481,148 @@
                 scrollToBottom();
             }
 
-            function showReactionMenu(e, messageId) {
-                // Удаляем предыдущее меню если есть
-                const existingMenu = document.querySelector('.reaction-context-menu');
-                if (existingMenu) existingMenu.remove();
 
-                const menu = document.createElement('div');
-                menu.className = 'reaction-context-menu';
-                menu.style.left = `${e.clientX}px`;
-                menu.style.top = `${e.clientY}px`;
 
-                // Добавляем варианты реакций
+            // Закрытие всех контекстных меню
+            function closeAllContextMenus() {
+                const menus = document.querySelectorAll('.context-menu-container');
+                menus.forEach(menu => menu.remove());
+                document.removeEventListener('click', handleOutsideClick);
+            }
+
+            // Обработка кликов вне меню
+            function handleOutsideClick(e) {
+                const reactionMenu = document.querySelector('.context-menu-container');
+
+                if (!reactionMenu?.contains(e.target)) {
+                    closeAllContextMenus();
+                }
+            }
+
+            function showContextMenu(e, messageId) {
+                closeAllContextMenus();
+                e.preventDefault();
+
+                const message = allMessages.find(m => m.id == messageId);
+                if (!message) return;
+
+                const menuContainer = document.createElement('div');
+                menuContainer.className = 'context-menu-container';
+
+                // Меню реакций
+                const reactionsMenu = document.createElement('div');
+                reactionsMenu.className = 'reactions-menu';
+
                 const reactions = ['like', 'love', 'laugh', 'wow', 'sad', 'angry', 'fire', 'star', 'clap', 'rocket'];
                 reactions.forEach(reaction => {
-                    const option = document.createElement('div');
+                    const option = document.createElement('button');
                     option.className = 'reaction-option';
-                    option.textContent = getReactionEmoji(reaction);
+                    option.innerHTML = getReactionEmoji(reaction);
+                    option.title = reaction;
                     option.addEventListener('click', () => {
                         addReaction(messageId, reaction);
-                        menu.remove();
+                        closeAllContextMenus();
                     });
-                    menu.appendChild(option);
+                    reactionsMenu.appendChild(option);
                 });
 
-                document.body.appendChild(menu);
+                // Меню действий
+                const actionsMenu = document.createElement('div');
+                actionsMenu.className = 'actions-menu';
 
-                // Закрываем меню при клике вне его
-                const closeMenu = (event) => {
-                    if (!menu.contains(event.target)) {
-                        menu.remove();
-                        document.removeEventListener('click', closeMenu);
-                    }
-                };
-                document.addEventListener('click', closeMenu);
+                const actions = [
+                    { icon: 'fi fi-br-reply', text: 'Ответить', action: () => replyToMessage(messageId) },
+                    { icon: 'fi fi-br-pin', text: 'Закрепить', action: () => pinMessage(messageId) },
+                    { icon: 'fi fi-br-copy', text: 'Копировать текст', action: () => copyMessageText(message.content) }
+                ];
+
+                if (message.user_id === userData.id) {
+                    actions.push({
+                        icon: 'fi fi-br-trash',
+                        text: 'Удалить',
+                        action: () => deleteMessage(messageId)
+                    });
+                }
+
+                actions.forEach(action => {
+                    const item = document.createElement('button');
+                    item.className = 'action-item';
+                    item.innerHTML = `<i class="${action.icon}"></i> ${action.text}`;
+                    item.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        action.action();
+                        closeAllContextMenus();
+                    });
+                    actionsMenu.appendChild(item);
+                });
+
+                menuContainer.appendChild(reactionsMenu);
+                menuContainer.appendChild(actionsMenu);
+                document.body.appendChild(menuContainer);
+
+                positionMenuContainer(menuContainer, e.clientX, e.clientY);
+
+                document.addEventListener('click', handleOutsideClick);
             }
+
+            function positionMenuContainer(menu, clientX, clientY) {
+                const menuWidth = menu.offsetWidth;
+                const menuHeight = menu.offsetHeight;
+                const windowWidth = window.innerWidth;
+                const windowHeight = window.innerHeight;
+                const scrollY = window.scrollY || window.pageYOffset;
+
+                let adjustedX = clientX;
+                let adjustedY = clientY;
+
+                if (clientX + menuWidth > windowWidth) {
+                    adjustedX = windowWidth - menuWidth - 10;
+                } else if (clientX < 10) {
+                    adjustedX = 10;
+                }
+
+                if (clientY + menuHeight > windowHeight + scrollY) {
+                    adjustedY = windowHeight + scrollY - menuHeight - 10;
+                } else if (clientY < scrollY + 10) {
+                    adjustedY = scrollY + 10;
+                }
+
+                menu.style.left = `${adjustedX}px`;
+                menu.style.top = `${adjustedY}px`;
+            }
+
+
+
+            function replyToMessage(messageId) {
+                const message = allMessages.find(m => m.id == messageId);
+                if (!message) return;
+
+                messageInput.value = `@${message.user.name} `;
+                messageInput.focus();
+                // Можно добавить визуальное выделение сообщения, на которое отвечаем
+            }
+
+            function pinMessage(messageId) {
+                // Реализуйте логику закрепления сообщения
+                console.log(`Pinning message ${messageId}`);
+                // Отправка запроса на сервер для закрепления
+            }
+
+            function copyMessageText(text) {
+                navigator.clipboard.writeText(text).then(() => {
+                    console.log('Text copied to clipboard');
+                    // Можно показать уведомление об успешном копировании
+                }).catch(err => {
+                    console.error('Failed to copy text: ', err);
+                });
+            }
+
             // Добавление сообщения в UI
             function addMessageToUI(message, prepend = false) {
                 const messageElement = document.createElement('div');
                 messageElement.addEventListener('contextmenu', (e) => {
                     e.preventDefault();
-                    showReactionMenu(e, message.id);
+                    showContextMenu(e, message.id);
                 });
 
                 messageElement.className = `MSG ${prepend ? 'prepend-message' : ''}`;
@@ -960,6 +1062,7 @@
                     console.error('Error adding reaction:', error);
                 }
             };
+
             async function removeReaction(messageId, reaction) {
                 try {
                     const response = await fetch(`/api/messages/${messageId}/react/${reaction}`, {
@@ -1051,6 +1154,7 @@
                     console.error('Error handling reaction:', error);
                 }
             }
+
             function getReactionEmoji(reaction) {
                 const emojis = {
                     'like': '👍',

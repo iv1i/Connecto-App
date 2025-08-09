@@ -1021,29 +1021,127 @@ h3 {
     transform: scale(1.1);
 }
 
-/* Добавьте в ваши стили */
+/* контекстное меню реакций */
 .reaction-context-menu {
     position: absolute;
     background: white;
-    border: 1px solid #ddd;
+    border: 1px solid #e2e8f0;
     border-radius: 8px;
-    padding: 5px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
     z-index: 1000;
-    display: flex;
-    gap: 5px;
+    padding: 8px 0;
+    max-height: 250px;
+    overflow-y: auto;
+}
+
+.message-actions-menu {
+    position: absolute;
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    padding: 8px 0;
+    max-height: 180px;
+    overflow-y: auto;
 }
 
 .reaction-option {
-    font-size: 20px;
+    padding: 8px 16px;
     cursor: pointer;
-    padding: 5px;
-    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
 
 .reaction-option:hover {
-    background: #f0f0f0;
+    background-color: #f7fafc;
+}
+
+.message-action-item {
+    padding: 8px 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.message-action-item:hover {
+    background-color: #f7fafc;
+}
+
+.message-action-item i {
+    font-size: 14px;
+}
+
+/* Контейнер для обоих меню */
+.context-menu-container {
+    position: absolute;
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    padding: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    max-width: 100vw;
+}
+
+/* Горизонтальное меню реакций */
+.reactions-menu {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    padding: 4px;
+    border-bottom: 1px solid #f1f1f1;
+    margin-bottom: 4px;
+}
+
+.reaction-option {
+    background: none;
+    border: none;
+    font-size: 1.2em;
+    padding: 6px 8px;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: all 0.2s;
+}
+
+.reaction-option:hover {
+    background-color: #f3f4f6;
     transform: scale(1.2);
+}
+
+/* Вертикальное меню действий */
+.actions-menu {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.action-item {
+    background: none;
+    border: none;
+    text-align: left;
+    padding: 8px 12px;
+    cursor: pointer;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.9em;
+    color: #333;
+}
+
+.action-item:hover {
+    background-color: #f3f4f6;
+}
+
+.action-item i {
+    font-size: 0.9em;
+    opacity: 0.8;
 }
 
 .reaction-badge {
@@ -1067,3 +1165,7 @@ h3 {
     background: #e0e0e0;
     transform: scale(1.1);
 }
+
+/* Добавьте рядом с существующими стилями для reaction-context-menu */
+
+
