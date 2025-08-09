@@ -7,6 +7,7 @@ use App\Http\Requests\LoginRequest;
 use App\Http\Requests\RegisterRequest;
 use App\Models\Author;
 use App\Models\User;
+use App\Services\Utility;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -19,6 +20,7 @@ class AuthController extends Controller
     {
         $user = User::create([
             'name' => $request->name,
+            'name_color' => Utility::generateRandomColor(),
             'link_name' => $request->link_name,
             'email' => $request->email,
             'password' => Hash::make($request->password),

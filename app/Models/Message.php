@@ -32,4 +32,9 @@ class Message extends Model
     {
         return $this->belongsTo(ChatRoom::class);
     }
+
+    public function userReactions()
+    {
+        return $this->hasMany(UserReactions::class);
+    }
 }

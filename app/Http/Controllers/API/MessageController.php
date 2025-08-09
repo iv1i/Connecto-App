@@ -41,4 +41,10 @@ class MessageController extends Controller
 
         return response()->json($message);
     }
+    public function delReaction(Message $message, string $reaction): JsonResponse
+    {
+        $message = $this->messageService->deleteReaction($message, $reaction, Auth::user());
+
+        return response()->json($message);
+    }
 }

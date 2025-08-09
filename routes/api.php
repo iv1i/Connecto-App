@@ -29,6 +29,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/messages', [MessageController::class, 'store']);
     Route::delete('/messages/{message}', [MessageController::class, 'destroy']);
     Route::post('/messages/{message}/react/{reaction}', [MessageController::class, 'addReaction']);
+    Route::delete('/messages/{message}/react/{reaction}', [MessageController::class, 'delReaction']);
 
     // Users
     Route::get('/profile', [UserController::class, 'profile']);

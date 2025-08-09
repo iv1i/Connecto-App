@@ -1,6 +1,9 @@
 @extends('layouts.app')
+@push('styles')
 
-@section('content')
+@endpush
+
+    @section('content')
     <div class="chat-layout">
         <!-- Sidebar -->
         <div class="sidebar">
@@ -183,6 +186,7 @@
             let currentRoomId = null;
             let allMessages = [];
             let userData = null;
+            const unreadRooms = {}
 
             // DOM элементы
             const messagesContainer = document.getElementById('messages');
@@ -196,10 +200,17 @@
             initApp();
 
             Echo.private(`room`).listen('MessageSentEvent', (e) => {
+                console.log(e.message);
                 if (e.message.user.id !== userData.id){
-                    loadRooms();
+                    //loadRooms();
+                    changeRoomMessagesCount(e.message.chat_room_id, 1);
                     if (String(e.message.chat_room_id) === localStorage.getItem('roomId')){
                         addMessageToUI(e.message);
+                    }
+                    // В обработчике события:
+                    if (String(e.message.chat_room_id) !== localStorage.getItem('roomId')) {
+                        unreadRooms[e.message.chat_room_id] = true;
+                        updateUnreadIndicators();
                     }
                     document.title = "Connecto-app (*)";
                     console.log('new message!')
@@ -217,14 +228,34 @@
             });
 
             Echo.private(`reaction-add`).listen('ReactionEvent', (e) => {
-                    if (String(e.message.chat_room_id) === currentRoom){
-                        const reactBtn = document.querySelector(`.reaction-btn[data-message-id="${e.message.id}"][data-reaction="${e.message.reaction}"]`);
-                        const count = e.message.reactions?.[e.message.reaction] || 0;
-                        reactBtn.textContent = `${count > 0 ? count : ''}${getReactionEmoji(e.message.reaction)}`;
-                    }
-                    console.log('add reaction!')
+                if (String(e.message.chat_room_id) === currentRoom) {
+                    updateMessageReactions(e.message.id, e.message.reactions);
+                }
             });
 
+            function updateUnreadIndicators() {
+                Object.keys(unreadRooms).forEach(roomId => {
+                    const span = document.getElementById(`newMessagesSpan-${roomId}`);
+                    if (span && unreadRooms[roomId]) {
+                        span.innerHTML = '<i class="newMessages fi fi-br-envelope-dot"></i>';
+                    }
+                });
+            }
+            function changeRoomMessagesCount(roomId, change) {
+                const countElement = document.querySelector(`.room-messages-count-${roomId}`);
+
+                if (countElement) {
+                    const currentText = countElement.textContent;
+                    const currentMatch = currentText.match(/\d+/);
+
+                    if (currentMatch) {
+                        const currentCount = parseInt(currentMatch[0]);
+                        const newCount = currentCount + change;
+                        const suffix = currentText.replace(/^\d+\s*/, '');
+                        countElement.textContent = `${newCount} ${suffix}`.trim();
+                    }
+                }
+            }
             async function initApp() {
                 await loadUser();
                 await loadRooms();
@@ -285,6 +316,7 @@
                     if (response.ok) {
                         userData = await response.json();
                         document.getElementById('userAvatar').textContent = userData.name.charAt(0).toUpperCase();
+                        document.getElementById('userAvatar').style.backgroundColor = userData.name_color; // Красный цвет
                         document.getElementById('userName').textContent = userData.name;
                         document.getElementById('userLink').textContent = userData.link_name;
                     } else {
@@ -345,15 +377,14 @@
             function renderRoomList(rooms) {
                 const roomList = document.getElementById('roomList');
                 roomList.innerHTML = '';
-
                 rooms.forEach(room => {
                     const roomElement = document.createElement('div');
                     roomElement.className = 'p-2 hover:bg-gray-100 rounded-md cursor-pointer';
                     roomElement.dataset.roomId = room.id;
                     roomElement.innerHTML = `
-                <h3 class="font-medium">${room.name} ${room.type === 'private' ? '<span class="private-chat">Private</span>' : '<span class="public-chat">Public</span>'}
+                <h3 class="font-medium">${room.name} <span id="newMessagesSpan-${room.id}"></span> ${room.type === 'private' ? '<span class="private-chat">Private</span>' : '<span class="public-chat">Public</span>'}
 </h3>
-                <p class="text-sm text-gray-500">${room.messages_count} messages</p>
+                <p class="room-messages-count-${room.id} text-sm text-gray-500">${room.messages_count} messages</p>
             `;
 
                     roomElement.addEventListener('click', () => joinRoom(room.id));
@@ -391,7 +422,15 @@
                     const messages = await messagesResponse.json();
 
                     currentRoomId = roomId;
+                    unreadRooms[currentRoomId] = false;
+                    updateUnreadIndicators();
                     localStorage.setItem('roomId', roomId);
+
+                    const roomElement = document.getElementById(`newMessagesSpan-${roomId}`);
+                    const iconElement = roomElement.querySelector('i.newMessages');
+                    if (iconElement) {
+                        iconElement.remove();
+                    }
 
                     updateRoomUI(room);
                     renderMessages(messages.data);
@@ -442,27 +481,87 @@
                 scrollToBottom();
             }
 
+            function showReactionMenu(e, messageId) {
+                // Удаляем предыдущее меню если есть
+                const existingMenu = document.querySelector('.reaction-context-menu');
+                if (existingMenu) existingMenu.remove();
+
+                const menu = document.createElement('div');
+                menu.className = 'reaction-context-menu';
+                menu.style.left = `${e.clientX}px`;
+                menu.style.top = `${e.clientY}px`;
+
+                // Добавляем варианты реакций
+                const reactions = ['like', 'love', 'laugh', 'wow', 'sad', 'angry', 'fire', 'star', 'clap', 'rocket'];
+                reactions.forEach(reaction => {
+                    const option = document.createElement('div');
+                    option.className = 'reaction-option';
+                    option.textContent = getReactionEmoji(reaction);
+                    option.addEventListener('click', () => {
+                        addReaction(messageId, reaction);
+                        menu.remove();
+                    });
+                    menu.appendChild(option);
+                });
+
+                document.body.appendChild(menu);
+
+                // Закрываем меню при клике вне его
+                const closeMenu = (event) => {
+                    if (!menu.contains(event.target)) {
+                        menu.remove();
+                        document.removeEventListener('click', closeMenu);
+                    }
+                };
+                document.addEventListener('click', closeMenu);
+            }
             // Добавление сообщения в UI
             function addMessageToUI(message, prepend = false) {
                 const messageElement = document.createElement('div');
-                messageElement.className = `flex space-x-3 mb-4 ${message.user_id === userData.id ? 'own-message' : ''}`;
+                messageElement.addEventListener('contextmenu', (e) => {
+                    e.preventDefault();
+                    showReactionMenu(e, message.id);
+                });
+
+                messageElement.className = `MSG ${prepend ? 'prepend-message' : ''}`;
                 messageElement.id = `message-${message.id}`;
 
+                // Получаем реакции пользователя из данных сообщения
+                const userReactions = message.user_reactions || [];
+
+                // Формируем HTML для реакций
+                const reactionsHTML = message.reactions && Object.keys(message.reactions).length > 0
+                    ? Object.entries(message.reactions).map(([type, count]) => {
+                        const isUserReaction = message.user_reactions.includes(type);
+                        return `
+                <span class="reaction-badge ${isUserReaction ? 'user-reaction' : ''}"
+                      data-reaction="${type}"
+                      data-message-id="${message.id}">
+                    ${getReactionEmoji(type)} ${count > 1 ? count : ''}
+                </span>
+            `;
+                    }).join('')
+                    : '';
+
                 messageElement.innerHTML = `
-            <div class="message-avatar">${message.user.name.charAt(0).toUpperCase()}</div>
-            <div class="message-content">
-                <div class="message-header">
-                    <span class="message-username">${message.user.name}</span>
-                    <span class="message-time">${formatDate(message.created_at)}</span>
-                    ${message.user_id === userData.id ?
-                    `<button class="delete-message-btn" data-message-id="${message.id}"><i class="fi fi-br-trash"></i></button>` : ''}
-                </div>
-                <p class="message-text">${message.content}</p>
-                <div class="message-reactions">
-                    ${renderReactions(message)}
-                </div>
+        <div class="message-avatar" style="background-color: ${message.user.name_color}">
+            ${message.user.name.charAt(0).toUpperCase()}
+        </div>
+        <div class="message-content ${message.user_id === userData.id ? 'own-message' : 'other-message'}">
+            <div class="message-header">
+                <span class="message-username">${message.user.name}</span>
+                <span class="message-time">${formatDate(message.created_at)}</span>
             </div>
-        `;
+            <p class="message-text">${message.content}</p>
+            <div class="message-reactions" id="reactions-${message.id}">
+                ${reactionsHTML}
+                ${message.user_id === userData.id ? `
+                    <button class="delete-message-btn" data-message-id="${message.id}">
+                        <i class="fi fi-br-trash"></i>
+                    </button>` : ''}
+            </div>
+        </div>
+    `;
 
                 if (prepend) {
                     messagesContainer.prepend(messageElement);
@@ -471,7 +570,16 @@
                     scrollToBottom();
                 }
 
-                // Добавляем обработчик удаления для своих сообщений
+                // Обновляем обработчики кликов
+                messageElement.querySelectorAll('.reaction-badge').forEach(badge => {
+                    badge.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        const messageId = badge.dataset.messageId;
+                        const reaction = badge.dataset.reaction;
+                        handleReactionClick(messageId, reaction);
+                    });
+                });
+
                 if (message.user_id === userData.id) {
                     messageElement.querySelector('.delete-message-btn').addEventListener('click', () => {
                         deleteMessage(message.id);
@@ -832,12 +940,6 @@
             // Глобальная функция для реакций
             window.addReaction = async function(messageId, reaction) {
                 try {
-                    const reactionBtn = document.querySelector(`.reaction-btn[data-message-id="${messageId}"][data-reaction="${reaction}"]`);
-                    if (!reactionBtn) return;
-
-                    const oldText = reactionBtn.textContent;
-                    reactionBtn.textContent = '...';
-
                     const response = await fetch(`/api/messages/${messageId}/react/${reaction}`, {
                         method: 'POST',
                         headers: {
@@ -849,10 +951,8 @@
 
                     if (response.ok) {
                         const data = await response.json();
-                        const count = data.reactions?.[reaction] || 0;
-                        reactionBtn.textContent = `${count > 0 ? count : ''}${getReactionEmoji(reaction)}`;
+                        updateMessageReactions(messageId, data.reactions);
                     } else {
-                        reactionBtn.textContent = oldText;
                         const error = await response.json();
                         console.error('Error adding reaction:', error);
                     }
@@ -860,12 +960,107 @@
                     console.error('Error adding reaction:', error);
                 }
             };
+            async function removeReaction(messageId, reaction) {
+                try {
+                    const response = await fetch(`/api/messages/${messageId}/react/${reaction}`, {
+                        method: 'DELETE',
+                        headers: {
+                            'Authorization': 'Bearer ' + token,
+                            'Accept': 'application/json',
+                            'X-XSRF-TOKEN': decodedToken
+                        }
+                    });
+
+                    if (response.ok) {
+                        const data = await response.json();
+                        updateMessageReactions(messageId, data.reactions);
+                    } else {
+                        const error = await response.json();
+                        console.error('Error removing reaction:', error);
+                    }
+                } catch (error) {
+                    console.error('Error removing reaction:', error);
+                }
+            }
+
+            function updateMessageReactions(messageId, reactions) {
+                const messageElement = document.getElementById(`message-${messageId}`);
+                if (!messageElement) return;
+
+                // Находим сообщение в нашем локальном хранилище
+                const messageIndex = allMessages.findIndex(m => m.id == messageId);
+                if (messageIndex === -1) return;
+
+                // Обновляем реакции в локальном хранилище
+                allMessages[messageIndex].reactions = reactions;
+
+                // Перестраиваем HTML реакций
+                const reactionsContainer = messageElement.querySelector('.message-reactions');
+                if (!reactionsContainer) return;
+
+                // Сохраняем кнопку удаления (если есть)
+                const deleteBtn = reactionsContainer.querySelector('.delete-message-btn');
+
+                // Очищаем и перестраиваем реакции
+                reactionsContainer.innerHTML = '';
+
+                if (reactions && Object.keys(reactions).length > 0) {
+                    Object.entries(reactions).forEach(([type, count]) => {
+                        if (count > 0) {
+                            const isUserReaction = allMessages[messageIndex].user_reactions.includes(type);
+                            const badge = document.createElement('span');
+                            badge.className = `reaction-badge ${isUserReaction ? 'user-reaction' : ''}`;
+                            badge.dataset.reaction = type;
+                            badge.dataset.messageId = messageId;
+                            badge.textContent = `${getReactionEmoji(type)} ${count > 1 ? count : ''}`;
+
+                            badge.addEventListener('click', (e) => {
+                                e.stopPropagation();
+                                handleReactionClick(messageId, type);
+                            });
+
+                            reactionsContainer.appendChild(badge);
+                        }
+                    });
+                }
+
+                // Восстанавливаем кнопку удаления для своих сообщений
+                if (allMessages[messageIndex].user_id === userData.id && deleteBtn) {
+                    reactionsContainer.appendChild(deleteBtn);
+                }
+            }
+            async function handleReactionClick(messageId, reaction) {
+                try {
+                    const response = await fetch(`/api/messages/${messageId}/react/${reaction}`, {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': 'Bearer ' + token,
+                            'Accept': 'application/json',
+                            'X-XSRF-TOKEN': decodedToken
+                        }
+                    });
+
+                    if (response.ok) {
+                        const data = await response.json();
+                        updateMessageReactions(messageId, data.reactions);
+                    }
+                } catch (error) {
+                    console.error('Error handling reaction:', error);
+                }
+            }
 
             function getReactionEmoji(reaction) {
                 const emojis = {
                     'like': '👍',
                     'love': '❤️',
-                    'laugh': '😆'
+                    'laugh': '😆',
+                    'wow': '😮',
+                    'sad': '😢',
+                    'angry': '😠',
+                    'fire': '🔥',
+                    'star': '⭐',
+                    'clap': '👏',
+                    'rocket': '🚀'
                 };
                 return emojis[reaction] || '';
             }

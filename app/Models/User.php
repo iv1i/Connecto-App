@@ -52,6 +52,11 @@ class User extends Authenticatable
             ->withTimestamps();
     }
 
+    public function reactions()
+    {
+        return $this->hasMany(UserReactions::class);
+    }
+
     public function isBlocked(): bool
     {
         return $this->is_blocked;
