@@ -97,18 +97,3 @@
         right: 100%;
     }
 }
-
-button {
-    /*padding: 12px 20px;*/
-    outline: none;
-    border: none;
-    background-color: #4070f4;
-    color: #fff;
-    border-radius: 6px;
-    cursor: pointer;
-    transition: 0.3s;
-}
-
-.toast.active ~ button {
-    pointer-events: none;
-}

@@ -25,10 +25,10 @@
         <div class="sidebar">
             <div class="sidebar-header">
                 <h2><i class="fi fi-br-cube"></i>Chat Rooms</h2>
-                <button id="createRoomBtn" class="btn btn-primary w-full mt-2" style="font-weight: bold">
+                <button id="createRoomBtn" class="btn btn-primary w-full mt-2 !font-bold">
                     <i class="fi fi-br-magic-wand"></i> Create Room
                 </button>
-                <button id="joinRoomBtn" class="btn btn-secondary w-full mt-2" style="font-weight: bold">
+                <button id="joinRoomBtn" class="btn btn-secondary w-full mt-2 !font-bold">
                     <i class="fi fi-br-add"></i> Join Room
                 </button>
             </div>
@@ -67,10 +67,10 @@
                         <p id="roomDescription" class="text-light"></p>
                     </div>
                     <div id="roomActions" class="hidden">
-                        <button id="inviteUsersBtn" class="btn btn-secondary mr-2">
+                        <button id="inviteUsersBtn" class="btn btn-secondary mr-2 !font-bold">
                             Invite Users
                         </button>
-                        <button id="deleteRoomBtn" class="btn btn-danger">
+                        <button id="deleteRoomBtn" class="btn btn-danger !font-bold">
                             Delete Room
                         </button>
                     </div>
