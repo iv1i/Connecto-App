@@ -1,6 +1,23 @@
 @extends('layouts.app')
 
 @section('content')
+    <div class="notifications">
+        <div class="toast ">
+            <div  class="toast-content">
+                <i class="fas fa-solid fa-check check"></i>
+
+                <div class="toast-message">
+                    <span class="text text-1"></span>
+                    <span class="text text-2"></span>
+                    <span class="text text-3"></span>
+                </div>
+            </div>
+            <i class="fi fi-br-cross-small close"></i>
+            <!-- Remove 'active' class, this is just to show in Codepen thumbnail -->
+            <div  class="progress"></div>
+        </div>
+    </div>
+
     <div class="auth-container">
         <div class="auth-card">
             <div class="card-header">
@@ -21,7 +38,7 @@
 
                 <div class="form-group">
                     <label for="remember" class="label">
-                        <i class="fi fi-br-lock"></i>Remember me
+                        <i class="fi fi-br-bookmark"></i>Remember me
                         <input type="checkbox" id="remember" name="remember">
                     </label>
                 </div>
@@ -66,7 +83,8 @@
                 // Перенаправляем
                 window.location.href = '/chat';
             } else {
-                alert('Login failed');
+                const alertToastMessage = {'type': 'error', 'message': 'Login failed'};
+                callShowToast(alertToastMessage);
             }
         });
     </script>

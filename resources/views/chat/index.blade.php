@@ -3,7 +3,23 @@
 
 @endpush
 
-    @section('content')
+@section('content')
+    <div class="notifications">
+            <div class="toast ">
+                <div  class="toast-content">
+                    <i class="fas fa-solid fa-check check"></i>
+
+                    <div class="toast-message">
+                        <span class="text text-1"></span>
+                        <span class="text text-2"></span>
+                        <span class="text text-3"></span>
+                    </div>
+                </div>
+                <i class="fi fi-br-cross-small close"></i>
+                <!-- Remove 'active' class, this is just to show in Codepen thumbnail -->
+                <div  class="progress"></div>
+            </div>
+        </div>
     <div class="chat-layout">
         <!-- Sidebar -->
         <div class="sidebar">
@@ -333,7 +349,8 @@
                         throw new Error('Failed to load user data');
                     }
                 } catch (error) {
-                    console.error('Error loading user:', error);
+                    const alertToastMessage = {'type': 'error', 'message': error};
+                    callShowToast(alertToastMessage);
                 }
             }
 
@@ -353,7 +370,8 @@
                         renderRoomList(data.data);
                     }
                 } catch (error) {
-                    console.error('Error loading rooms:', error);
+                    const alertToastMessage = {'type': 'error', 'message': 'Error loading rooms'};
+                    callShowToast(alertToastMessage);
                 }
             }
 
@@ -379,7 +397,8 @@
                         renderRoomList(data.data);
                     }
                 } catch (error) {
-                    console.error('Error searching rooms:', error);
+                    const alertToastMessage = {'type': 'error', 'message': 'Error searching rooms'};
+                    callShowToast(alertToastMessage);
                 }
             }
 
@@ -447,7 +466,6 @@
                     messageInputContainer.classList.remove('hidden');
                     messageInput.focus();
                 } catch (error) {
-                    console.error('Error joining room:', error);
                     messagesContainer.innerHTML = `<div class="error-loading-room"><i class="fi fi-br-bug-slash"></i> Error loading room</div>`;
                 }
             }
@@ -660,7 +678,8 @@
             // Добавление сообщения в UI
             function addMessageToUI(message, prepend = false) {
                 if (message.error){
-                    return;
+                    const alertToastMessage = {'type': 'error', 'message': message.error};
+                    callShowToast(alertToastMessage);
                 }
                 const messageElement = document.createElement('div');
                 messageElement.addEventListener('contextmenu', (e) => {
@@ -758,11 +777,13 @@
                         updateRoomMessageCount(currentRoomId, 1);
                     } else {
                         const error = await response.json();
-                        alert(error.message || 'Failed to send message');
+                        const alertToastMessage = {'type': 'error', 'message': error.message || 'Failed to send message'};
+                        callShowToast(alertToastMessage);
                     }
                 } catch (error) {
+                    const alertToastMessage = {'type': 'error', 'message': 'An error occurred while sending message'};
+                    callShowToast(alertToastMessage);
                     console.error('Error sending message:', error);
-                    alert('An error occurred while sending message');
                 } finally {
                     submitBtn.disabled = false;
                     submitBtn.textContent = 'Send';
@@ -788,11 +809,13 @@
                         updateRoomMessageCount(currentRoomId, -1);
                     } else {
                         const error = await response.json();
-                        alert(error.message || 'Failed to delete message');
+                        const alertToastMessage = {'type': 'error', 'message': error.message || 'Failed to delete message'};
+                        callShowToast(alertToastMessage);
                     }
                 } catch (error) {
                     console.error('Error deleting message:', error);
-                    alert('An error occurred while deleting message');
+                    const alertToastMessage = {'type': 'error', 'message': 'An error occurred while deleting message'};
+                    callShowToast(alertToastMessage);
                 }
             }
 
@@ -850,11 +873,13 @@
                         await loadRooms();
                     } else {
                         const error = await response.json();
-                        alert(error.message || 'Failed to create room');
+                        const alertToastMessage = {'type': 'error', 'message': error.message || 'Failed to create room'};
+                        callShowToast(alertToastMessage);
                     }
                 } catch (error) {
                     console.error('Error creating room:', error);
-                    alert('An error occurred while creating room');
+                    const alertToastMessage = {'type': 'error', 'message': 'An error occurred while creating room'};
+                    callShowToast(alertToastMessage);
                 } finally {
                     submitBtn.disabled = false;
                     submitBtn.textContent = 'Create';
@@ -915,11 +940,13 @@
                         await loadRooms();
                     } else {
                         const error = await response.json();
-                        alert(error.message || 'Failed to join room');
+                        const alertToastMessage = {'type': 'error', 'message': error.message || 'Failed to join room'};
+                        callShowToast(alertToastMessage);
                     }
                 } catch (error) {
                     console.error('Error joining room:', error);
-                    alert('An error occurred while joining room');
+                    const alertToastMessage = {'type': 'error', 'message': 'An error occurred while joining room'};
+                    callShowToast(alertToastMessage);
                 } finally {
                     submitBtn.disabled = false;
                     submitBtn.textContent = 'Join';
@@ -971,15 +998,18 @@
                     });
 
                     if (response.ok) {
-                        alert('User invited successfully');
+                        const alertToastMessage = {'type': 'success', 'message': 'User invited successfully'};
+                        callShowToast(alertToastMessage);
                         document.getElementById('usernameInput').value = '';
                     } else {
                         const error = await response.json();
-                        alert(error.message || 'Failed to invite user');
+                        const alertToastMessage = {'type': 'success', 'message': error.message || 'Failed to invite user'};
+                        callShowToast(alertToastMessage);
                     }
                 } catch (error) {
                     console.error('Error inviting user:', error);
-                    alert('An error occurred while inviting user');
+                    const alertToastMessage = {'type': 'success', 'message': error.message || 'An error occurred while inviting user'};
+                    callShowToast(alertToastMessage);
                 } finally {
                     inviteBtn.disabled = false;
                     inviteBtn.textContent = 'Invite';
@@ -1006,7 +1036,8 @@
                     });
 
                     if (response.ok) {
-                        alert('Room deleted successfully');
+                        const alertToastMessage = {'type': 'success', 'message': 'Room deleted successfully'};
+                        callShowToast(alertToastMessage);
                         currentRoomId = null;
                         localStorage.removeItem('roomId');
                         document.getElementById('roomActions').classList.add('hidden');
@@ -1017,11 +1048,13 @@
                         await loadRooms();
                     } else {
                         const error = await response.json();
-                        alert(error.message || 'Failed to delete room');
+                        const alertToastMessage = {'type': 'error', 'message': error.message || 'Failed to delete room'};
+                        callShowToast(alertToastMessage);
                     }
                 } catch (error) {
                     console.error('Error deleting room:', error);
-                    alert('An error occurred while deleting room');
+                    const alertToastMessage = {'type': 'error', 'message': 'An error occurred while deleting room'};
+                    callShowToast(alertToastMessage);
                 } finally {
                     deleteBtn.disabled = false;
                     deleteBtn.textContent = 'Delete Room';
@@ -1126,7 +1159,6 @@
                     });
                 }
             }
-
 
             async function handleReactionClick(messageId, reaction) {
                 try {

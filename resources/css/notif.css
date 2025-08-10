@@ -4,7 +4,7 @@
     top: 20px;
     right: 30px;
     border-radius: 12px;
-    background: var(--app-bg-2);
+    background: var(--secondary);
     padding: 20px 35px 20px 25px;
     box-shadow: 0 6px 20px -5px rgba(0, 0, 0, 0.1);
     overflow: hidden;
@@ -35,26 +35,26 @@
     height: 35px;
     min-width: 35px;
     background-color: #4070f4;
-    color: #fff;
+    color: var(--secondary);
     font-size: 20px;
     border-radius: 50%;
 }
 
-.toast-content .message {
+.toast-content .toast-message {
     display: flex;
     flex-direction: column;
     margin: 0 20px;
 }
 
-.message .text {
+.toast-message .text {
     font-size: 16px;
     font-weight: 400;
-    color: var(--app-bg-inv);
+    color: var(--text);
 }
 
-.message .text.text-1 {
+.toast-message .text.text-1 {
     font-weight: 600;
-    color: var(--app-bg-2-inv);
+    color: var(--text);
 }
 
 .toast .close {

@@ -1,6 +1,6 @@
 let toastTimer1, toastTimer2;
 
-function showToast(type, title, message, actions = null) {
+window.showToast = function (type, title, message, actions = null) {
     const toast = document.querySelector(".toast");
     const toastContent = toast.querySelector(".toast-content");
     const checkIcon = toast.querySelector(".check");
@@ -26,7 +26,7 @@ function showToast(type, title, message, actions = null) {
 
     // Set icon and colors based on type
     if (type === 'success') {
-        checkIcon.className = "fas fa-solid fa-check check";
+        checkIcon.className = "fi fi-br-check check";
         checkIcon.style.backgroundColor = "#40f443";
         const style = document.createElement('style');
         style.innerHTML = '.toast .progress:before { background-color: #40f443 !important; }';
@@ -34,7 +34,7 @@ function showToast(type, title, message, actions = null) {
         document.head.appendChild(style);
     }
     if (type === 'info'){
-        checkIcon.className = "fas fa-solid fa-info check";
+        checkIcon.className = "fi fi-br-information check";
         checkIcon.style.backgroundColor = "#40aff4";
         const style = document.createElement('style');
         style.innerHTML = '.toast .progress:before { background-color: #40aff4 !important; }';
@@ -42,7 +42,7 @@ function showToast(type, title, message, actions = null) {
         document.head.appendChild(style);
     }
     if (type === 'warning'){
-        checkIcon.className = "fas fa-solid fa-exclamation check";
+        checkIcon.className = "fi fi-br-triangle-warning check";
         checkIcon.style.backgroundColor = "#f4bb40";
         const style = document.createElement('style');
         style.innerHTML = '.toast .progress:before { background-color: #f4bb40 !important; }';
@@ -50,7 +50,7 @@ function showToast(type, title, message, actions = null) {
         document.head.appendChild(style);
     }
     if (type === 'error') {
-        checkIcon.className = "fas fa-solid fa-times check";
+        checkIcon.className = "fi fi-br-cross check";
         checkIcon.style.backgroundColor = "#f4406a";
         const style = document.createElement('style');
         style.innerHTML = '.toast .progress:before { background-color: #f4406a !important; }';
@@ -97,7 +97,7 @@ function showToast(type, title, message, actions = null) {
         }
     }
 }
-function closeToast() {
+window.closeToast = function () {
     const toast = document.querySelector(".toast");
     const progress = toast.querySelector(".progress");
 
@@ -110,25 +110,56 @@ function closeToast() {
     clearTimeout(toastTimer1);
     clearTimeout(toastTimer2);
 }
-function callShowToast(data){
+// Объект с переводами для разных языков
+const toastTranslations = {
+    en: {
+        titles: {
+            error: 'Error',
+            success: 'Success',
+            warning: 'Warning',
+            info: 'Information'
+        },
+        messages: {
+            error: 'An error occurred',
+            success: 'Operation completed successfully',
+            warning: 'Please note',
+            info: 'Information message'
+        }
+    },
+    ru: {
+        titles: {
+            error: 'Ошибка',
+            success: 'Успех',
+            warning: 'Предупреждение',
+            info: 'Информация'
+        },
+        messages: {
+            error: 'Произошла ошибка',
+            success: 'Операция выполнена успешно',
+            warning: 'Обратите внимание',
+            info: 'Информационное сообщение'
+        }
+    },
+    // Добавьте другие языки по аналогии
+};
+// Текущий язык (можно получать из настроек приложения или браузера)
+let currentLanguage = 'en'; // или 'en' и т.д.
+
+window.callShowToast = function (data) {
     const type = data.type || (data.success ? 'success' : 'error');
-    const defaultTitles = {
-        error: 'Ошибка',
-        success: 'Успех',
-        warning: 'Предупреждение',
-        info: 'Информация'
-    };
-    const defaultMessages = {
-        error: 'Произошла ошибка',
-        success: 'Операция выполнена успешно',
-        warning: 'Обратите внимание',
-        info: 'Информационное сообщение'
-    };
+    const translations = toastTranslations[currentLanguage] || toastTranslations.ru;
 
     showToast(
         type,
-        defaultTitles[type] || 'Уведомление',
-        data.message || defaultMessages[type],
+        data.title || translations.titles[type] || 'Notification',
+        data.message || translations.messages[type] || '',
         data.actions
     );
-}
+};
+
+// Функция для смены языка
+window.setToastLanguage = function(lang) {
+    if (toastTranslations[lang]) {
+        currentLanguage = lang;
+    }
+};
