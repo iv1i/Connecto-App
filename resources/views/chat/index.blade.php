@@ -647,7 +647,6 @@
                 const messageElement = document.createElement('div');
                 messageElement.addEventListener('contextmenu', (e) => {
                     e.preventDefault();
-                    console.log('Context menu triggered for message', message.id);
                     showContextMenu(e, message.id);
                 });
 
