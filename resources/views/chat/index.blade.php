@@ -218,8 +218,10 @@
 
             Echo.private(`deleted-message`).listen('MessageDellEvent', (e) => {
                 if (e.message.user.id !== userData.id){
-                    loadRooms();
-                    if (String(e.message.chat_room_id) === currentRoom){
+                    updateRoomMessageCount(e.message.chat_room_id, -1)
+                    unreadRooms[e.message.chat_room_id] = false;
+                    updateUnreadIndicators();
+                    if (String(e.message.chat_room_id) === localStorage.getItem('roomId')){
                         document.getElementById(`message-${e.message.id}`).remove();
                     }
                     console.log('delete message!')
@@ -227,7 +229,7 @@
             });
 
             Echo.private(`reaction-add`).listen('ReactionEvent', (e) => {
-                if (String(e.message.chat_room_id) === currentRoom) {
+                if (String(e.message.chat_room_id) === localStorage.getItem('roomId')) {
                     updateMessageReactions(e.message.id, e.message.reactions);
                 }
             });
