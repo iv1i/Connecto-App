@@ -9,11 +9,11 @@
         <div class="sidebar">
             <div class="sidebar-header">
                 <h2><i class="fi fi-br-cube"></i>Chat Rooms</h2>
-                <button id="createRoomBtn" class="btn btn-primary w-full mt-2">
+                <button id="createRoomBtn" class="btn btn-primary w-full mt-2" style="font-weight: bold">
                     <i class="fi fi-br-magic-wand"></i> Create Room
                 </button>
-                <button id="joinRoomBtn" class="btn btn-secondary w-full mt-2">
-                    <i class="fi fi-br-add"></i>Join Room
+                <button id="joinRoomBtn" class="btn btn-secondary w-full mt-2" style="font-weight: bold">
+                    <i class="fi fi-br-add"></i> Join Room
                 </button>
             </div>
 
@@ -175,7 +175,7 @@
             </div>
         </div>
     </div>
-    <script>
+    <script id="v1.0.0">
         document.addEventListener('DOMContentLoaded', function() {
             const token = localStorage.getItem('token');
             const encodedToken = getCookie('XSRF-TOKEN');
@@ -238,7 +238,14 @@
                 Object.keys(unreadRooms).forEach(roomId => {
                     const span = document.getElementById(`newMessagesSpan-${roomId}`);
                     if (span && unreadRooms[roomId]) {
-                        span.innerHTML = '<i class="newMessages fi fi-br-envelope-dot"></i>';
+                        span.innerHTML = '<i id="" class="newMessages fi fi-br-envelope-dot"></i>';
+                    }
+                    if (span && !unreadRooms[roomId]) {
+                        const roomElement = document.getElementById(`newMessagesSpan-${roomId}`);
+                        const iconElement = roomElement.querySelector('i.newMessages');
+                        if (iconElement) {
+                            iconElement.remove();
+                        }
                     }
                 });
             }
@@ -427,25 +434,34 @@
                     updateUnreadIndicators();
                     localStorage.setItem('roomId', roomId);
 
-                    const roomElement = document.getElementById(`newMessagesSpan-${roomId}`);
-                    const iconElement = roomElement.querySelector('i.newMessages');
-                    if (iconElement) {
-                        iconElement.remove();
-                    }
-
                     updateRoomUI(room);
-                    renderMessages(messages.data);
+                    if (messages.data.length === 0){
+                        showNopeMessages();
+                    }
+                    else {
+                        renderMessages(messages.data);
+                    }
 
                     messageInputContainer.classList.remove('hidden');
                     messageInput.focus();
                 } catch (error) {
                     console.error('Error joining room:', error);
-                    messagesContainer.innerHTML = `<div class="error">Error loading room: ${error.message}</div>`;
+                    messagesContainer.innerHTML = `<div class="error-loading-room"><i class="fi fi-br-bug-slash"></i> Error loading room</div>`;
                 }
             }
 
             function showLoadingMessages() {
-                messagesContainer.innerHTML = '<div class="loading">Loading messages...</div>';
+                messagesContainer.innerHTML = '<div class="loading"><i class="fi fi-br-loading"></i></div>';
+            }
+
+            function showNopeMessages() {
+                messagesContainer.innerHTML = '<div id="nope-messages" class="nope-messages"><i class="fi fi-br-message-slash"></i>Nope messages</div>';
+            }
+            function removeShowNopeMessages(){
+                const nopeMessages = document.getElementById(`nope-messages`);
+                if (nopeMessages){
+                    nopeMessages.remove();
+                }
             }
 
             function updateRoomUI(room) {
@@ -481,8 +497,6 @@
 
                 scrollToBottom();
             }
-
-
 
             // Закрытие всех контекстных меню
             function closeAllContextMenus() {
@@ -617,8 +631,6 @@
                 menu.style.top = `${adjustedY}px`;
             }
 
-
-
             function replyToMessage(messageId) {
                 const message = allMessages.find(m => m.id == messageId);
                 if (!message) return;
@@ -653,7 +665,7 @@
 
                 messageElement.className = `MSG ${prepend ? 'prepend-message' : ''}`;
                 messageElement.id = `message-${message.id}`;
-
+                removeShowNopeMessages();
                 // Формируем HTML для реакций
                 const reactionsHTML = message.reactions && Object.keys(message.reactions).length > 0
                     ? Object.entries(message.reactions).map(([type, count]) => {
