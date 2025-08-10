@@ -522,7 +522,6 @@
                             reactions: {},
                             user_reactions: []
                         };
-                        console.log('Created message object from DOM:', message);
                     }
                 }
 
@@ -607,9 +606,9 @@
                 }
 
                 if (clientY + menuHeight > windowHeight + scrollY) {
-                    adjustedY = windowHeight + scrollY - menuHeight - 10;
+                    adjustedY = windowHeight + scrollY - menuHeight - 80;
                 } else if (clientY < scrollY + 10) {
-                    adjustedY = scrollY + 10;
+                    adjustedY = scrollY + 30;
                 }
 
                 menu.style.left = `${adjustedX}px`;
@@ -752,8 +751,6 @@
             }
             // Удаление сообщения
             async function deleteMessage(messageId) {
-                if (!confirm('Are you sure you want to delete this message?')) return;
-
                 try {
                     const response = await fetch(`/api/messages/${messageId}`, {
                         method: 'DELETE',
@@ -1085,10 +1082,6 @@
                 const reactionsContainer = messageElement.querySelector('.message-reactions');
                 if (!reactionsContainer) return;
 
-                // Сохраняем кнопку удаления (если есть)
-                const deleteBtn = reactionsContainer.querySelector('.delete-message-btn');
-
-                // Очищаем и перестраиваем реакции
                 reactionsContainer.innerHTML = '';
 
                 if (reactions && Object.keys(reactions).length > 0) {
@@ -1099,7 +1092,7 @@
                             badge.className = `reaction-badge ${isUserReaction ? 'user-reaction' : ''}`;
                             badge.dataset.reaction = type;
                             badge.dataset.messageId = messageId;
-                            badge.textContent = `${getReactionEmoji(type)} ${count > 1 ? count : ''}`;
+                            badge.innerHTML = `${getReactionEmoji(type)}${count > 1 ? ` ${count}` : ''}`; // Используем innerHTML
 
                             badge.addEventListener('click', async (e) => {
                                 e.stopPropagation();
@@ -1110,14 +1103,8 @@
                         }
                     });
                 }
-
-                // Восстанавливаем кнопку удаления для своих сообщений
-                const message = allMessages.find(m => m.id == messageId);
-                if (message && message.user_id === userData.id && deleteBtn) {
-                    reactionsContainer.appendChild(deleteBtn);
-                    deleteBtn.addEventListener('click', () => deleteMessage(messageId));
-                }
             }
+
 
             async function handleReactionClick(messageId, reaction) {
                 try {
