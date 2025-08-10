@@ -25,12 +25,6 @@
     --radius-md: 0.5rem;
 }
 
-* {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-}
-
 body {
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
     background-color: var(--bg);
@@ -38,6 +32,7 @@ body {
     line-height: 1.5;
     -webkit-font-smoothing: antialiased;
     min-height: 100vh;
+    overflow: hidden;
 }
 
 /* Typography */
@@ -73,10 +68,6 @@ h3 {
 
 .text-lighter {
     color: var(--text-lighter);
-}
-
-.text-center {
-    text-align: center;
 }
 
 /* Layout */
