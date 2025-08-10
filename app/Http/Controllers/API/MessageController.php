@@ -31,8 +31,8 @@ class MessageController extends Controller
 
     public function destroy(Message $message): JsonResponse
     {
-        $this->messageService->deleteMessage($message);
-        return response()->json(null, 204);
+        $resp = $this->messageService->deleteMessage($message);
+        return response()->json($resp);
     }
 
     public function addReaction(Message $message, string $reaction): JsonResponse

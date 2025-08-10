@@ -659,6 +659,9 @@
 
             // Добавление сообщения в UI
             function addMessageToUI(message, prepend = false) {
+                if (message.error){
+                    return;
+                }
                 const messageElement = document.createElement('div');
                 messageElement.addEventListener('contextmenu', (e) => {
                     e.preventDefault();

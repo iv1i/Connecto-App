@@ -10,30 +10,48 @@ use App\Models\ChatRoom;
 use App\Models\Message;
 use App\Models\User;
 use Illuminate\Pagination\LengthAwarePaginator;
+use function PHPUnit\Framework\isEmpty;
 
 class MessageService
 {
-    public function sendMessage(MessageRequest $request, User $user): Message
+    public function sendMessage(MessageRequest $request, User $user): Message|array
     {
         $data = $request->validated();
         $data['user_id'] = $user->id;
+        $chatRoom = ChatRoom::find($data['chat_room_id']);
+        if ($chatRoom->type === 'private') {
+            $accsess_room = $user->chatRooms()->where('chat_room_id', $data['chat_room_id'])->first();
+            //dd(isEmpty($accsess_room));
+            if ($accsess_room !== null || $chatRoom->created_by === $user->id) {
+                $message = Message::create($data);
+                $msg = $message->load('user');
+                MessageSentEvent::dispatch($msg);
+                return $msg;
+            }
+            return ['error' => 'no access'];
+        }
         $message = Message::create($data);
         $msg = $message->load('user');
         MessageSentEvent::dispatch($msg);
         return $msg;
     }
 
-    public function deleteMessage(Message $message): void
+    public function deleteMessage(Message $message): array
     {
-        $msg = [
-            'id' => $message->id,
-            'chat_room_id' => $message->chat_room_id,
-            'user' => [
-                'id' => $message->user_id,
-            ]
-        ];
-        MessageDellEvent::dispatch($msg);
-        $message->delete();
+        if ($message->user_id === auth()->user()->id || auth()->user()->role === 'admin') {
+            $msg = [
+                'id' => $message->id,
+                'chat_room_id' => $message->chat_room_id,
+                'user' => [
+                    'id' => $message->user_id,
+                ]
+            ];
+            MessageDellEvent::dispatch($msg);
+            $message->delete();
+            return ['message' => 'deleted'];
+        }
+
+        return ['message' => 'not access'];
     }
 
     public function getRoomMessages(ChatRoom $room): LengthAwarePaginator
