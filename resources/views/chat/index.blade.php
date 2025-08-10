@@ -202,12 +202,11 @@
             Echo.private(`room`).listen('MessageSentEvent', (e) => {
                 console.log(e.message);
                 if (e.message.user.id !== userData.id){
-                    //loadRooms();
                     changeRoomMessagesCount(e.message.chat_room_id, 1);
                     if (String(e.message.chat_room_id) === localStorage.getItem('roomId')){
+                        // Добавляем обработчик контекстного меню для новых сообщений
                         addMessageToUI(e.message);
                     }
-                    // В обработчике события:
                     if (String(e.message.chat_room_id) !== localStorage.getItem('roomId')) {
                         unreadRooms[e.message.chat_room_id] = true;
                         updateUnreadIndicators();
@@ -503,8 +502,34 @@
                 closeAllContextMenus();
                 e.preventDefault();
 
-                const message = allMessages.find(m => m.id == messageId);
-                if (!message) return;
+                // Ищем сообщение в allMessages или в DOM
+                let message = allMessages.find(m => m.id == messageId);
+
+                if (!message) {
+                    // Если сообщение не найдено в allMessages, попробуем получить данные из DOM
+                    const messageElement = document.getElementById(`message-${messageId}`);
+                    if (messageElement) {
+                        message = {
+                            id: messageId,
+                            user_id: messageElement.querySelector('.own-message') ? userData.id : null,
+                            content: messageElement.querySelector('.message-text')?.textContent || '',
+                            user: {
+                                id: messageElement.querySelector('.own-message') ? userData.id : null,
+                                name: messageElement.querySelector('.message-username')?.textContent || '',
+                                name_color: messageElement.querySelector('.message-avatar')?.style.backgroundColor || '#ccc'
+                            },
+                            // Добавляем пустые реакции по умолчанию
+                            reactions: {},
+                            user_reactions: []
+                        };
+                        console.log('Created message object from DOM:', message);
+                    }
+                }
+
+                if (!message) {
+                    console.error('Message not found:', messageId);
+                    return;
+                }
 
                 const menuContainer = document.createElement('div');
                 menuContainer.className = 'context-menu-container';
@@ -531,8 +556,8 @@
                 actionsMenu.className = 'actions-menu';
 
                 const actions = [
-                    { icon: 'fi fi-br-reply', text: 'Ответить', action: () => replyToMessage(messageId) },
-                    { icon: 'fi fi-br-pin', text: 'Закрепить', action: () => pinMessage(messageId) },
+                    { icon: 'fi fi-br-undo', text: 'Ответить', action: () => replyToMessage(messageId) },
+                    { icon: 'fi fi-br-thumbtack', text: 'Закрепить', action: () => pinMessage(messageId) },
                     { icon: 'fi fi-br-copy', text: 'Копировать текст', action: () => copyMessageText(message.content) }
                 ];
 
@@ -622,14 +647,12 @@
                 const messageElement = document.createElement('div');
                 messageElement.addEventListener('contextmenu', (e) => {
                     e.preventDefault();
+                    console.log('Context menu triggered for message', message.id);
                     showContextMenu(e, message.id);
                 });
 
                 messageElement.className = `MSG ${prepend ? 'prepend-message' : ''}`;
                 messageElement.id = `message-${message.id}`;
-
-                // Получаем реакции пользователя из данных сообщения
-                const userReactions = message.user_reactions || [];
 
                 // Формируем HTML для реакций
                 const reactionsHTML = message.reactions && Object.keys(message.reactions).length > 0
@@ -657,10 +680,6 @@
             <p class="message-text">${message.content}</p>
             <div class="message-reactions" id="reactions-${message.id}">
                 ${reactionsHTML}
-                ${message.user_id === userData.id ? `
-                    <button class="delete-message-btn" data-message-id="${message.id}">
-                        <i class="fi fi-br-trash"></i>
-                    </button>` : ''}
             </div>
         </div>
     `;
@@ -681,37 +700,11 @@
                         handleReactionClick(messageId, reaction);
                     });
                 });
-
-                if (message.user_id === userData.id) {
-                    messageElement.querySelector('.delete-message-btn').addEventListener('click', () => {
-                        deleteMessage(message.id);
-                    });
-                }
             }
 
             function formatDate(dateString) {
                 const date = new Date(dateString);
                 return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-            }
-
-            function renderReactions(message) {
-                const reactions = {
-                    like: '👍',
-                    love: '❤️',
-                    laugh: '😆'
-                };
-
-                return Object.entries(reactions).map(([type, emoji]) => {
-                    const count = message.reactions?.[type] || 0;
-                    return `
-                <button class="reaction-btn"
-                        onclick="addReaction(${message.id}, '${type}')"
-                        data-reaction="${type}"
-                        data-message-id="${message.id}">
-                    ${count > 0 ? count : ''}${emoji}
-                </button>
-            `;
-                }).join('');
             }
 
             // Отправка сообщения
@@ -742,6 +735,7 @@
 
                     if (response.ok) {
                         const result = await response.json();
+                        // Добавляем новое сообщение с обработчиком контекстного меню
                         addMessageToUI(result);
                         messageInput.value = '';
                         updateRoomMessageCount(currentRoomId, 1);
@@ -757,7 +751,6 @@
                     submitBtn.textContent = 'Send';
                 }
             }
-
             // Удаление сообщения
             async function deleteMessage(messageId) {
                 if (!confirm('Are you sure you want to delete this message?')) return;
@@ -1157,16 +1150,16 @@
 
             function getReactionEmoji(reaction) {
                 const emojis = {
-                    'like': '👍',
-                    'love': '❤️',
-                    'laugh': '😆',
-                    'wow': '😮',
-                    'sad': '😢',
-                    'angry': '😠',
-                    'fire': '🔥',
-                    'star': '⭐',
-                    'clap': '👏',
-                    'rocket': '🚀'
+                    'like': `<i class="fi fi-br-social-network"></i>`,
+                    'love': `<i class="fi fi-br-heart"></i>`,
+                    'laugh': `<i class="fi fi-br-grin-squint-tears"></i>`,
+                    'wow': '<i class="fi fi-br-surprise"></i>',
+                    'sad': '<i class="fi fi-br-sad-tear"></i>',
+                    'angry': '<i class="fi fi-br-face-swear"></i>',
+                    'fire': '<i class="fi fi-br-flame"></i>',
+                    'star': '<i class="fi fi-br-star"></i>',
+                    'clap': '<i class="fi fi-br-hands-clapping"></i>',
+                    'rocket': '<i class="fi fi-br-rocket-lunch"></i>'
                 };
                 return emojis[reaction] || '';
             }
