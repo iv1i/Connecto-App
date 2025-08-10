@@ -33,7 +33,8 @@ class AuthController extends Controller
 
     public function login(LoginRequest $request): JsonResponse
     {
-        if (Auth::attempt($request->only('email', 'password'))) {
+        $remember = $request->has('remember');
+        if (Auth::attempt($request->only('email', 'password'), $remember)) {
             $request->session()->regenerate();
 
             return response()->json([
@@ -46,6 +47,10 @@ class AuthController extends Controller
 
     public function logout(Request $request)
     {
+        $user = $request->user();
+        $user->remember_token = null;
+        $user->save();
+
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 

@@ -19,6 +19,13 @@
                     <input type="password" id="password" name="password" required class="input">
                 </div>
 
+                <div class="form-group">
+                    <label for="remember" class="label">
+                        <i class="fi fi-br-lock"></i>Remember me
+                        <input type="checkbox" id="remember" name="remember">
+                    </label>
+                </div>
+
                 <button type="submit" class="btn btn-primary btn-block">
                     Login
                 </button>
@@ -45,6 +52,7 @@
                 body: JSON.stringify({
                     email: document.getElementById('email').value,
                     password: document.getElementById('password').value,
+                    remember: document.getElementById('remember').value,
                     _token: "{{ csrf_token() }}"
                 })
             });
