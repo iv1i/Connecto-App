@@ -249,6 +249,7 @@
                     }
                 });
             }
+
             function changeRoomMessagesCount(roomId, change) {
                 const countElement = document.querySelector(`.room-messages-count-${roomId}`);
 
@@ -264,6 +265,7 @@
                     }
                 }
             }
+
             async function initApp() {
                 await loadUser();
                 await loadRooms();
@@ -777,6 +779,9 @@
 
                     if (response.ok) {
                         document.getElementById(`message-${messageId}`).remove();
+                        if (allMessages.length === 0){
+                            showNopeMessages();
+                        }
                         updateRoomMessageCount(currentRoomId, -1);
                     } else {
                         const error = await response.json();
