@@ -21,27 +21,51 @@
             </div>
         </div>
     <div class="chat-layout">
-        <!-- Sidebar -->
-        <div class="sidebar">
-            <div class="sidebar-header">
-                <h2><i class="fi fi-br-cube"></i>Chat Rooms</h2>
+        <!-- Sidebar-left -->
+        <div id="sidebar-left" class="flex flex-col h-screen w-16 border-r-1 border-(--border) bg-white">
+
+            <div id="sidebar-left-header" class="flex-none border-b-1 border-(--border)">
+                <div id="menu" class="text-[25px] p-4">
+                    <button id="openSidebarBtn" class="w-full !text-[25px] cursor-pointer">
+                        <i class="fi fi-br-menu-burger"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div id="sidebar-left-content" class="grow">
                 <button id="createRoomBtn" class="btn btn-primary w-full mt-2 !font-bold">
-                    <i class="fi fi-br-magic-wand"></i> Create Room
+                    <i class="fi fi-br-magic-wand"></i>
                 </button>
                 <button id="joinRoomBtn" class="btn btn-secondary w-full mt-2 !font-bold">
-                    <i class="fi fi-br-add"></i> Join Room
+                    <i class="fi fi-br-add"></i>
                 </button>
             </div>
 
-            <div class="sidebar-content">
-                <input type="text" id="roomSearch" placeholder="Search rooms..." class="input mb-4">
+            <div id="sidebar-left-footer" class="flex-none border-t-1 border-(--border)">
+                <div class="flex flex-col items-center gap-2 p-3">
+                    <button id="header__sun" onclick="" title="Switch to system theme" class="grow focus:text-yellow-500 text-gray-500">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 1024 1024"><path fill="currentColor" fill-rule="evenodd" d="M548 818v126c0 8.837-7.163 16-16 16h-40c-8.837 0-16-7.163-16-16V818c15.845 1.643 27.845 2.464 36 2.464c8.155 0 20.155-.821 36-2.464m205.251-115.66l89.096 89.095c6.248 6.248 6.248 16.38 0 22.627l-28.285 28.285c-6.248 6.248-16.379 6.248-22.627 0L702.34 753.25c12.365-10.043 21.431-17.947 27.198-23.713c5.766-5.767 13.67-14.833 23.713-27.198m-482.502 0c10.043 12.365 17.947 21.431 23.713 27.198c5.767 5.766 14.833 13.67 27.198 23.713l-89.095 89.096c-6.248 6.248-16.38 6.248-22.627 0l-28.285-28.285c-6.248-6.248-6.248-16.379 0-22.627zM512 278c129.235 0 234 104.765 234 234S641.235 746 512 746S278 641.235 278 512s104.765-234 234-234m0 72c-89.47 0-162 72.53-162 162s72.53 162 162 162s162-72.53 162-162s-72.53-162-162-162M206 476c-1.643 15.845-2.464 27.845-2.464 36c0 8.155.821 20.155 2.464 36H80c-8.837 0-16-7.163-16-16v-40c0-8.837 7.163-16 16-16zm738 0c8.837 0 16 7.163 16 16v40c0 8.837-7.163 16-16 16H818c1.643-15.845 2.464-27.845 2.464-36c0-8.155-.821-20.155-2.464-36ZM814.062 180.653l28.285 28.285c6.248 6.248 6.248 16.379 0 22.627L753.25 320.66c-10.043-12.365-17.947-21.431-23.713-27.198c-5.767-5.766-14.833-13.67-27.198-23.713l89.095-89.096c6.248-6.248 16.38-6.248 22.627 0m-581.497 0l89.095 89.096c-12.365 10.043-21.431 17.947-27.198 23.713c-5.766 5.767-13.67 14.833-23.713 27.198l-89.096-89.095c-6.248-6.248-6.248-16.38 0-22.627l28.285-28.285c6.248-6.248 16.379-6.248 22.627 0M532 64c8.837 0 16 7.163 16 16v126c-15.845-1.643-27.845-2.464-36-2.464c-8.155 0-20.155.821-36 2.464V80c0-8.837 7.163-16 16-16z"/></svg>
+                    </button>
+                    <button id="header__moon" onclick="" title="Switch to light mode" class="grow focus:text-blue-500 text-gray-500">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 1024 1024"><path fill="currentColor" fill-rule="evenodd" d="M489.493 111.658c30.658-1.792 45.991 36.44 22.59 56.329C457.831 214.095 426 281.423 426 354c0 134.757 109.243 244 244 244c72.577 0 139.905-31.832 186.014-86.084c19.868-23.377 58.064-8.102 56.332 22.53C900.4 745.823 725.141 912 512.5 912C291.31 912 112 732.69 112 511.5c0-211.39 164.287-386.024 374.198-399.649l.206-.013zm-81.143 79.75l-4.112 1.362C271.1 237.943 176 364.092 176 511.5C176 697.344 326.656 848 512.5 848c148.28 0 274.938-96.192 319.453-230.41l.625-1.934l-.11.071c-47.18 29.331-102.126 45.755-159.723 46.26L670 662c-170.104 0-308-137.896-308-308c0-58.595 16.476-114.54 46.273-162.467z"/></svg>        </button>
+                </div>
+            </div>
 
+        </div>
+        <!-- Sidebar -->
+        <div id="sidebar" class="flex flex-col h-screen w-md border-r-1 border-(--border) bg-white">
+
+            <div id="sidebar-header" class="border-b-1 border-(--border) flex-none p-3">
+                <input type="text" id="roomSearch" placeholder="Search rooms..." class="input">
+            </div>
+
+            <div id="sidebar-content" class=" p-3 grow overflow-auto">
                 <div id="roomList" class="space-y-2">
                     <!-- Rooms will be loaded here -->
                 </div>
             </div>
 
-            <div class="sidebar-footer">
+            <div id="sidebar-footer" class="border-t-1 border-(--border) flex-none p-3 ">
                 <div class="flex items-center gap-2">
                     <div id="userAvatar" class="message-avatar">
                     </div>
