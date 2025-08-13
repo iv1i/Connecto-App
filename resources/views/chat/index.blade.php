@@ -33,11 +33,17 @@
             </div>
 
             <div id="sidebar-left-content" class="grow">
-                <button id="createRoomBtn" class="btn btn-primary w-full mt-2 !font-bold">
+                <button id="createRoomBtn" class="btn btn-primary w-full mt-2 !font-bold" title="Create room">
                     <i class="fi fi-br-magic-wand"></i>
                 </button>
-                <button id="joinRoomBtn" class="btn btn-secondary w-full mt-2 !font-bold">
-                    <i class="fi fi-br-add"></i>
+                <button id="joinRoomBtn" class="btn btn-secondary w-full mt-2 !font-bold" title="Join private room">
+                    <i class="fi fi-br-key"></i>
+                </button>
+                <button id="PublicRoomList" class="btn btn-secondary w-full mt-2 !font-bold" title="Join public room">
+                    <i class="fi fi-br-search"></i>
+                </button>
+                <button id="friendsListBtn" class="btn btn-secondary w-full mt-2 !font-bold" title="Friends">
+                    <i class="fi fi-br-users"></i>
                 </button>
             </div>
 
@@ -53,7 +59,7 @@
 
         </div>
         <!-- Sidebar -->
-        <div id="sidebar" class="flex flex-col h-screen w-md border-r-1 border-(--border) bg-white">
+        <div id="sidebar" class="flex flex-col h-screen border-r-1 border-(--border) bg-white">
 
             <div id="sidebar-header" class="border-b-1 border-(--border) flex-none p-3">
                 <input type="text" id="roomSearch" placeholder="Search rooms..." class="input">
@@ -91,11 +97,14 @@
                         <p id="roomDescription" class="text-light"></p>
                     </div>
                     <div id="roomActions" class="hidden">
-                        <button id="inviteUsersBtn" class="btn btn-secondary mr-2 !font-bold">
-                            Invite Users
+                        <button id="logoutRoomBtn" class="btn btn-secondary mr-2 !font-bold" title="Logout room">
+                            <i class="fi fi-br-leave"></i>
                         </button>
-                        <button id="deleteRoomBtn" class="btn btn-danger !font-bold">
-                            Delete Room
+                        <button id="inviteUsersBtn" class="btn btn-secondary mr-2 !font-bold" title="Invite users">
+                            <i class="fi fi-br-person-circle-plus"></i>
+                        </button>
+                        <button id="deleteRoomBtn" class="btn btn-danger !font-bold" title="Delete room">
+                            <i class="fi fi-br-trash-xmark"></i>
                         </button>
                     </div>
                 </div>
@@ -172,6 +181,65 @@
                 </div>
             </div>
         </div>
+        <!-- friendsModal -->
+        <div id="friendsModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>Friends</h2>
+                </div>
+                <div class="p-4">
+                    <div id="pendingFriends" class="flex flex-col gap-2">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="text-lg font-semibold">Friend request</h3>
+                        </div>
+                        <!-- Приглашения в друзья -->
+                        <div id="pendingFriendsList" class="space-y-2 mb-4">
+                            <!-- Pending friends will be loaded here -->
+                        </div>
+                    </div>
+                    <div>
+                        <!-- Кнопка добавления друга -->
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="text-lg font-semibold">My Friends</h3>
+                            <button id="addFriendBtn" class="btn btn-primary !font-bold">
+                                <i class="fi fi-br-user-add"></i> Add Friend
+                            </button>
+                        </div>
+                        <!-- Список друзей -->
+                        <div id="friendsList" class="space-y-2">
+                            <!-- Friends will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" id="closeFriendsModal" class="btn btn-secondary">
+                        Close
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Модальное окно для добавления друзей -->
+        <div id="addFriendModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>Add New Friend</h2>
+                </div>
+                <div class="p-4">
+                    <div class="form-group mb-4">
+                        <input type="text" id="friendSearchInput" placeholder="Search users..." class="input w-full">
+                    </div>
+                    <div id="searchResults" class="space-y-2">
+                        <!-- Search results will appear here -->
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" id="closeAddFriendModal" class="btn btn-secondary">
+                        Cancel
+                    </button>
+                </div>
+            </div>
+        </div>
         <!-- Create Room Modal -->
         <div id="createRoomModal" class="modal">
             <div class="modal-content">
@@ -214,8 +282,28 @@
                 </form>
             </div>
         </div>
+        <div id="publicRoomsModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>Public Rooms</h2>
+                </div>
+                <div class="p-4 overflow-hidden">
+                    <div class="form-group mb-4">
+                        <input type="text" id="publicRoomSearch" placeholder="Search public rooms..." class="input w-full">
+                    </div>
+                    <div id="publicRoomsList" class="space-y-2 overflow-auto h-[200px]">
+                        <!-- Public rooms will be loaded here -->
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" id="closePublicRoomsModal" class="btn btn-secondary">
+                        Close
+                    </button>
+                </div>
+            </div>
+        </div>
     </div>
-    <script id="v1.0.0">
+    <script id="v1.1.1">
         document.addEventListener('DOMContentLoaded', function() {
             const token = localStorage.getItem('token');
             const encodedToken = getCookie('XSRF-TOKEN');
@@ -332,12 +420,60 @@
                 document.getElementById('cancelJoinRoom').addEventListener('click', hideJoinRoomModal);
                 document.getElementById('joinRoomForm').addEventListener('submit', handleJoinRoom);
 
+                // Присоединение к публичной комнате
+                document.getElementById('PublicRoomList').addEventListener('click', showPublicRoomsModal);
+                document.getElementById('closePublicRoomsModal').addEventListener('click', hidePublicRoomsModal);
+                document.getElementById('publicRoomSearch').addEventListener('input', debounce(searchPublicRooms, 300));
+
                 // Управление комнатой
                 document.getElementById('inviteUsersBtn').addEventListener('click', showInviteUsersModal);
                 document.getElementById('deleteRoomBtn').addEventListener('click', deleteCurrentRoom);
+                document.getElementById('logoutRoomBtn').addEventListener('click', logoutCurrentRoom);
                 document.getElementById('closeInviteModal').addEventListener('click', hideInviteUsersModal);
                 document.getElementById('copyInviteLinkBtn').addEventListener('click', copyInviteLink);
                 document.getElementById('inviteUserBtn').addEventListener('click', inviteUserByUsername);
+
+                // Обработчик для кнопки друзей
+                document.getElementById('friendsListBtn').addEventListener('click', showFriendsModal);
+                document.getElementById('closeFriendsModal').addEventListener('click', hideFriendsModal);
+
+                // Обработчики модальных окон
+                document.getElementById('addFriendBtn').addEventListener('click', showAddFriendModal);
+                document.getElementById('closeAddFriendModal').addEventListener('click', hideAddFriendModal);
+
+                // Поиск пользователей
+                document.getElementById('friendSearchInput').addEventListener('input', debounce(searchUsers, 300));
+
+                // Обработчик для кнопки добавления в друзья
+                document.addEventListener('click', async function(e) {
+                    if (e.target.closest('.add-friend-btn')) {
+                        const userId = e.target.closest('.add-friend-btn').dataset.userId;
+                        await sendFriendRequest(userId);
+                    }
+                });
+
+                // Обработчик для создания личного чата
+                document.addEventListener('click', async function(e) {
+                    if (e.target.closest('.start-chat-btn')) {
+                        const friendId = e.target.closest('.start-chat-btn').dataset.friendId;
+                        await createPrivateChat(friendId);
+                    }
+                });
+
+                // Обработчик кнопки принятия друга
+                document.addEventListener('click', async function(e) {
+                    if (e.target.closest('.accept-friend-btn')) {
+                        const friendId = e.target.closest('.accept-friend-btn').dataset.friendId;
+                        await acceptFriendRequest(friendId);
+                    }
+                });
+
+                document.addEventListener('click', async function(e) {
+                    if (e.target.closest('.delete-friend-btn')) {
+                        const friendId = e.target.closest('.delete-friend-btn').dataset.friendId;
+                        await deleteFriendRequest(friendId);
+                    }
+                });
 
                 // Выход
                 document.getElementById('logoutBtn').addEventListener('click', logout);
@@ -350,6 +486,274 @@
                     clearTimeout(timeout);
                     timeout = setTimeout(() => func.apply(this, args), wait);
                 };
+            }
+
+            function showPublicRoomsModal() {
+                document.getElementById('publicRoomsModal').classList.add('active');
+                loadPublicRooms();
+                document.getElementById('publicRoomSearch').focus();
+                document.getElementById('publicRoomSearch').value = '';
+            }
+
+            function hidePublicRoomsModal() {
+                document.getElementById('publicRoomsModal').classList.remove('active');
+            }
+
+            function showAddFriendModal() {
+                document.getElementById('addFriendModal').classList.add('active');
+                document.getElementById('friendSearchInput').focus();
+                document.getElementById('friendSearchInput').value = '';
+
+                document.getElementById('searchResults').innerHTML = '';
+            }
+
+            function hideAddFriendModal() {
+                document.getElementById('addFriendModal').classList.remove('active');
+            }
+
+            // Поиск пользователей
+            async function searchUsers(e) {
+                const query = e.target.value.trim();
+                if (query.length < 2) {
+                    document.getElementById('searchResults').innerHTML = '';
+                    return;
+                }
+
+                try {
+                    const response = await fetch(`/api/users/search?query=${encodeURIComponent(query)}`, {
+                        headers: {
+                            'Authorization': 'Bearer ' + token,
+                            'Accept': 'application/json',
+                            'X-XSRF-TOKEN': decodedToken
+                        }
+                    });
+
+                    if (response.ok) {
+                        const data = await response.json();
+                        renderSearchResults(data.data);
+                    }
+                } catch (error) {
+                    console.error('Error searching users:', error);
+                }
+            }
+
+            // Отображение результатов поиска
+            function renderSearchResults(users) {
+                const resultsContainer = document.getElementById('searchResults');
+                resultsContainer.innerHTML = '';
+
+                if (users.length === 0) {
+                    resultsContainer.innerHTML = '<div class="text-gray-500">No users found</div>';
+                    return;
+                }
+
+                users.forEach(user => {
+                    const userElement = document.createElement('div');
+                    userElement.className = 'flex items-center justify-between p-2 hover:bg-gray-100 rounded-md';
+                    userElement.innerHTML = `
+            <div class="flex items-center gap-2">
+                <div class="message-avatar" style="background-color: ${user.name_color}">
+                    ${user.name.charAt(0).toUpperCase()}
+                </div>
+                <span>${user.name}</span>
+            </div>
+            <button class="btn btn-secondary add-friend-btn" data-user-id="${user.id}">
+                <i class="fi fi-br-user-add"></i>
+            </button>
+        `;
+                    resultsContainer.appendChild(userElement);
+                });
+            }
+
+            // Загрузка публичных комнат
+            async function loadPublicRooms() {
+                try {
+                    const response = await fetch('/api/rooms', {
+                        headers: {
+                            'Authorization': 'Bearer ' + token,
+                            'Accept': 'application/json',
+                            'X-XSRF-TOKEN': decodedToken
+                        }
+                    });
+
+                    if (response.ok) {
+                        const data = await response.json();
+                        renderPublicRoomsList(data.data);
+                    }
+                } catch (error) {
+                    console.error('Error loading public rooms:', error);
+                    const alertToastMessage = {'type': 'error', 'message': 'Error loading public rooms'};
+                    callShowToast(alertToastMessage);
+                }
+            }
+
+            // Поиск публичных комнат
+            async function searchPublicRooms(e) {
+                const query = e.target.value.trim();
+
+                try {
+                    const url = query.length >= 2
+                        ? `/api/rooms/search?query=${encodeURIComponent(query)}`
+                        : '/api/rooms/search';
+
+                    const response = await fetch(url, {
+                        headers: {
+                            'Authorization': 'Bearer ' + token,
+                            'Accept': 'application/json',
+                            'X-XSRF-TOKEN': decodedToken
+                        }
+                    });
+
+                    if (response.ok) {
+                        const data = await response.json();
+                        renderPublicRoomsList(data.data);
+                    }
+                } catch (error) {
+                    console.error('Error searching public rooms:', error);
+                }
+            }
+
+            // Отправка запроса на дружбу
+            async function sendFriendRequest(userId) {
+                try {
+                    const response = await fetch(`api/friends/${userId}`, {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': 'Bearer ' + token,
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json',
+                            'X-XSRF-TOKEN': decodedToken
+                        },
+                        body: JSON.stringify({ friend_id: userId })
+                    });
+
+                    if (response.ok) {
+                        const alertToastMessage = {'type': 'success', 'message': 'Friend added'};
+                        callShowToast(alertToastMessage);
+                        hideAddFriendModal();
+                        await loadFriends(); // Обновляем список друзей
+                    } else {
+                        const error = await response.json();
+                        const alertToastMessage = {'type': 'error', 'message': error.message || 'Failed to send request'};
+                        callShowToast(alertToastMessage);
+                    }
+                } catch (error) {
+                    console.error('Error sending friend request:', error);
+                    const alertToastMessage = {'type': 'error', 'message': 'An error occurred'};
+                    callShowToast(alertToastMessage);
+                }
+            }
+
+            async function acceptFriendRequest(userId) {
+                try {
+                    const response = await fetch(`api/friends/${userId}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Authorization': 'Bearer ' + token,
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json',
+                            'X-XSRF-TOKEN': decodedToken
+                        },
+                        body: JSON.stringify({ friend_id: userId })
+                    });
+
+                    if (response.ok) {
+                        const alertToastMessage = {'type': 'success', 'message': 'Friend accepted'};
+                        callShowToast(alertToastMessage);
+                        hideAddFriendModal();
+                        await loadFriends(); // Обновляем список друзей
+                    } else {
+                        const error = await response.json();
+                        const alertToastMessage = {'type': 'error', 'message': error.message || 'Failed to accepted friend'};
+                        callShowToast(alertToastMessage);
+                    }
+                } catch (error) {
+                    console.error('Error sending friend request:', error);
+                    const alertToastMessage = {'type': 'error', 'message': 'An error occurred'};
+                    callShowToast(alertToastMessage);
+                }
+            }
+
+            async function deleteFriendRequest(userId) {
+                try {
+                    const response = await fetch(`api/friends/${userId}`, {
+                        method: 'DELETE',
+                        headers: {
+                            'Authorization': 'Bearer ' + token,
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json',
+                            'X-XSRF-TOKEN': decodedToken
+                        },
+                        body: JSON.stringify({ friend_id: userId })
+                    });
+
+                    if (response.ok) {
+                        const alertToastMessage = {'type': 'success', 'message': 'Friend deleted'};
+                        callShowToast(alertToastMessage);
+                        hideAddFriendModal();
+                        await loadFriends(); // Обновляем список друзей
+                    } else {
+                        const error = await response.json();
+                        const alertToastMessage = {'type': 'error', 'message': error.message || 'Failed to delete friend'};
+                        callShowToast(alertToastMessage);
+                    }
+                } catch (error) {
+                    console.error('Error sending friend request:', error);
+                    const alertToastMessage = {'type': 'error', 'message': 'An error occurred'};
+                    callShowToast(alertToastMessage);
+                }
+            }
+
+            // Функция присоединения к публичной комнате
+            async function joinPublicRoom(roomId) {
+                try {
+                    hidePublicRoomsModal();
+                    showLoadingMessages();
+                    document.title = "Connecto-app";
+                    const [roomResponse, messagesResponse] = await Promise.all([
+                        fetch(`/api/rooms/${roomId}/join`, {
+                            method: 'POST',
+                            headers: {
+                                'Authorization': 'Bearer ' + token,
+                                'Accept': 'application/json',
+                                'X-XSRF-TOKEN': decodedToken
+                            }
+                        }),
+                        fetch(`/api/rooms/${roomId}/messages`, {
+                            headers: {
+                                'Authorization': 'Bearer ' + token,
+                                'Accept': 'application/json',
+                                'X-XSRF-TOKEN': decodedToken
+                            }
+                        })
+                    ]);
+
+                    if (!roomResponse.ok || !messagesResponse.ok) {
+                        throw new Error('Failed to load room data');
+                    }
+
+                    const room = await roomResponse.json();
+                    const messages = await messagesResponse.json();
+
+                    currentRoomId = roomId;
+                    unreadRooms[currentRoomId] = false;
+                    updateUnreadIndicators();
+                    localStorage.setItem('roomId', roomId);
+
+                    updateRoomUI(room.room);
+                    await loadRooms();
+                    if (messages.data.length === 0){
+                        showNopeMessages();
+                    }
+                    else {
+                        renderMessages(messages.data);
+                    }
+
+                    messageInputContainer.classList.remove('hidden');
+                    messageInput.focus();
+                } catch (error) {
+                    messagesContainer.innerHTML = `<div class="error-loading-room"><i class="fi fi-br-bug-slash"></i> Error loading room</div>`;
+                }
             }
 
             // Загрузка пользователя
@@ -381,7 +785,7 @@
             // Загрузка комнат
             async function loadRooms() {
                 try {
-                    const response = await fetch('/api/rooms', {
+                    const response = await fetch('/api/rooms/joined', {
                         headers: {
                             'Authorization': 'Bearer ' + token,
                             'Accept': 'application/json',
@@ -391,9 +795,11 @@
 
                     if (response.ok) {
                         const data = await response.json();
-                        renderRoomList(data.data);
+                        renderRoomList(data);
+                        //renderPrivateChatsList(data.data.private_chats);
                     }
                 } catch (error) {
+                    console.error(error);
                     const alertToastMessage = {'type': 'error', 'message': 'Error loading rooms'};
                     callShowToast(alertToastMessage);
                 }
@@ -429,19 +835,68 @@
             // Отображение списка комнат
             function renderRoomList(rooms) {
                 const roomList = document.getElementById('roomList');
+                const publicRoomList = document.getElementById('publicRoomsList');
                 roomList.innerHTML = '';
+                publicRoomList.innerHTML = '';
+                //renderPublicRoomsList(rooms);
                 rooms.forEach(room => {
                     const roomElement = document.createElement('div');
+                    const publicRoomElement = document.createElement('div');
+
                     roomElement.className = 'p-2 hover:bg-gray-100 rounded-md cursor-pointer';
                     roomElement.dataset.roomId = room.id;
                     roomElement.innerHTML = `
-                <h3 class="font-medium">${room.name} <span id="newMessagesSpan-${room.id}"></span> ${room.type === 'private' ? '<span class="private-chat">Private</span>' : '<span class="public-chat">Public</span>'}
+            <h3 class="font-medium">${room.name} <span id="newMessagesSpan-${room.id}"></span> ${room.type === 'private' ? '<span class="private-chat">Private</span>' : '<span class="public-chat">Public</span>'}
 </h3>
-                <p class="room-messages-count-${room.id} text-sm text-gray-500">${room.messages_count} messages</p>
-            `;
-
+            <p class="room-messages-count-${room.id} text-sm text-gray-500">${room.messages_count} messages</p>
+        `;
                     roomElement.addEventListener('click', () => joinRoom(room.id));
                     roomList.appendChild(roomElement);
+                });
+            }
+
+            // Функция для отображения приватных чатов
+            function renderPrivateChatsList(chats) {
+                const roomList = document.getElementById('roomList');
+
+                chats.forEach(chat => {
+                    const otherUser = chat.users.find(u => u.id !== userData.id);
+                    const roomElement = document.createElement('div');
+                    roomElement.className = 'p-2 hover:bg-gray-100 rounded-md cursor-pointer';
+                    roomElement.dataset.roomId = `private_${chat.id}`;
+                    roomElement.innerHTML = `
+            <h3 class="font-medium">${otherUser.name} <span class="private-chat">Private</span></h3>
+            <p class="room-messages-count-${chat.id} text-sm text-gray-500">${chat.messages_count} messages</p>
+        `;
+
+                    roomElement.addEventListener('click', () => joinRoom(`private_${chat.id}`));
+                    roomList.appendChild(roomElement);
+                });
+            }
+
+            function renderPublicRoomsList(rooms){
+                const publicRoomList = document.getElementById('publicRoomsList');
+                publicRoomList.innerHTML = '';
+
+                if (rooms.length === 0) {
+                    publicRoomList.innerHTML = '<div class="text-gray-500">No public rooms found</div>';
+                    return;
+                }
+                //renderPublicRoomsList(rooms);
+                rooms.forEach(room => {
+                    const publicRoomElement = document.createElement('div');
+
+                    if (room.type === 'public') {
+                        publicRoomElement.className = 'flex items-center justify-between p-2 hover:bg-gray-100 rounded-md';
+                        publicRoomElement.dataset.roomId = room.id;
+                        publicRoomElement.innerHTML = `
+                <h3 class="font-medium">${room.name} <span id="newMessagesSpan-${room.id}"></span> ${room.type === 'private' ? '<span class="private-chat">Private</span>' : '<span class="public-chat">Public</span>'}
+</h3>
+                <p class="room-messages-count-${room.id} text-sm text-gray-500">${room.messages_count} messages</p>`;
+                        publicRoomElement.addEventListener('click', () => joinPublicRoom(room.id));
+                        publicRoomList.appendChild(publicRoomElement);
+                    }
+
                 });
             }
 
@@ -479,7 +934,7 @@
                     updateUnreadIndicators();
                     localStorage.setItem('roomId', roomId);
 
-                    updateRoomUI(room);
+                    updateRoomUI(room.room)
                     if (messages.data.length === 0){
                         showNopeMessages();
                     }
@@ -492,6 +947,171 @@
                 } catch (error) {
                     messagesContainer.innerHTML = `<div class="error-loading-room"><i class="fi fi-br-bug-slash"></i> Error loading room</div>`;
                 }
+            }
+
+            // Создание личного чата
+            async function createPrivateChat(friendId) {
+                try {
+                    const response = await fetch(`/api/rooms/friend/${friendId}`, {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': 'Bearer ' + token,
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json',
+                            'X-XSRF-TOKEN': decodedToken
+                        },
+                    });
+
+                    if (response.ok) {
+                        const chat = await response.json();
+                        hideFriendsModal();
+                        await joinRoom(chat.id);
+                        await loadRooms();
+                    } else {
+                        const error = await response.json();
+                        const alertToastMessage = {'type': 'error', 'message': error.message || 'Failed to create chat'};
+                        callShowToast(alertToastMessage);
+                    }
+                } catch (error) {
+                    console.error('Error creating private chat:', error);
+                    const alertToastMessage = {'type': 'error', 'message': 'An error occurred while creating chat'};
+                    callShowToast(alertToastMessage);
+                }
+            }
+
+            // Присоединение к личному чату
+            async function joinPrivateChat(chatId) {
+                try {
+                    showLoadingMessages();
+
+                    const response = await fetch(`/api/private-chats/${chatId}/messages`, {
+                        headers: {
+                            'Authorization': 'Bearer ' + token,
+                            'Accept': 'application/json',
+                            'X-XSRF-TOKEN': decodedToken
+                        }
+                    });
+
+                    if (response.ok) {
+                        const messages = await response.json();
+                        currentRoomId = `private_${chatId}`;
+                        localStorage.setItem('roomId', currentRoomId);
+
+                        roomNameElement.textContent = 'Private Chat';
+                        roomDescriptionElement.textContent = '';
+
+                        if (messages.data.length === 0) {
+                            showNopeMessages();
+                        } else {
+                            renderMessages(messages.data);
+                        }
+
+                        messageInputContainer.classList.remove('hidden');
+                        document.getElementById('roomActions').classList.add('hidden');
+                        messageInput.focus();
+                    }
+                } catch (error) {
+                    messagesContainer.innerHTML = `<div class="error-loading-room"><i class="fi fi-br-bug-slash"></i> Error loading chat</div>`;
+                }
+            }
+
+            // Новая функция для загрузки друзей
+            async function loadFriends() {
+                try {
+                    const [friendsResponse, pendingFriendsResponse] = await Promise.all([
+                        fetch(`/api/friends`, {
+                            headers: {
+                                'Authorization': 'Bearer ' + token,
+                                'Accept': 'application/json',
+                                'X-XSRF-TOKEN': decodedToken
+                            }
+                        }),
+                        fetch(`/api/friends/pending`, {
+                            headers: {
+                                'Authorization': 'Bearer ' + token,
+                                'Accept': 'application/json',
+                                'X-XSRF-TOKEN': decodedToken
+                            }
+                        })
+                    ]);
+
+                    if (friendsResponse.ok) {
+                        const friends = await friendsResponse.json();
+                        renderFriendsList(friends.data);
+                    }
+                    else {
+                        const friendsList = document.getElementById('friendsList');
+                        friendsList.innerHTML = '<div class="text-gray-500">No friends found</div>';
+                    }
+                    if (pendingFriendsResponse.ok){
+                        const pendingFriends = await pendingFriendsResponse.json();
+                        renderPendingFriendsList(pendingFriends.data);
+                    }
+                    else {
+                        const friendsList = document.getElementById('pendingFriendsList');
+                        friendsList.innerHTML = '<div class="text-gray-500">No friend request</div>';
+                    }
+                } catch (error) {
+                    console.error('Error loading friends:', error);
+                }
+            }
+
+            // Отображение списка друзей
+
+            function renderFriendsList(friends) {
+                const friendsList = document.getElementById('friendsList');
+                friendsList.innerHTML = '';
+
+                friends.forEach(friend => {
+                    if (friend.pivot.status === 'accepted') {
+                        const friendElement = document.createElement('div');
+                        friendElement.className = 'flex items-center justify-between p-2 hover:bg-gray-100 rounded-md';
+                        friendElement.innerHTML = `
+            <div class="flex items-center gap-2">
+                <div class="message-avatar" style="background-color: ${friend.name_color}">
+                    ${friend.name.charAt(0).toUpperCase()}
+                </div>
+                <span>${friend.name}</span>
+            </div>
+<div>
+            <button class="btn btn-secondary hover:bg-blue-200 start-chat-btn" data-friend-id="${friend.id}">
+                <i class=" fi fi-br-comment-alt"></i>
+            </button>
+            <button class="btn btn-secondary hover:bg-red-200 delete-friend-btn" data-friend-id="${friend.id}">
+                <i class=" fi fi-br-trash-xmark"></i>
+            </button>
+</div>
+        `;
+                        friendsList.appendChild(friendElement);
+                    }
+                });
+            }
+
+            function renderPendingFriendsList(friends) {
+                const pendingFriendsList = document.getElementById('pendingFriendsList');
+                const pendingFriends = document.getElementById('pendingFriends');
+                pendingFriends.classList.add('hidden');
+                pendingFriendsList.innerHTML = '';
+
+                friends.forEach(friend => {
+                    if (friend.pivot.status === 'pending'){
+                        pendingFriends.classList.remove('hidden');
+                        const pendingFriendElement = document.createElement('div');
+                        pendingFriendElement.className = 'flex items-center justify-between p-2 hover:bg-gray-100 rounded-md';
+                        pendingFriendElement.innerHTML = `
+            <div class="flex items-center gap-2">
+                <div class="message-avatar" style="background-color: ${friend.name_color}">
+                    ${friend.name.charAt(0).toUpperCase()}
+                </div>
+                <span>${friend.name}</span>
+            </div>
+            <button class="accept-friend-btn" data-friend-id="${friend.id}">
+                <i class="fi fi-br-check"></i>
+            </button>
+        `;
+                        pendingFriendsList.appendChild(pendingFriendElement);
+                    }
+                });
             }
 
             function showLoadingMessages() {
@@ -508,22 +1128,45 @@
                 }
             }
 
+            function showFriendsModal() {
+                document.getElementById('friendsModal').classList.add('active');
+                loadFriends();
+            }
+
+            function hideFriendsModal() {
+                document.getElementById('friendsModal').classList.remove('active');
+            }
+
             function updateRoomUI(room) {
                 roomNameElement.textContent = room.name;
                 roomDescriptionElement.textContent = room.description || 'No description';
-                room.is_owner = room.created_by !== userData.id ? false : true;
+                room.is_owner = room.created_by === userData.id;
 
+                // Всегда показываем кнопку выхода
+                const logoutRoomBtn = document.getElementById('logoutRoomBtn');
+                logoutRoomBtn.classList.remove('hidden');
 
+                // Кнопка приглашения - только для владельца приватной комнаты
                 const inviteUsersBtn = document.getElementById('inviteUsersBtn');
-                inviteUsersBtn.classList.remove('hidden');
-
-                if (room.type === 'public'){
+                if (room.type === 'private' && room.is_owner && room.actions.invite !== 'none') {
+                    inviteUsersBtn.classList.remove('hidden');
+                } else {
                     inviteUsersBtn.classList.add('hidden');
                 }
 
-                const inviteLink = document.getElementById('inviteLinkInput').value = `${room.invite_code}`;
+                // Кнопка удаления - для владельца или если разрешено всем
+                const deleteRoomBtn = document.getElementById('deleteRoomBtn');
+                if (room.is_owner || room.actions.delete === 'all') {
+                    deleteRoomBtn.classList.remove('hidden');
+                } else {
+                    deleteRoomBtn.classList.add('hidden');
+                }
+
+                // Показываем контейнер действий, если хотя бы одна кнопка видима
                 const roomActions = document.getElementById('roomActions');
-                if (room.is_owner) {
+                if (!logoutRoomBtn.classList.contains('hidden') ||
+                    !inviteUsersBtn.classList.contains('hidden') ||
+                    !deleteRoomBtn.classList.contains('hidden')) {
                     roomActions.classList.remove('hidden');
                 } else {
                     roomActions.classList.add('hidden');
@@ -926,6 +1569,8 @@
             async function showJoinRoomModal() {
                 document.getElementById('joinRoomModal').classList.add('active');
                 document.getElementById('inviteCodeInput').focus();
+                document.getElementById('inviteCodeInput').value = '';
+
             }
 
             function hideJoinRoomModal() {
@@ -1037,6 +1682,49 @@
                 } finally {
                     inviteBtn.disabled = false;
                     inviteBtn.textContent = 'Invite';
+                }
+            }
+
+            async function logoutCurrentRoom() {
+                if (!currentRoomId || !confirm('Are you sure you want to logout this room?')) {
+                    return;
+                }
+
+                const logoutBtn = document.getElementById('logoutRoomBtn');
+                logoutBtn.disabled = true;
+
+                try {
+                    const response = await fetch(`/api/rooms/${currentRoomId}/logout`, {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': 'Bearer ' + token,
+                            'Accept': 'application/json',
+                            'X-XSRF-TOKEN': decodedToken
+                        }
+                    });
+
+                    if (response.ok) {
+                        const alertToastMessage = {'type': 'success', 'message': 'Room logout successfully'};
+                        callShowToast(alertToastMessage);
+                        currentRoomId = null;
+                        localStorage.removeItem('roomId');
+                        document.getElementById('roomActions').classList.add('hidden');
+                        document.getElementById('messageInputContainer').classList.add('hidden');
+                        document.getElementById('messages').innerHTML = '';
+                        document.getElementById('roomName').textContent = 'Select a room';
+                        document.getElementById('roomDescription').textContent = '';
+                        await loadRooms();
+                    } else {
+                        const error = await response.json();
+                        const alertToastMessage = {'type': 'error', 'message': error.message || 'Failed to logout room'};
+                        callShowToast(alertToastMessage);
+                    }
+                } catch (error) {
+                    console.error('Error logout room:', error);
+                    const alertToastMessage = {'type': 'error', 'message': 'An error occurred while logout room'};
+                    callShowToast(alertToastMessage);
+                } finally {
+                    logoutBtn.disabled = false;
                 }
             }
 

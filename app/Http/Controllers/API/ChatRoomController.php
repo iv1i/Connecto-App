@@ -4,11 +4,17 @@ namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ChatRoomRequest;
+use App\Http\Requests\SearchRequest;
 use App\Models\ChatRoom;
+use App\Models\User;
 use App\Services\ChatRoomService;
+use App\Services\Utility;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
+use function PHPUnit\Framework\isEmpty;
 
 class ChatRoomController extends Controller
 {
@@ -22,6 +28,12 @@ class ChatRoomController extends Controller
         return response()->json($rooms);
     }
 
+    public function joined(): JsonResponse
+    {
+        $rooms = $this->chatRoomService->getJoinedRooms();
+        return response()->json($rooms);
+    }
+
     public function store(ChatRoomRequest $request): JsonResponse
     {
         $room = $this->chatRoomService->createRoom($request, Auth::user());
@@ -30,7 +42,8 @@ class ChatRoomController extends Controller
 
     public function show(ChatRoom $room): JsonResponse
     {
-        return response()->json($room);
+        $resp = $this->chatRoomService->showRoom($room, Auth::user());
+        return response()->json($resp);
     }
 
     public function update(ChatRoomRequest $request, ChatRoom $room): JsonResponse
@@ -41,31 +54,39 @@ class ChatRoomController extends Controller
 
     public function destroy(ChatRoom $room): JsonResponse
     {
-        $this->chatRoomService->deleteRoom($room);
-        return response()->json(null, 204);
+        $resp = $this->chatRoomService->deleteRoom($room);
+        return response()->json($resp);
     }
 
-    public function search(Request $request): JsonResponse
+    public function join(ChatRoom $room)
+    {
+        $rooms = $this->chatRoomService->joinRoom($room);
+        return response()->json($rooms);
+    }
+
+    public function search(SearchRequest $request): JsonResponse
     {
         $query = $request->input('query');
         $rooms = $this->chatRoomService->searchRooms($query);
         return response()->json($rooms);
     }
 
-    public function joinByInviteCode(Request $request): JsonResponse
+    public function invite(Request $request): JsonResponse
     {
-        $code = $request->input('code');
-        $room = $this->chatRoomService->getRoomByInviteCode($code);
-
-        if (!$room) {
-            return response()->json(['message' => 'Room not found'], 404);
-        }
-
-        // Присоединяем пользователя к комнате
-        auth()->user()->chatRooms()->syncWithoutDetaching([
-            $room->id => ['joined_via' => 'invite_code']
-        ]);
-
+        $room = $this->chatRoomService->joinByInviteCode($request);
         return response()->json($room);
     }
+
+    public function logout(ChatRoom $room): JsonResponse
+    {
+        $this->chatRoomService->logoutRoom($room);
+        return response()->json(['message' => 'Successfully logged out']);
+    }
+
+    public function personal(User $user): JsonResponse
+    {
+        $room = $this->chatRoomService->createPersonalRoom($user);
+        return response()->json($room);
+    }
+
 }

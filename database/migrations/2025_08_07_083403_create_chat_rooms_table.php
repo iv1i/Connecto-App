@@ -12,6 +12,8 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->text('description')->nullable();
+            $table->json('actions')->nullable();
+            $table->string('personal_chat')->nullable();
             $table->enum('type', ['public', 'private'])->default('public');
             $table->foreignId('created_by')->constrained('users');
             $table->string('invite_code')->nullable();

@@ -19,16 +19,9 @@ class MessageService
         $data = $request->validated();
         $data['user_id'] = $user->id;
         $chatRoom = ChatRoom::find($data['chat_room_id']);
-        if ($chatRoom->type === 'private') {
-            $accsess_room = $user->chatRooms()->where('chat_room_id', $data['chat_room_id'])->first();
-            //dd(isEmpty($accsess_room));
-            if ($accsess_room !== null || $chatRoom->created_by === $user->id) {
-                $message = Message::create($data);
-                $msg = $message->load('user');
-                MessageSentEvent::dispatch($msg);
-                return $msg;
-            }
-            return ['error' => 'no access'];
+        $check = $chatRoom->members()->where('users.id', $user->id)->exists();
+        if (!$check) {
+            return ['error' => 'user not joined on chat room'];
         }
         $message = Message::create($data);
         $msg = $message->load('user');
@@ -54,9 +47,14 @@ class MessageService
         return ['message' => 'not access'];
     }
 
-    public function getRoomMessages(ChatRoom $room): LengthAwarePaginator
+    public function getRoomMessages(ChatRoom $room): LengthAwarePaginator|array
     {
         $user = auth()->user();
+
+        $check = $room->members()->where('users.id', $user->id)->exists();
+        if (!$check) {
+            return ['error' => 'user not joined on chat room'];
+        }
 
         return $room->messages()
             ->with(['user', 'userReactions' => function($query) use ($user) {

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\SearchRequest;
 use App\Http\Requests\UpdateUserRequest;
 use App\Models\User;
 use App\Services\UserService;
@@ -29,6 +30,13 @@ class UserController extends Controller
     public function show(User $user): JsonResponse
     {
         return response()->json($user);
+    }
+
+    public function search(SearchRequest $request): JsonResponse
+    {
+        $query = $request->input('query');
+        $rooms = $this->userService->searchUsers($query);
+        return response()->json($rooms);
     }
 
     public function update(UpdateUserRequest $request, User $user): JsonResponse

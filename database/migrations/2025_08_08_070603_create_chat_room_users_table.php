@@ -8,7 +8,7 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('chat_room_user', function (Blueprint $table) {
+        Schema::create('chat_room_users', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->foreignId('chat_room_id')->constrained()->onDelete('cascade');

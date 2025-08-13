@@ -5,7 +5,6 @@ namespace App\Http\Controllers\API;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\LoginRequest;
 use App\Http\Requests\RegisterRequest;
-use App\Models\Author;
 use App\Models\User;
 use App\Services\Utility;
 use Illuminate\Http\JsonResponse;
@@ -18,9 +17,10 @@ class AuthController extends Controller
     use HasApiTokens;
     public function register(RegisterRequest $request): JsonResponse
     {
+        $color = Utility::generateRandomColor();
         $user = User::create([
             'name' => $request->name,
-            'name_color' => Utility::generateRandomColor(),
+            'name_color' => $color,
             'link_name' => $request->link_name,
             'email' => $request->email,
             'password' => Hash::make($request->password),

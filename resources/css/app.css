@@ -2,13 +2,14 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 @import "@flaticon/flaticon-uicons/css/all/all.css";
 @import 'tailwindcss';
+@import "./notif.css";
 
 :root {
-    --primary: #6366f1;
-    --primary-hover: #4f46e5;
+    --primary: var(--color-blue-500);
+    --primary-hover: var(--color-blue-600);
     --primary-light: #e0e7ff;
-    --secondary: #f3f4f6;
-    --secondary-hover: #e5e7eb;
+    --secondary: var(--color-gray-100);
+    --secondary-hover: var(--color-gray-200);
     --text: #111827;
     --text-light: #6b7280;
     --text-lighter: #9ca3af;
