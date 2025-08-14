@@ -22,8 +22,30 @@ class UserService
         }
         $data = $request->validated();
 
+        if (empty($data['password'])) {
+            unset($data['password']);
+        }
+
+
         if (isset($data['password'])) {
+            // Для обычных пользователей (не админов) проверяем current_password
+            if (!auth()->user()->isAdmin()) {
+                // Проверяем наличие current_password
+                if (!isset($data['current_password'])) {
+                    abort(403, 'Current password is required');
+                }
+
+                // Проверяем соответствие текущего пароля
+                if (!Hash::check($data['current_password'], $user->password)) {
+                    abort(403, 'Current password does not match');
+                }
+            }
+
+            // Хешируем новый пароль
             $data['password'] = Hash::make($data['password']);
+
+            // Удаляем все текущие токены пользователя
+            $user->tokens()->delete();
         }
 
         $user->update($data);

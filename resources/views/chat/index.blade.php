@@ -20,7 +20,72 @@
                 <div  class="progress"></div>
             </div>
         </div>
+
     <div class="chat-layout">
+        <!-- Sidebar -->
+        <div id="sidebar" class="fixed hidden z-[1000]">
+            <!-- Затемнённый оверлей (всё кроме сайдбара) -->
+            <div id="sidebar-overlay" class="fixed inset-0 hidden bg-black opacity-20 backdrop-blur-sm transition-opacity duration-300">
+
+            </div>
+
+
+            <!-- Сам сайдбар -->
+            <div id="sidebar-content" class="relative z-[9999]  flex flex-col h-screen w-xs bg-white border-r border-gray-200 transform -translate-x-full transition-transform duration-300 ease-in-out">
+                <!-- Контент сайдбара -->
+                <div id="sidebar-header" class="flex border-b-1 border-(--border) justify-center p-4 flex-none">
+                    <h1 class="flex items-center gap-2">
+                        <i class="fi fi-br-messages text-blue-500 text-4xl flex items-center"></i>
+                        <span>Connecto-App</span>
+                    </h1>
+                </div>
+
+                <div id="sidebar-content" class="grow p-4">
+                    <!-- Профиль -->
+                    <div class="border-b-1 border-(--border) w-full">
+                        <button id="openProfileBtn" class="w-full flex cursor-pointer !items-center gap-3 p-3 rounded-lg hover:bg-gray-100 transition-colors">
+                            <i class="fi fi-br-user"></i>
+                            <span>Мой Профиль</span>
+                        </button>
+                    </div>
+
+                    <div class="border-b-1 border-(--border) w-full">
+                        <!-- Друзья -->
+                        <button id="friendsListBtn" class="w-full cursor-pointer flex items-center gap-3 p-3 rounded-lg hover:bg-gray-100 transition-colors">
+                            <i class="fi fi-br-users"></i>
+                            <span>Друзья</span>
+                        </button>
+
+                        <!-- Найти друзей -->
+                        <button id="addFriendBtn" class="w-full cursor-pointer flex items-center gap-3 p-3 rounded-lg hover:bg-gray-100 transition-colors">
+                            <i class="fi fi-br-user-add"></i>
+                            <span>Найти друзей</span>
+                        </button>
+                    </div>
+
+                    <!-- Публичные комнаты -->
+                    <button id="PublicRoomList" class="w-full cursor-pointer flex items-center gap-3 p-3 rounded-lg hover:bg-gray-100 transition-colors">
+                        <i class="fi fi-br-search"></i>
+                        <span>Публичные комнаты</span>
+                    </button>
+                </div>
+
+                <div id="sidebar-footer" class="flex-none border-t-1 border-(--border) p-3">
+                    <div class="flex items-center gap-2">
+                        <div id="userAvatar" class="message-avatar">
+                        </div>
+                        <div class="UserData">
+                            <span id="userName"></span>
+                            <span id="userLink"></span>
+                        </div>
+                        <button id="logoutBtn" class="logout-button">
+                            <i class="fi fi-br-sign-out-alt"></i>
+                            <span>Logout</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
         <!-- Sidebar-left -->
         <div id="sidebar-left" class="flex flex-col h-screen w-16 border-r-1 border-(--border) bg-white">
 
@@ -39,12 +104,6 @@
                 <button id="joinRoomBtn" class="btn btn-secondary w-full mt-2 !font-bold" title="Join private room">
                     <i class="fi fi-br-key"></i>
                 </button>
-                <button id="PublicRoomList" class="btn btn-secondary w-full mt-2 !font-bold" title="Join public room">
-                    <i class="fi fi-br-search"></i>
-                </button>
-                <button id="friendsListBtn" class="btn btn-secondary w-full mt-2 !font-bold" title="Friends">
-                    <i class="fi fi-br-users"></i>
-                </button>
             </div>
 
             <div id="sidebar-left-footer" class="flex-none border-t-1 border-(--border)">
@@ -58,31 +117,16 @@
             </div>
 
         </div>
-        <!-- Sidebar -->
-        <div id="sidebar" class="flex flex-col h-screen border-r-1 border-(--border) bg-white">
+        <!-- Sidebar-rooms -->
+        <div id="sidebar-rooms" class="flex flex-col w-md h-screen border-r-1 border-(--border) bg-white">
 
-            <div id="sidebar-header" class="border-b-1 border-(--border) flex-none p-3">
-                <input type="text" id="roomSearch" placeholder="Search rooms..." class="input">
+            <div id="sidebar-rooms-header" class="border-b-1 border-(--border) flex-none p-3">
+                <input type="text" id="roomSearch" placeholder="Search rooms..." class="input placeholder:text-gray-500">
             </div>
 
-            <div id="sidebar-content" class=" p-3 grow overflow-auto">
+            <div id="sidebar-rooms-content" class=" p-3 grow overflow-auto">
                 <div id="roomList" class="space-y-2">
                     <!-- Rooms will be loaded here -->
-                </div>
-            </div>
-
-            <div id="sidebar-footer" class="border-t-1 border-(--border) flex-none p-3 ">
-                <div class="flex items-center gap-2">
-                    <div id="userAvatar" class="message-avatar">
-                    </div>
-                    <div class="UserData">
-                        <span id="userName"></span>
-                        <span id="userLink"></span>
-                    </div>
-                    <button id="logoutBtn" class="logout-button">
-                        <i class="fi fi-br-sign-out-alt"></i>
-                        <span>Logout</span>
-                    </button>
                 </div>
             </div>
         </div>
@@ -149,6 +193,7 @@
                 </form>
             </div>
         </div>
+
         <div id="inviteUsersModal" class="modal">
             <div class="modal-content">
                 <div class="modal-header">
@@ -188,9 +233,9 @@
                     <h2>Friends</h2>
                 </div>
                 <div class="p-4">
-                    <div id="pendingFriends" class="flex flex-col gap-2">
+                    <div id="pendingFriends" class="flex !hidden flex-col gap-2">
                         <div class="flex justify-between items-center mb-4">
-                            <h3 class="text-lg font-semibold">Friend request</h3>
+                            <h3 class="text-lg font-semibold">Pending Friend</h3>
                         </div>
                         <!-- Приглашения в друзья -->
                         <div id="pendingFriendsList" class="space-y-2 mb-4">
@@ -198,13 +243,6 @@
                         </div>
                     </div>
                     <div>
-                        <!-- Кнопка добавления друга -->
-                        <div class="flex justify-between items-center mb-4">
-                            <h3 class="text-lg font-semibold">My Friends</h3>
-                            <button id="addFriendBtn" class="btn btn-primary !font-bold">
-                                <i class="fi fi-br-user-add"></i> Add Friend
-                            </button>
-                        </div>
                         <!-- Список друзей -->
                         <div id="friendsList" class="space-y-2">
                             <!-- Friends will be loaded here -->
@@ -227,7 +265,7 @@
                 </div>
                 <div class="p-4">
                     <div class="form-group mb-4">
-                        <input type="text" id="friendSearchInput" placeholder="Search users..." class="input w-full">
+                        <input type="text" id="friendSearchInput" placeholder="Search users..." class="input placeholder:text-gray-500 w-full">
                     </div>
                     <div id="searchResults" class="space-y-2">
                         <!-- Search results will appear here -->
@@ -236,6 +274,65 @@
                 <div class="modal-footer">
                     <button type="button" id="closeAddFriendModal" class="btn btn-secondary">
                         Cancel
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div id="profileModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>User Profile</h2>
+                </div>
+                <div class="p-4">
+                    <div class="flex flex-col items-center mb-4">
+                        <div id="profileAvatar" class="message-avatar w-20 h-20 text-3xl flex items-center justify-center mb-2"></div>
+                        <h3 id="profileName" class="text-xl font-bold"></h3>
+                        <div id="nameEditFields" class="hidden w-full">
+                            <input type="text" id="newNameInput" class="input w-full mb-2" placeholder="New name">
+                            <input type="color" id="newColorInput" class="w-full h-10" title="Choose your color">
+                        </div>
+                        <span id="profileLink" class="text-gray-500"></span>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4 mb-4">
+                        <div>
+                            <p class="text-gray-500 text-sm">Account created</p>
+                            <p id="profileCreatedAt" class="font-medium"></p>
+                        </div>
+                        <div>
+                            <p class="text-gray-500 text-sm">Status</p>
+                            <p id="profileStatus" class="font-medium"></p>
+                        </div>
+                    </div>
+
+                    <div id="passwordChangeFields" class="hidden border-t border-gray-200 pt-4 mb-4">
+                        <h4 class="font-medium mb-2">Change Password</h4>
+                        <input type="password" id="currentPassword" class="input placeholder:text-gray-500 w-full mb-2" placeholder="Current password">
+                        <input type="password" id="newPassword" class="input placeholder:text-gray-500 w-full mb-2" placeholder="New password">
+                        <input type="password" id="confirmPassword" class="input placeholder:text-gray-500 w-full" placeholder="Confirm new password">
+                    </div>
+
+                    <div class="border-t border-gray-200 pt-4">
+                        <h4 class="font-medium mb-2">Additional Information</h4>
+                        <p id="profileEmailVerified" class="text-sm"></p>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" id="closeProfileModal" class="btn btn-secondary">
+                        Close
+                    </button>
+                    <button type="button" id="editProfileBtn" class="btn btn-secondary ">
+                        <i class="fi fi-br-user-pen"></i> Edit Profile
+                    </button>
+                    <button type="button" id="cancelEditProfileBtn" class="btn btn-secondary !hidden">
+                        Cancel
+                    </button>
+                    <button type="button" id="saveProfileBtn" class="btn btn-primary !hidden">
+                        <i class="fi fi-br-check mr-2"></i> Save Changes
+                    </button>
+                    <button type="button" id="sendMessageBtn" class="btn btn-primary !hidden">
+                        <i class="fi fi-br-envelope mr-2"></i> Send Message
                     </button>
                 </div>
             </div>
@@ -282,6 +379,7 @@
                 </form>
             </div>
         </div>
+
         <div id="publicRoomsModal" class="modal">
             <div class="modal-content">
                 <div class="modal-header">
@@ -289,7 +387,7 @@
                 </div>
                 <div class="p-4 overflow-hidden">
                     <div class="form-group mb-4">
-                        <input type="text" id="publicRoomSearch" placeholder="Search public rooms..." class="input w-full">
+                        <input type="text" id="publicRoomSearch" placeholder="Search public rooms..." class="input placeholder:text-gray-500 w-full">
                     </div>
                     <div id="publicRoomsList" class="space-y-2 overflow-auto h-[200px]">
                         <!-- Public rooms will be loaded here -->
@@ -303,7 +401,7 @@
             </div>
         </div>
     </div>
-    <script id="v1.1.1">
+    <script id="v1.1.12">
         document.addEventListener('DOMContentLoaded', function() {
             const token = localStorage.getItem('token');
             const encodedToken = getCookie('XSRF-TOKEN');
@@ -314,6 +412,8 @@
             let currentRoomId = null;
             let allMessages = [];
             let userData = null;
+            let isEditMode = false;
+            let currentProfileData = null;
             const unreadRooms = {}
 
             // DOM элементы
@@ -327,40 +427,52 @@
             // Инициализация приложения
             initApp();
 
-            Echo.private(`room`).listen('MessageSentEvent', (e) => {
-                console.log(e.message);
-                if (e.message.user.id !== userData.id){
-                    changeRoomMessagesCount(e.message.chat_room_id, 1);
-                    if (String(e.message.chat_room_id) === localStorage.getItem('roomId')){
-                        // Добавляем обработчик контекстного меню для новых сообщений
-                        addMessageToUI(e.message);
+            async function initApp() {
+                initWebsockets();
+                await loadUser();
+                await loadRooms();
+                if (currentRoom) {
+                    await joinRoom(currentRoom);
+                }
+                setupEventListeners();
+            }
+
+            function initWebsockets(){
+                Echo.private(`room`).listen('MessageSentEvent', (e) => {
+                    console.log(e.message);
+                    if (e.message.user.id !== userData.id){
+                        changeRoomMessagesCount(e.message.chat_room_id, 1);
+                        if (String(e.message.chat_room_id) === localStorage.getItem('roomId')){
+                            // Добавляем обработчик контекстного меню для новых сообщений
+                            addMessageToUI(e.message);
+                        }
+                        if (String(e.message.chat_room_id) !== localStorage.getItem('roomId')) {
+                            unreadRooms[e.message.chat_room_id] = true;
+                            updateUnreadIndicators();
+                        }
+                        document.title = "Connecto-app (*)";
+                        console.log('new message!')
                     }
-                    if (String(e.message.chat_room_id) !== localStorage.getItem('roomId')) {
-                        unreadRooms[e.message.chat_room_id] = true;
+                });
+
+                Echo.private(`deleted-message`).listen('MessageDellEvent', (e) => {
+                    if (e.message.user.id !== userData.id){
+                        updateRoomMessageCount(e.message.chat_room_id, -1)
+                        unreadRooms[e.message.chat_room_id] = false;
                         updateUnreadIndicators();
+                        if (String(e.message.chat_room_id) === localStorage.getItem('roomId')){
+                            document.getElementById(`message-${e.message.id}`).remove();
+                        }
+                        console.log('delete message!')
                     }
-                    document.title = "Connecto-app (*)";
-                    console.log('new message!')
-                }
-            });
+                });
 
-            Echo.private(`deleted-message`).listen('MessageDellEvent', (e) => {
-                if (e.message.user.id !== userData.id){
-                    updateRoomMessageCount(e.message.chat_room_id, -1)
-                    unreadRooms[e.message.chat_room_id] = false;
-                    updateUnreadIndicators();
-                    if (String(e.message.chat_room_id) === localStorage.getItem('roomId')){
-                        document.getElementById(`message-${e.message.id}`).remove();
+                Echo.private(`reaction-add`).listen('ReactionEvent', (e) => {
+                    if (String(e.message.chat_room_id) === localStorage.getItem('roomId')) {
+                        updateMessageReactions(e.message.id, e.message.reactions);
                     }
-                    console.log('delete message!')
-                }
-            });
-
-            Echo.private(`reaction-add`).listen('ReactionEvent', (e) => {
-                if (String(e.message.chat_room_id) === localStorage.getItem('roomId')) {
-                    updateMessageReactions(e.message.id, e.message.reactions);
-                }
-            });
+                });
+            }
 
             function updateUnreadIndicators() {
                 Object.keys(unreadRooms).forEach(roomId => {
@@ -392,15 +504,6 @@
                         countElement.textContent = `${newCount} ${suffix}`.trim();
                     }
                 }
-            }
-
-            async function initApp() {
-                await loadUser();
-                await loadRooms();
-                if (currentRoom) {
-                    await joinRoom(currentRoom);
-                }
-                setupEventListeners();
             }
 
             function setupEventListeners() {
@@ -438,8 +541,24 @@
                 document.getElementById('closeFriendsModal').addEventListener('click', hideFriendsModal);
 
                 // Обработчики модальных окон
+                document.getElementById('editProfileBtn').addEventListener('click', toggleEditMode);
+                document.getElementById('cancelEditProfileBtn').addEventListener('click', toggleEditMode);
+                document.getElementById('saveProfileBtn').addEventListener('click', saveProfileChanges);
                 document.getElementById('addFriendBtn').addEventListener('click', showAddFriendModal);
                 document.getElementById('closeAddFriendModal').addEventListener('click', hideAddFriendModal);
+                document.getElementById('openSidebarBtn').addEventListener('click', showSidebar);
+                document.getElementById('sidebar-overlay').addEventListener('click', hideSidebar);
+                document.getElementById('openProfileBtn').addEventListener('click', showProfileModal);
+                document.getElementById('closeProfileModal').addEventListener('click', hideProfileModal);
+                document.querySelectorAll('.modal').forEach(modal => {
+                    modal.addEventListener('click', (e) => {
+                        if (e.target === modal) { // Проверяем, что кликнули именно на фон
+                            hideAllModals();
+                        }
+                    });
+                });;
+
+
 
                 // Поиск пользователей
                 document.getElementById('friendSearchInput').addEventListener('input', debounce(searchUsers, 300));
@@ -457,6 +576,16 @@
                     if (e.target.closest('.start-chat-btn')) {
                         const friendId = e.target.closest('.start-chat-btn').dataset.friendId;
                         await createPrivateChat(friendId);
+                    }
+                });
+
+                // Обработчик для просмотра профиля пользователя
+                document.addEventListener('click', async function(e) {
+                    if (e.target.closest('.open-user-profile-btn')) {
+                        const friendId = e.target.closest('.open-user-profile-btn').dataset.friendId;
+                        //hideFriendsModal();
+                        await loadOtherUserProfile(friendId);
+                        showOtherProfileModal();
                     }
                 });
 
@@ -486,6 +615,238 @@
                     clearTimeout(timeout);
                     timeout = setTimeout(() => func.apply(this, args), wait);
                 };
+            }
+
+            function hideAllModals(){
+                hideCreateRoomModal();
+                hideProfileModal();
+                hidePublicRoomsModal();
+                hideAddFriendModal();
+                hideFriendsModal();
+                hideJoinRoomModal();
+                hideInviteUsersModal();
+            }
+
+            // Функции для работы с модальным окном профиля
+            function showOtherProfileModal() {
+                document.getElementById('profileModal').classList.add('active');
+            }
+
+            function showProfileModal() {
+                loadUserProfile();
+                document.getElementById('profileModal').classList.add('active');
+            }
+
+            function hideProfileModal() {
+                document.getElementById('profileModal').classList.remove('active');
+                setTimeout(() => {
+                    hideEditProfileMode();
+                }, 200);
+            }
+
+            async function loadOtherUserProfile(userId) {
+                try {
+                    const response = await fetch(`/api/users/${userId}`, {
+                        headers: {
+                            'Authorization': 'Bearer ' + token,
+                            'Accept': 'application/json',
+                            'X-XSRF-TOKEN': decodedToken
+                        }
+                    });
+
+                    if (response.ok) {
+                        const profile = await response.json();
+                        renderProfile(profile);
+                    } else {
+                        throw new Error('Failed to load profile');
+                    }
+                } catch (error) {
+                    console.error('Error loading profile:', error);
+                    const alertToastMessage = {'type': 'error', 'message': 'Error loading profile'};
+                    callShowToast(alertToastMessage);
+                }
+            }
+
+            async function loadUserProfile() {
+                try {
+                    const response = await fetch('/api/profile', {
+                        headers: {
+                            'Authorization': 'Bearer ' + token,
+                            'Accept': 'application/json',
+                            'X-XSRF-TOKEN': decodedToken
+                        }
+                    });
+
+                    if (response.ok) {
+                        const profile = await response.json();
+                        renderProfile(profile);
+                    } else {
+                        throw new Error('Failed to load profile');
+                    }
+                } catch (error) {
+                    console.error('Error loading profile:', error);
+                    const alertToastMessage = {'type': 'error', 'message': 'Error loading profile'};
+                    callShowToast(alertToastMessage);
+                }
+            }
+
+            function hideEditProfileMode(){
+                isEditMode = false;
+                document.getElementById('nameEditFields').classList.add('hidden');
+                document.getElementById('passwordChangeFields').classList.add('hidden');
+                document.getElementById('cancelEditProfileBtn').classList.add('!hidden')
+                document.getElementById('editProfileBtn').classList.remove('!hidden');
+                document.getElementById('saveProfileBtn').classList.add('!hidden');
+            }
+
+            function toggleEditMode() {
+                isEditMode = !isEditMode;
+
+                if (isEditMode) {
+                    // Включаем режим редактирования
+                    document.getElementById('nameEditFields').classList.remove('hidden');
+                    document.getElementById('passwordChangeFields').classList.remove('hidden');
+                    document.getElementById('editProfileBtn').classList.add('!hidden');
+                    document.getElementById('cancelEditProfileBtn').classList.remove('!hidden')
+                    document.getElementById('saveProfileBtn').classList.remove('!hidden');
+
+                    // Заполняем текущие значения
+                    document.getElementById('newNameInput').value = currentProfileData.name;
+                    document.getElementById('newColorInput').value = currentProfileData.name_color || '#0a17e7';
+                } else {
+                    // Выключаем режим редактирования
+                    document.getElementById('nameEditFields').classList.add('hidden');
+                    document.getElementById('passwordChangeFields').classList.add('hidden');
+                    document.getElementById('cancelEditProfileBtn').classList.add('!hidden')
+                    document.getElementById('editProfileBtn').classList.remove('!hidden');
+                    document.getElementById('saveProfileBtn').classList.add('!hidden');
+                }
+            }
+
+            async function saveProfileChanges() {
+                const newName = document.getElementById('newNameInput').value.trim();
+                const newColor = document.getElementById('newColorInput').value;
+                const currentPassword = document.getElementById('currentPassword').value;
+                const newPassword = document.getElementById('newPassword').value;
+                const confirmPassword = document.getElementById('confirmPassword').value;
+
+                // Валидация
+                if (!newName) {
+                    const alertToastMessage = {'type': 'error', 'message': 'Name cannot be empty'};
+                    callShowToast(alertToastMessage);
+                    return;
+                }
+
+                if (newPassword && newPassword !== confirmPassword) {
+                    const alertToastMessage = {'type': 'error', 'message': 'Passwords do not match'};
+                    callShowToast(alertToastMessage);
+                    return;
+                }
+
+                if (newPassword && !currentPassword) {
+                    const alertToastMessage = {'type': 'error', 'message': 'Please enter current password'};
+                    callShowToast(alertToastMessage);
+                    return;
+                }
+
+                try {
+                    const updateData = {
+                        name: newName,
+                        name_color: newColor,
+                        current_password: currentPassword,
+                        password: newPassword,
+                        password_confirmation: confirmPassword
+                    };
+
+                    if (!newPassword) {
+                        delete updateData.password;
+                        delete updateData.password_confirmation;
+                        delete updateData.current_password;
+                    }
+
+                    const response = await fetch(`/api/users/${currentProfileData.id}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Authorization': 'Bearer ' + token,
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json',
+                            'X-XSRF-TOKEN': decodedToken
+                        },
+                        body: JSON.stringify(updateData)
+                    });
+
+                    if (response.ok) {
+                        const alertToastMessage = {'type': 'success', 'message': 'Profile updated successfully'};
+                        callShowToast(alertToastMessage);
+
+                        // Обновляем данные пользователя
+                        await loadUser();
+                        await loadUserProfile();
+                        toggleEditMode();
+                    } else {
+                        const error = await response.json();
+                        const alertToastMessage = {'type': 'error', 'message': error.message || 'Failed to update profile'};
+                        callShowToast(alertToastMessage);
+                    }
+                } catch (error) {
+                    console.error('Error updating profile:', error);
+                    const alertToastMessage = {'type': 'error', 'message': 'An error occurred while updating profile'};
+                    callShowToast(alertToastMessage);
+                }
+            }
+
+            function renderProfile(profile) {
+                currentProfileData = profile;
+
+                document.getElementById('profileAvatar').textContent = profile.name.charAt(0).toUpperCase();
+                document.getElementById('profileAvatar').style.backgroundColor = profile.name_color;
+                document.getElementById('profileName').textContent = profile.name;
+                document.getElementById('profileLink').textContent = profile.link_name;
+
+                const createdAt = new Date(profile.created_at);
+                document.getElementById('profileCreatedAt').textContent = createdAt.toLocaleDateString();
+
+                document.getElementById('profileStatus').innerHTML = profile.is_blocked ? `<p class='text-rose-500'> Blocked </p>` : `<p class='text-lime-500'> Active </p>`;
+                document.getElementById('profileEmailVerified').textContent =
+                    profile.email_verified_at ? 'Email verified' : 'Email not verified';
+
+                // Показываем кнопку отправки сообщения только если это не текущий пользователь
+                const isCurrentUser = profile.id === userData.id;
+                document.getElementById('sendMessageBtn').classList.toggle('!hidden', isCurrentUser);
+                document.getElementById('editProfileBtn').classList.toggle('!hidden', !isCurrentUser);
+
+                // Сбрасываем поля редактирования
+                if (isEditMode) {
+                    document.getElementById('newNameInput').value = profile.name;
+                    document.getElementById('newColorInput').value = profile.name_color || '#0a17e7';
+                    document.getElementById('currentPassword').value = '';
+                    document.getElementById('newPassword').value = '';
+                    document.getElementById('confirmPassword').value = '';
+                }
+            }
+
+            function showSidebar() {
+                const sidebarContent = document.getElementById('sidebar-content');
+                document.getElementById('sidebar-overlay').classList.remove('hidden');
+
+                document.getElementById('sidebar').classList.add('flex');
+                document.getElementById('sidebar').classList.remove('hidden');
+
+                setTimeout(() => {
+                    sidebarContent.classList.remove('-translate-x-full');
+                }, 10);
+            }
+
+            function hideSidebar() {
+                const sidebar = document.getElementById('sidebar')
+                const overlay = document.getElementById('sidebar-overlay');
+                const sidebarContent = document.getElementById('sidebar-content');
+                sidebarContent.classList.add('-translate-x-full');
+                sidebar.classList.remove('flex');
+                overlay.classList.add('hidden');
+                setTimeout(() => {
+                    sidebar.classList.add('hidden');
+                }, 300); // Должно совпадать с duration-300
             }
 
             function showPublicRoomsModal() {
@@ -557,9 +918,15 @@
                 </div>
                 <span>${user.name}</span>
             </div>
-            <button class="btn btn-secondary add-friend-btn" data-user-id="${user.id}">
-                <i class="fi fi-br-user-add"></i>
-            </button>
+            <div>
+                <button class="btn btn-secondary open-user-profile-btn" data-friend-id="${user.id}">
+                    <i class="fi fi-br-eye"></i>
+                </button>
+                <button class="btn btn-secondary add-friend-btn" data-user-id="${user.id}">
+                    <i class="fi fi-br-user-add"></i>
+                </button>
+            </div>
+
         `;
                     resultsContainer.appendChild(userElement);
                 });
@@ -807,28 +1174,35 @@
 
             // Поиск комнат
             async function searchRooms(e) {
-                const query = e.target.value.trim();
-                if (query.length < 2) {
-                    await loadRooms();
+                const query = e.target.value.trim().toLowerCase();
+                const roomElements = document.querySelectorAll('#roomList > [data-room-id]');
+
+                if (!query) {
+                    // Показываем все комнаты если запрос пустой
+                    roomElements.forEach(room => room.style.display = '');
                     return;
                 }
 
-                try {
-                    const response = await fetch(`/api/rooms/search?query=${encodeURIComponent(query)}`, {
-                        headers: {
-                            'Authorization': 'Bearer ' + token,
-                            'Accept': 'application/json',
-                            'X-XSRF-TOKEN': decodedToken
-                        }
-                    });
+                let hasMatches = false;
 
-                    if (response.ok) {
-                        const data = await response.json();
-                        renderRoomList(data.data);
-                    }
-                } catch (error) {
-                    const alertToastMessage = {'type': 'error', 'message': 'Error searching rooms'};
-                    callShowToast(alertToastMessage);
+                roomElements.forEach(room => {
+                    const roomName = room.querySelector('span.font-medium').textContent.toLowerCase();
+                    const shouldShow = roomName.includes(query);
+
+                    room.style.display = shouldShow ? '' : 'none';
+                    if (shouldShow) hasMatches = true;
+                });
+
+                if (!hasMatches) {
+                    // Можно добавить сообщение "Ничего не найдено"
+                    const noResults = document.createElement('div');
+                    noResults.className = 'p-4 text-center text-gray-500';
+                    noResults.textContent = 'No rooms found';
+
+                    // Очищаем и добавляем сообщение
+                    const roomList = document.getElementById('roomList');
+                    roomList.innerHTML = '';
+                    roomList.appendChild(noResults);
                 }
             }
 
@@ -846,30 +1220,32 @@
                     roomElement.className = 'p-2 hover:bg-gray-100 rounded-md cursor-pointer';
                     roomElement.dataset.roomId = room.id;
                     roomElement.innerHTML = `
-            <h3 class="font-medium">${room.name} <span id="newMessagesSpan-${room.id}"></span> ${room.type === 'private' ? '<span class="private-chat">Private</span>' : '<span class="public-chat">Public</span>'}
-</h3>
-            <p class="room-messages-count-${room.id} text-sm text-gray-500">${room.messages_count} messages</p>
-        `;
+  <div class="flex flex-col gap-1">
+    <div class="flex items-baseline gap-2">
+      <!-- Название комнаты с обрезкой длинного текста -->
+      <span class="font-medium text-gray-800 truncate flex-1 min-w-0">
+        ${room.name}
+      </span>
+
+      <!-- Бейдж типа комнаты -->
+      ${room.type === 'private'
+                        ? '<span class="text-xs bg-pink-100 border-1 border-pink-600/15 text-pink-600 px-2 py-0.5 rounded-full whitespace-nowrap">Private</span>'
+                        : '<span class="text-xs bg-blue-100 border-1 border-blue-600/15 text-blue-600 px-2 py-0.5 rounded-full whitespace-nowrap">Public</span>'
+                    }
+
+      <!-- Счетчик новых сообщений (только если есть) -->
+      <span id="newMessagesSpan-${room.id}" class="${room.new_messages ? 'flex' : 'hidden'} items-center justify-center h-5 w-5 rounded-full bg-blue-500 text-white text-xs">
+        ${room.new_messages || ''}
+      </span>
+    </div>
+
+    <!-- Счетчик сообщений -->
+    <p class="text-sm text-gray-500">
+      ${room.messages_count} ${room.messages_count === 1 ? 'message' : 'messages'}
+    </p>
+  </div>
+`;
                     roomElement.addEventListener('click', () => joinRoom(room.id));
-                    roomList.appendChild(roomElement);
-                });
-            }
-
-            // Функция для отображения приватных чатов
-            function renderPrivateChatsList(chats) {
-                const roomList = document.getElementById('roomList');
-
-                chats.forEach(chat => {
-                    const otherUser = chat.users.find(u => u.id !== userData.id);
-                    const roomElement = document.createElement('div');
-                    roomElement.className = 'p-2 hover:bg-gray-100 rounded-md cursor-pointer';
-                    roomElement.dataset.roomId = `private_${chat.id}`;
-                    roomElement.innerHTML = `
-            <h3 class="font-medium">${otherUser.name} <span class="private-chat">Private</span></h3>
-            <p class="room-messages-count-${chat.id} text-sm text-gray-500">${chat.messages_count} messages</p>
-        `;
-
-                    roomElement.addEventListener('click', () => joinRoom(`private_${chat.id}`));
                     roomList.appendChild(roomElement);
                 });
             }
@@ -979,42 +1355,6 @@
                 }
             }
 
-            // Присоединение к личному чату
-            async function joinPrivateChat(chatId) {
-                try {
-                    showLoadingMessages();
-
-                    const response = await fetch(`/api/private-chats/${chatId}/messages`, {
-                        headers: {
-                            'Authorization': 'Bearer ' + token,
-                            'Accept': 'application/json',
-                            'X-XSRF-TOKEN': decodedToken
-                        }
-                    });
-
-                    if (response.ok) {
-                        const messages = await response.json();
-                        currentRoomId = `private_${chatId}`;
-                        localStorage.setItem('roomId', currentRoomId);
-
-                        roomNameElement.textContent = 'Private Chat';
-                        roomDescriptionElement.textContent = '';
-
-                        if (messages.data.length === 0) {
-                            showNopeMessages();
-                        } else {
-                            renderMessages(messages.data);
-                        }
-
-                        messageInputContainer.classList.remove('hidden');
-                        document.getElementById('roomActions').classList.add('hidden');
-                        messageInput.focus();
-                    }
-                } catch (error) {
-                    messagesContainer.innerHTML = `<div class="error-loading-room"><i class="fi fi-br-bug-slash"></i> Error loading chat</div>`;
-                }
-            }
-
             // Новая функция для загрузки друзей
             async function loadFriends() {
                 try {
@@ -1057,7 +1397,6 @@
             }
 
             // Отображение списка друзей
-
             function renderFriendsList(friends) {
                 const friendsList = document.getElementById('friendsList');
                 friendsList.innerHTML = '';
@@ -1074,12 +1413,17 @@
                 <span>${friend.name}</span>
             </div>
 <div>
+            <button class="btn btn-secondary open-user-profile-btn" data-friend-id="${friend.id}">
+                <i class="fi fi-br-eye"></i>
+            </button>
             <button class="btn btn-secondary hover:bg-blue-200 start-chat-btn" data-friend-id="${friend.id}">
                 <i class=" fi fi-br-comment-alt"></i>
             </button>
             <button class="btn btn-secondary hover:bg-red-200 delete-friend-btn" data-friend-id="${friend.id}">
                 <i class=" fi fi-br-trash-xmark"></i>
             </button>
+
+
 </div>
         `;
                         friendsList.appendChild(friendElement);
@@ -1090,12 +1434,11 @@
             function renderPendingFriendsList(friends) {
                 const pendingFriendsList = document.getElementById('pendingFriendsList');
                 const pendingFriends = document.getElementById('pendingFriends');
-                pendingFriends.classList.add('hidden');
                 pendingFriendsList.innerHTML = '';
 
                 friends.forEach(friend => {
                     if (friend.pivot.status === 'pending'){
-                        pendingFriends.classList.remove('hidden');
+                        pendingFriends.classList.remove('!hidden');
                         const pendingFriendElement = document.createElement('div');
                         pendingFriendElement.className = 'flex items-center justify-between p-2 hover:bg-gray-100 rounded-md';
                         pendingFriendElement.innerHTML = `
@@ -1105,9 +1448,15 @@
                 </div>
                 <span>${friend.name}</span>
             </div>
-            <button class="accept-friend-btn" data-friend-id="${friend.id}">
+            <div>
+            <button class="btn !bg-green-200 !text-white !border-1 hover:!border-green-500/15 hover:!text-green-500 accept-friend-btn" data-friend-id="${friend.id}">
                 <i class="fi fi-br-check"></i>
             </button>
+            <button class="btn !bg-rose-200 !text-white !border-1 hover:!border-rose-500/15 hover:!text-rose-500 deny-friend-btn" data-friend-id="${friend.id}">
+                <i class="fi fi-br-cross"></i>
+            </button>
+</div>
+
         `;
                         pendingFriendsList.appendChild(pendingFriendElement);
                     }
@@ -1121,6 +1470,7 @@
             function showNopeMessages() {
                 messagesContainer.innerHTML = '<div id="nope-messages" class="nope-messages"><i class="fi fi-br-message-slash"></i>Nope messages</div>';
             }
+
             function removeShowNopeMessages(){
                 const nopeMessages = document.getElementById(`nope-messages`);
                 if (nopeMessages){
@@ -1134,6 +1484,7 @@
             }
 
             function hideFriendsModal() {
+                document.getElementById('pendingFriends').classList.add('!hidden');
                 document.getElementById('friendsModal').classList.remove('active');
             }
 
@@ -1560,6 +1911,7 @@
             function hideCreateRoomModal() {
                 document.getElementById('createRoomModal').classList.remove('active');
             }
+
             function getCookie(name) {
                 const value = `; ${document.cookie}`;
                 const parts = value.split(`; ${name}=`);
@@ -1818,29 +2170,6 @@
                     console.error('Error adding reaction:', error);
                 }
             };
-
-            async function removeReaction(messageId, reaction) {
-                try {
-                    const response = await fetch(`/api/messages/${messageId}/react/${reaction}`, {
-                        method: 'DELETE',
-                        headers: {
-                            'Authorization': 'Bearer ' + token,
-                            'Accept': 'application/json',
-                            'X-XSRF-TOKEN': decodedToken
-                        }
-                    });
-
-                    if (response.ok) {
-                        const data = await response.json();
-                        updateMessageReactions(messageId, data.reactions);
-                    } else {
-                        const error = await response.json();
-                        console.error('Error removing reaction:', error);
-                    }
-                } catch (error) {
-                    console.error('Error removing reaction:', error);
-                }
-            }
 
             function updateMessageReactions(messageId, reactions, userReactions = []) {
                 const messageElement = document.getElementById(`message-${messageId}`);

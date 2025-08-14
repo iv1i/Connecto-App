@@ -220,11 +220,21 @@ class ChatRoomService
 
     public function searchRooms(string $query): LengthAwarePaginator
     {
-        return ChatRoom::where('name', 'like', "%{$query}%")
+        $query = ChatRoom::where('name', 'like', "%{$query}%")
             ->where('type', ChatRoom::TYPE_PUBLIC)
-            ->where('created_by','!=', Auth::id())
-            ->withCount('messages')
-            ->paginate(10);
+            ->withCount('messages');
+
+        // Если пользователь авторизован, исключаем комнаты, где он создатель или участник
+        if (auth('sanctum')->check()) {
+            $userId = auth('sanctum')->id();
+
+            $query->where('created_by', '!=', $userId)
+                ->whereDoesntHave('members', function($q) use ($userId) {
+                    $q->where('user_id', $userId);
+                });
+        }
+
+        return $query->paginate(10);
     }
 
 }

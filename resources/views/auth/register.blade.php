@@ -22,7 +22,7 @@
 
                 <div class="mb-[1rem]">
                     <label for="link_name" class="flex gap-1 mb-[0.5rem] font-medium"><i class="fi fi-br-link-alt"></i><span>Link-Name</span></label>
-                    <input type="text" id="link_name" name="link_name" placeholder="@link_name" required class="input">
+                    <input type="text" id="link_name" name="link_name" placeholder="@link_name" value="" required class="placeholder:text-gray-500 input">
                 </div>
 
                 <div class="mb-[1rem]">
