@@ -37,7 +37,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/rooms/{room}/join', [ChatRoomController::class, 'join']);
     Route::post('/rooms/{room}/logout', [ChatRoomController::class, 'logout']);
     Route::post('/rooms', [ChatRoomController::class, 'store']);
-    Route::put('/rooms/{room}', [ChatRoomController::class, 'update']);
+    Route::put('/rooms/{room}', [ChatRoomController::class, 'update'])->name('rooms.update');
     Route::delete('/rooms/{room}', [ChatRoomController::class, 'destroy']);
     Route::post('/rooms/join', [ChatRoomController::class, 'invite']);
 

@@ -31,7 +31,7 @@ class MessageService
 
     public function deleteMessage(Message $message): array
     {
-        if ($message->user_id === auth()->user()->id || auth()->user()->role === 'admin') {
+        if ($message->user_id === auth()->user()->id || auth()->user()->isAdmin()) {
             $msg = [
                 'id' => $message->id,
                 'chat_room_id' => $message->chat_room_id,

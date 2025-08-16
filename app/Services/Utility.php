@@ -2,11 +2,37 @@
 
 namespace App\Services;
 
+use Illuminate\Support\Str;
+use Ramsey\Uuid\Uuid;
+
+
 class Utility
 {
     public static function generateRandomColor(): string
     {
         return '#' . str_pad(dechex(mt_rand(0, 0xFFFFFF)), 6, '0', STR_PAD_LEFT);
+    }
+
+    public static function generateInviteCode($uniaqueString)
+    {
+        $prefix = Str::random(32); // Случайная строка
+        $uniqueString = uniqid(microtime(true), true); // Уникальный ID с высокой точностью
+        $randomBytes = bin2hex(random_bytes(16)); // Криптографически безопасные случайные байты
+        $uuid4 = Uuid::uuid4()->toString();
+
+        return md5($prefix . $uniqueString . $uuid4 . $randomBytes . $uniaqueString);
+    }
+    public static function generateUniqueString(): string
+    {
+        $prefix = Str::random(32); // Случайная строка
+        $uniqueString = uniqid(microtime(true), true); // Уникальный ID с высокой точностью
+        $randomBytes = bin2hex(random_bytes(16)); // Криптографически безопасные случайные байты
+
+        return md5($prefix . $uniqueString . $randomBytes);
+    }
+    public static function generateUniqueId(): string
+    {
+        return Uuid::uuid4()->toString(); // Например: "f47ac10b-58cc-4372-a567-0e02b2c3d479"
     }
     public static function hexSumStrings($str1, $str2) {
         // Переводим строки в hex

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\API;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ChatRoomRequest;
 use App\Http\Requests\SearchRequest;
+use App\Http\Requests\UpdateChatRoomRequest;
 use App\Models\ChatRoom;
 use App\Models\User;
 use App\Services\ChatRoomService;
@@ -46,7 +47,7 @@ class ChatRoomController extends Controller
         return response()->json($resp);
     }
 
-    public function update(ChatRoomRequest $request, ChatRoom $room): JsonResponse
+    public function update(UpdateChatRoomRequest $request, ChatRoom $room): JsonResponse
     {
         $room = $this->chatRoomService->updateRoom($request, $room);
         return response()->json($room);

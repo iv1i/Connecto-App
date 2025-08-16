@@ -4,6 +4,9 @@ use App\Http\Middleware\EnsureTokenIsValid;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Validation\ValidationException;
+use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
+use Symfony\Component\Routing\Exception\RouteNotFoundException;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -26,5 +29,19 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        //
+        $exceptions->render(function (MethodNotAllowedHttpException $e) {
+            return response()->json([
+                'error' => 'Method is not supported.'
+            ], 401);
+        });
+        $exceptions->render(function (RouteNotFoundException $e) {
+            return response()->json([
+                'error' => 'Invalid endpoint or unauthorized access.'
+            ], 404);
+        });
+        $exceptions->render(function (ValidationException $e) {
+            return response()->json([
+                'error' => $e->validator->errors()->first()
+            ], 422);
+        });
     })->create();

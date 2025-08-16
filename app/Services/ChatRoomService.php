@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Http\Requests\ChatRoomRequest;
+use App\Http\Requests\UpdateChatRoomRequest;
 use App\Models\ChatRoom;
 use App\Models\ChatRoomUser;
 use App\Models\User;
@@ -31,7 +32,7 @@ class ChatRoomService
                 'invite' => 'owner',
                 'update' => 'owner'
             ];
-            $data['invite_code'] = Str::random(32);
+            $data['invite_code'] = Utility::generateInviteCode($user->id);
         }
         $data['actions'] = $actions;
         //$room = ChatRoom::create($data);
@@ -41,9 +42,22 @@ class ChatRoomService
         return $room;
     }
 
-    public function updateRoom(ChatRoomRequest $request, ChatRoom $room): ChatRoom
+    public function updateRoom(UpdateChatRoomRequest $request, ChatRoom $room): ChatRoom
     {
-        $room->update($request->validated());
+        $data = $request->validated();
+        if ($request->user()->cannot('update', $room)) {
+            abort(403, 'Only owner can update chat rooms');
+        }
+        if (isset($data['type'])) {
+            if ($data['type'] === ChatRoom::TYPE_PRIVATE) {
+                $data['invite_code'] = Utility::generateInviteCode($request->user()->id);
+            }
+            if ($data['type'] === ChatRoom::TYPE_PUBLIC) {
+                $data['invite_code'] = null;
+            }
+        }
+
+        $room->update($data);
         return $room;
     }
 

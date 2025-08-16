@@ -6,6 +6,7 @@ use App\Http\Requests\UpdateUserRequest;
 use App\Models\ChatRoom;
 use App\Models\User;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Hash;
 
 class UserService
@@ -17,7 +18,9 @@ class UserService
     }
     public function updateUser(UpdateUserRequest $request, User $user): User
     {
-        if (auth()->user()->id !== $user->id && !auth()->user()->isAdmin()) {
+        //Gate::authorize('update', $user);
+
+        if ($request->user()->can('update', $user)) {
             abort(403, 'No access');
         }
         $data = $request->validated();
@@ -25,7 +28,6 @@ class UserService
         if (empty($data['password'])) {
             unset($data['password']);
         }
-
 
         if (isset($data['password'])) {
             // Для обычных пользователей (не админов) проверяем current_password
@@ -46,6 +48,11 @@ class UserService
 
             // Удаляем все текущие токены пользователя
             $user->tokens()->delete();
+        }
+        if (isset($data['role'])) {
+            if ($data['role'] === 'admin' && !auth()->user()->isAdmin()) {
+                abort(403, 'Admin only');
+            }
         }
 
         $user->update($data);
