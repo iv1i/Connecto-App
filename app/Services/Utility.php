@@ -10,7 +10,12 @@ class Utility
 {
     public static function generateRandomColor(): string
     {
-        return '#' . str_pad(dechex(mt_rand(0, 0xFFFFFF)), 6, '0', STR_PAD_LEFT);
+        // Генерируем значения RGB в диапазоне 100-255 для яркости
+        $r = mt_rand(100, 255);
+        $g = mt_rand(100, 255);
+        $b = mt_rand(100, 255);
+
+        return sprintf('#%02X%02X%02X', $r, $g, $b);
     }
 
     public static function generateInviteCode($uniaqueString)
