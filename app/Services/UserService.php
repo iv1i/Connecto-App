@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Http\Requests\UpdateUserRequest;
+use App\Models\Friendships;
 use App\Models\User;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Hash;
@@ -67,7 +68,21 @@ class UserService
 
     public function getAllUsers(): LengthAwarePaginator
     {
-        return User::paginate(15);
+        $authUser = auth()->user();
+        $authUserId = $authUser->id;
+
+        $query = User::where('id', '!=', $authUserId);
+
+        if (auth('sanctum')->check()) {
+            // Получаем ID друзей через подзапрос для оптимизации
+            $friendIds = Friendships::where('user_id', $authUserId)
+                ->pluck('friend_id');
+
+            // Исключаем друзей
+            $query->whereNotIn('id', $friendIds);
+        }
+
+        return $query->paginate(10);
     }
 
     public function blockUser(User $user): User
