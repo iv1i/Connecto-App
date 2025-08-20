@@ -12,6 +12,7 @@ class ChatRoom extends Model
 
     const TYPE_PUBLIC = 'public';
     const TYPE_PRIVATE = 'private';
+    const TYPE_PERSONAL = 'personal';
 
     protected $fillable = [
         'name',
@@ -38,6 +39,7 @@ class ChatRoom extends Model
         return [
             self::TYPE_PUBLIC => 'Public',
             self::TYPE_PRIVATE => 'Private',
+            self::TYPE_PERSONAL => 'Personal',
         ];
     }
 
@@ -56,12 +58,6 @@ class ChatRoom extends Model
         return $this->belongsTo(User::class, 'created_by');
     }
 
-    public function isMember($userId)
-    {
-        return $this->users()->where('user_id', $userId)->exists();
-    }
-
-
     public function members()
     {
         return $this->belongsToMany(User::class,'chat_room_users')
@@ -69,20 +65,24 @@ class ChatRoom extends Model
             ->withTimestamps();
     }
 
-    public function isPublic(): bool
+    public static function getRoomByInviteCode(string $code)
     {
-        return $this->type === self::TYPE_PUBLIC;
-    }
-
-
-    public function getRoomByInviteCode(string $code)
-    {
-        return $this->where('invite_code', $code)->first();
+        return self::where('invite_code', $code)->first();
     }
 
     public function roomExistsByInviteCode(string $code): bool
     {
         return $this->where('invite_code', $code)->exists();
+    }
+
+    public function isMember($userId)
+    {
+        return $this->members()->where('users.id', $userId)->exists();
+    }
+
+    public function isPublic(): bool
+    {
+        return $this->type === self::TYPE_PUBLIC;
     }
 
     public function isPrivate(): bool
@@ -92,6 +92,6 @@ class ChatRoom extends Model
 
     public function isPersonal(): bool
     {
-        return $this->personal_chat !== null && $this->type === self::TYPE_PRIVATE;
+        return $this->personal_chat !== null && $this->type === self::TYPE_PERSONAL;
     }
 }

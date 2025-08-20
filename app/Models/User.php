@@ -96,6 +96,25 @@ class User extends Authenticatable
             ->withTimestamps();
     }
 
+    public function isFriendWith($user)
+    {
+        // Если передан объект User, берем его ID
+        $userId = $user instanceof User ? $user->id : $user;
+
+        // Проверяем дружбу в обоих направлениях
+        return Friendships::where(function($query) use ($userId) {
+            $query->where('user_id', $this->id)
+                ->where('friend_id', $userId)
+                ->where('status', 'confirmed');
+        })
+            ->orWhere(function($query) use ($userId) {
+                $query->where('user_id', $userId)
+                    ->where('friend_id', $this->id)
+                    ->where('status', 'confirmed');
+            })
+            ->exists();
+    }
+
     public function chat_room_user(): HasMany
     {
         return $this->hasMany(ChatRoomUser::class, 'user_id', 'id', '');
@@ -106,6 +125,12 @@ class User extends Authenticatable
         return $this->belongsToMany(ChatRoom::class, 'chat_room_users', 'user_id', 'chat_room_id')
             ->withPivot('joined_via', 'joined_at', 'user_id', 'chat_room_id')
             ->withTimestamps();
+    }
+
+    // В App\Models\User
+    public function isOwnerRoom(ChatRoom $chatRoom): bool
+    {
+        return $this->id === $chatRoom->created_by;
     }
 
     public function reactions(): HasMany

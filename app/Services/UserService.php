@@ -3,10 +3,8 @@
 namespace App\Services;
 
 use App\Http\Requests\UpdateUserRequest;
-use App\Models\ChatRoom;
 use App\Models\User;
 use Illuminate\Pagination\LengthAwarePaginator;
-use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Hash;
 
 class UserService
@@ -18,9 +16,9 @@ class UserService
     }
     public function updateUser(UpdateUserRequest $request, User $user): User
     {
-        //Gate::authorize('update', $user);
+        $authUser = auth()->user();
 
-        if ($request->user()->can('update', $user)) {
+        if ($authUser->can('update', $user)) {
             abort(403, 'No access');
         }
         $data = $request->validated();
@@ -31,7 +29,7 @@ class UserService
 
         if (isset($data['password'])) {
             // Для обычных пользователей (не админов) проверяем current_password
-            if (!auth()->user()->isAdmin()) {
+            if (!$authUser->isAdmin()) {
                 // Проверяем наличие current_password
                 if (!isset($data['current_password'])) {
                     abort(403, 'Current password is required');
@@ -50,7 +48,7 @@ class UserService
             $user->tokens()->delete();
         }
         if (isset($data['role'])) {
-            if ($data['role'] === 'admin' && !auth()->user()->isAdmin()) {
+            if ($data['role'] === 'admin' && !$authUser->isAdmin()) {
                 abort(403, 'Admin only');
             }
         }

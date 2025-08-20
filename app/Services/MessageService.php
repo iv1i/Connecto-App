@@ -10,7 +10,6 @@ use App\Models\ChatRoom;
 use App\Models\Message;
 use App\Models\User;
 use Illuminate\Pagination\LengthAwarePaginator;
-use function PHPUnit\Framework\isEmpty;
 
 class MessageService
 {
@@ -49,20 +48,21 @@ class MessageService
 
     public function getRoomMessages(ChatRoom $room): LengthAwarePaginator|array
     {
-        $user = auth()->user();
+        $authUser = auth()->user();
+        $authUserId = $authUser->id;
 
-        $check = $room->members()->where('users.id', $user->id)->exists();
+        $check = $room->isMember($authUserId);
         if (!$check) {
             return ['error' => 'user not joined on chat room'];
         }
 
         return $room->messages()
-            ->with(['user', 'userReactions' => function($query) use ($user) {
-                $query->where('user_id', $user->id);
+            ->with(['user', 'userReactions' => function($query) use ($authUser) {
+                $query->where('user_id', $authUser->id);
             }])
             ->orderBy('created_at', 'desc')
             ->paginate(20)
-            ->through(function ($message) use ($user) {
+            ->through(function ($message) use ($authUser) {
                 $message->user_reactions = $message->userReactions->pluck('reaction')->toArray();
                 unset($message->userReactions); // Удаляем relations, чтобы не дублировать данные
                 return $message;
