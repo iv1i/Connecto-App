@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Events\RoomsEvent;
 use App\Http\Requests\ChatRoomRequest;
 use App\Http\Requests\UpdateChatRoomRequest;
 use App\Models\ChatRoom;
@@ -71,10 +72,14 @@ class ChatRoomService
             if ($member) {
                 $room->delete();
             }
+
+            RoomsEvent::dispatch(true);
+
             return ['message' => 'the room was successfully deleted'];
         }
         if ($room->created_by === $authUserId) {
             $room->delete();
+            RoomsEvent::dispatch(true);
             return ['message' => 'the room was successfully deleted'];
         }
         return ['error' => 'not enough rights'];
@@ -160,6 +165,8 @@ class ChatRoomService
             $authUser->chatRooms()->syncWithoutDetaching([
                 $chatRoom->id => ['joined_via' => 'friend-personal-chat']
             ]);
+
+            RoomsEvent::dispatch(true);
 
             return $chatRoom;
         }

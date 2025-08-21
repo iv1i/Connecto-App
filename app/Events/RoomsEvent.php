@@ -2,7 +2,6 @@
 
 namespace App\Events;
 
-use App\Models\Message;
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Broadcasting\PresenceChannel;
@@ -13,19 +12,25 @@ use Illuminate\Contracts\Broadcasting\ShouldRescue;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
-class MessageSentEvent implements ShouldBroadcastNow, ShouldRescue
+class RoomsEvent implements ShouldBroadcastNow, ShouldRescue
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
-    public $message;
-
-    public function __construct(Message $message)
+    public $room;
+    public function __construct($bool)
     {
-        $this->message = $message->load('user');
+        $this->room = $bool;
     }
 
-    public function broadcastOn(): Channel
+    /**
+     * Get the channels the event should broadcast on.
+     *
+     * @return array<int, \Illuminate\Broadcasting\Channel>
+     */
+    public function broadcastOn(): array
     {
-        return new PrivateChannel('send-messages.'.$this->message->chat_room_id);
+        return [
+            new PrivateChannel('rooms-event'),
+        ];
     }
 }

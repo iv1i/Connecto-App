@@ -395,7 +395,8 @@
             </div>
         </div>
     </div>
-    <script id="v1.1.17">
+
+    <script id="v1.1.23">
         document.addEventListener('DOMContentLoaded', function() {
             const token = localStorage.getItem('token');
             const encodedToken = getCookie('XSRF-TOKEN');
@@ -495,23 +496,7 @@
             }
 
             function initWebsockets(){
-                Echo.private(`room`).listen('MessageSentEvent', (e) => {
-                    console.log(e.message);
-                    if (e.message.user.id !== userData.id){
-                        changeRoomMessagesCount(e.message.chat_room_id, 1);
-                        if (String(e.message.chat_room_id) === localStorage.getItem('roomId')){
-                            // Добавляем обработчик контекстного меню для новых сообщений
-                            addMessageToUI(e.message);
-                        }
-                        if (String(e.message.chat_room_id) !== localStorage.getItem('roomId')) {
-                            unreadRooms[e.message.chat_room_id] = true;
-                            updateRoomMessageCount(e.message.chat_room_id, 1)
-                            updateUnreadIndicators();
-                        }
-                        document.title = "Connecto-app (*)";
-                        console.log('new message!')
-                    }
-                });
+
 
                 Echo.private(`deleted-message`).listen('MessageDellEvent', (e) => {
                     if (e.message.user.id !== userData.id){
@@ -522,6 +507,12 @@
                             document.getElementById(`message-${e.message.id}`).remove();
                         }
                         console.log('delete message!')
+                    }
+                });
+
+                Echo.private(`rooms-event`).listen('RoomsEvent', (e) => {
+                    if (e.room) {
+                        loadRooms();
                     }
                 });
 
@@ -1272,6 +1263,7 @@
                 try {
                     console.log(roomId);
                     hidePublicRoomsModal();
+                    hideSidebar();
                     showLoadingMessages();
                     document.title = "Connecto-app";
                     const [roomResponse, messagesResponse] = await Promise.all([
@@ -1410,7 +1402,27 @@
                 roomList.innerHTML = '';
                 publicRoomList.innerHTML = '';
                 //renderPublicRoomsList(rooms);
+
                 rooms.forEach(room => {
+                    Echo.private(`send-messages.${room.id}`)
+                        .stopListening('MessageSentEvent');
+                    Echo.leave(`send-messages.${room.id}`);
+                    Echo.private(`send-messages.${room.id}`).listen('MessageSentEvent', (e) => {
+                        if (e.message.user.id !== userData.id){
+                            if (String(e.message.chat_room_id) === localStorage.getItem('roomId')){
+                                // Добавляем обработчик контекстного меню для новых сообщений
+                                changeRoomMessagesCount(e.message.chat_room_id, 1);
+                                addMessageToUI(e.message);
+                            }
+                            if (String(e.message.chat_room_id) !== localStorage.getItem('roomId')) {
+                                unreadRooms[e.message.chat_room_id] = true;
+                                updateRoomMessageCount(e.message.chat_room_id, 1)
+                                updateUnreadIndicators();
+                            }
+                            document.title = "Connecto-app (*)";
+                            console.log('new message!')
+                        }
+                    });
                     const roomElement = document.createElement('div');
                     const publicRoomElement = document.createElement('div');
                     room.is_owner = room.created_by === userData.id;
@@ -1526,7 +1538,7 @@
                     }
                     else {
                         renderMessages(messages.data);
-                    }
+                    }createPrivateChat
 
                     messageInputContainer.classList.remove('hidden');
                     messageInput.focus();
@@ -1552,6 +1564,7 @@
                     if (response.ok) {
                         const chat = await response.json();
                         hideFriendsModal();
+                        hideSidebar();
                         await joinRoom(chat.id);
                         await loadRooms();
                     } else {
@@ -1627,10 +1640,10 @@
             <button class="btn btn-secondary open-user-profile-btn" data-friend-id="${friend.id}">
                 <i class="fi fi-br-eye"></i>
             </button>
-            <button class="btn btn-secondary hover:bg-blue-200 start-chat-btn" data-friend-id="${friend.id}">
+            <button class="btn btn-primary hover:bg-blue-200 start-chat-btn" data-friend-id="${friend.id}">
                 <i class=" fi fi-br-comment-alt"></i>
             </button>
-            <button class="btn btn-secondary hover:bg-red-200 delete-friend-btn" data-friend-id="${friend.id}">
+            <button class="btn btn-danger hover:bg-red-200 delete-friend-btn" data-friend-id="${friend.id}">
                 <i class=" fi fi-br-trash-xmark"></i>
             </button>
 
