@@ -25,7 +25,7 @@
 
 ## <img src="public/docs/icons/book2.png" width="35" align="absmiddle"> Описание <a id='description'></a>[<img src="public/docs/icons/up.png" width="20" align="absmiddle">](#links)
 
-Проект представляет собой RESTful API для управления библиотекой с тремя типами пользователей: гости, авторы и администраторы.
+Проект представляет собой RESTful API мессенджер c Веб-версий и веб-сокетами.
 
 ### Основные сущности
 
