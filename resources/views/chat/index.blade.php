@@ -5,72 +5,74 @@
 
 @section('content')
     <div class="notifications">
-            <div class="toast ">
-                <div  class="toast-content">
-                    <i class="fas fa-solid fa-check check"></i>
+        <div class="toast ">
+            <div  class="toast-content">
+                <i class="fas fa-solid fa-check check"></i>
 
-                    <div class="toast-message">
-                        <span class="text text-1"></span>
-                        <span class="text text-2"></span>
-                        <span class="text text-3"></span>
-                    </div>
+                <div class="toast-message">
+                    <span class="text text-1"></span>
+                    <span class="text text-2"></span>
+                    <span class="text text-3"></span>
                 </div>
-                <i class="fi fi-br-cross-small close"></i>
-                <!-- Remove 'active' class, this is just to show in Codepen thumbnail -->
-                <div  class="progress"></div>
             </div>
+            <i class="fi fi-br-cross-small close"></i>
+            <!-- Remove 'active' class, this is just to show in Codepen thumbnail -->
+            <div  class="progress"></div>
         </div>
+    </div>
 
     <div class="chat-layout">
         <!-- Sidebar -->
-        <div id="sidebar" class="fixed hidden z-[1000]">
+        <div id="sidebar" class="sidebar hidden">
             <!-- Затемнённый оверлей (всё кроме сайдбара) -->
-            <div id="sidebar-overlay" class="fixed inset-0 hidden bg-black opacity-20 backdrop-blur-sm transition-opacity duration-300">
+            <div id="sidebar-overlay" class="sidebar-overlay hidden">
 
             </div>
 
 
             <!-- Сам сайдбар -->
-            <div id="sidebar-content" class="relative z-[9999]  flex flex-col h-screen w-xs bg-white border-r border-gray-200 transform -translate-x-full transition-transform duration-300 ease-in-out">
+            <div id="sidebar-main" class="sidebar-main -translate-x-full">
                 <!-- Контент сайдбара -->
-                <div id="sidebar-header" class="flex border-b-1 border-(--border) justify-center p-4 flex-none">
+                <div id="sidebar-header" class="sidebar-header">
                     <h1 class="flex items-center gap-2">
                         <i class="fi fi-br-messages text-blue-500 text-4xl flex items-center"></i>
                         <span>Connecto-App</span>
                     </h1>
                 </div>
 
-                <div id="sidebar-content" class="grow p-4">
+                <div id="sidebar-content" class="sidebar-content">
                     <!-- Профиль -->
-                    <div class="border-b-1 border-(--border) w-full">
-                        <button id="openProfileBtn" class="w-full flex cursor-pointer !items-center gap-3 p-3 rounded-lg hover:bg-gray-100 transition-colors">
+                    <div class="sidebar-btn-container">
+                        <button id="openProfileBtn" class="sidebar-btn">
                             <i class="fi fi-br-user"></i>
                             <span>Мой Профиль</span>
                         </button>
                     </div>
 
-                    <div class="border-b-1 border-(--border) w-full">
+                    <div class="sidebar-btn-container">
                         <!-- Друзья -->
-                        <button id="friendsListBtn" class="w-full cursor-pointer flex items-center gap-3 p-3 rounded-lg hover:bg-gray-100 transition-colors">
+                        <button id="friendsListBtn" class="sidebar-btn">
                             <i class="fi fi-br-users"></i>
                             <span>Друзья</span>
                         </button>
 
                         <!-- Найти друзей -->
-                        <button id="addFriendBtn" class="w-full cursor-pointer flex items-center gap-3 p-3 rounded-lg hover:bg-gray-100 transition-colors">
+                        <button id="addFriendBtn" class="sidebar-btn">
                             <i class="fi fi-br-user-add"></i>
                             <span>Найти друзей</span>
                         </button>
                     </div>
 
-                    <!-- Публичные комнаты -->
-                    <button id="PublicRoomList" class="w-full cursor-pointer flex items-center gap-3 p-3 rounded-lg hover:bg-gray-100 transition-colors">
-                        <i class="fi fi-br-search"></i>
-                        <span>Публичные комнаты</span>
-                    </button>
+                    <div class="sidebar-btn-container">
+                        <!-- Публичные комнаты -->
+                        <button id="PublicRoomList" class="sidebar-btn">
+                            <i class="fi fi-br-search"></i>
+                            <span>Публичные комнаты</span>
+                        </button>
+                    </div>
                 </div>
 
-                <div id="sidebar-footer" class="flex-none border-t-1 border-(--border) p-3">
+                <div id="sidebar-footer" class="sidebar-footer">
                     <div class="flex items-center gap-2">
                         <div id="userAvatar" class="message-avatar">
                         </div>
@@ -87,9 +89,8 @@
             </div>
         </div>
         <!-- Sidebar-left -->
-        <div id="sidebar-left" class="flex flex-col h-screen w-16 border-r-1 border-(--border) bg-white">
-
-            <div id="sidebar-left-header" class="flex-none border-b-1 border-(--border)">
+        <div id="sidebar-left" class="flex flex-col h-screen w-16 dark:bg-gray-900 dark:border-gray-500  bg-gray-50">
+            <div id="sidebar-left-header" class="flex-none dark:text-gray-400 dark:border-gray-500">
                 <div id="menu" class="text-[25px] p-4">
                     <button id="openSidebarBtn" class="w-full !text-[25px] cursor-pointer">
                         <i class="fi fi-br-menu-burger"></i>
@@ -97,34 +98,34 @@
                 </div>
             </div>
 
-            <div id="sidebar-left-content" class="grow">
-                <button id="createRoomBtn" class="btn btn-primary w-full mt-2 !font-bold" title="Create room">
+            <div id="sidebar-left-content" class="grow p-2">
+                <button id="createRoomBtn" class="btn btn-primary mb-2" title="Create room">
                     <i class="fi fi-br-magic-wand"></i>
                 </button>
-                <button id="joinRoomBtn" class="btn btn-secondary w-full mt-2 !font-bold" title="Join private room">
+                <button id="joinRoomBtn" class="btn btn-secondary mb-2" title="Join private room">
                     <i class="fi fi-br-key"></i>
                 </button>
             </div>
 
-            <div id="sidebar-left-footer" class="flex-none border-t-1 border-(--border)">
+            <div id="sidebar-left-footer" class="flex-none">
                 <div class="flex flex-col items-center gap-2 p-3">
-                    <button id="header__sun" onclick="" title="Switch to system theme" class="grow focus:text-yellow-500 text-gray-500">
+                    <button id="header__sun" onclick="" title="Switch to system theme" class="grow text-gray-500 cursor-pointer">
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 1024 1024"><path fill="currentColor" fill-rule="evenodd" d="M548 818v126c0 8.837-7.163 16-16 16h-40c-8.837 0-16-7.163-16-16V818c15.845 1.643 27.845 2.464 36 2.464c8.155 0 20.155-.821 36-2.464m205.251-115.66l89.096 89.095c6.248 6.248 6.248 16.38 0 22.627l-28.285 28.285c-6.248 6.248-16.379 6.248-22.627 0L702.34 753.25c12.365-10.043 21.431-17.947 27.198-23.713c5.766-5.767 13.67-14.833 23.713-27.198m-482.502 0c10.043 12.365 17.947 21.431 23.713 27.198c5.767 5.766 14.833 13.67 27.198 23.713l-89.095 89.096c-6.248 6.248-16.38 6.248-22.627 0l-28.285-28.285c-6.248-6.248-6.248-16.379 0-22.627zM512 278c129.235 0 234 104.765 234 234S641.235 746 512 746S278 641.235 278 512s104.765-234 234-234m0 72c-89.47 0-162 72.53-162 162s72.53 162 162 162s162-72.53 162-162s-72.53-162-162-162M206 476c-1.643 15.845-2.464 27.845-2.464 36c0 8.155.821 20.155 2.464 36H80c-8.837 0-16-7.163-16-16v-40c0-8.837 7.163-16 16-16zm738 0c8.837 0 16 7.163 16 16v40c0 8.837-7.163 16-16 16H818c1.643-15.845 2.464-27.845 2.464-36c0-8.155-.821-20.155-2.464-36ZM814.062 180.653l28.285 28.285c6.248 6.248 6.248 16.379 0 22.627L753.25 320.66c-10.043-12.365-17.947-21.431-23.713-27.198c-5.767-5.766-14.833-13.67-27.198-23.713l89.095-89.096c6.248-6.248 16.38-6.248 22.627 0m-581.497 0l89.095 89.096c-12.365 10.043-21.431 17.947-27.198 23.713c-5.766 5.767-13.67 14.833-23.713 27.198l-89.096-89.095c-6.248-6.248-6.248-16.38 0-22.627l28.285-28.285c6.248-6.248 16.379-6.248 22.627 0M532 64c8.837 0 16 7.163 16 16v126c-15.845-1.643-27.845-2.464-36-2.464c-8.155 0-20.155.821-36 2.464V80c0-8.837 7.163-16 16-16z"/></svg>
                     </button>
-                    <button id="header__moon" onclick="" title="Switch to light mode" class="grow focus:text-blue-500 text-gray-500">
+                    <button id="header__moon" onclick="" title="Switch to light mode" class="grow text-gray-500 cursor-pointer">
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 1024 1024"><path fill="currentColor" fill-rule="evenodd" d="M489.493 111.658c30.658-1.792 45.991 36.44 22.59 56.329C457.831 214.095 426 281.423 426 354c0 134.757 109.243 244 244 244c72.577 0 139.905-31.832 186.014-86.084c19.868-23.377 58.064-8.102 56.332 22.53C900.4 745.823 725.141 912 512.5 912C291.31 912 112 732.69 112 511.5c0-211.39 164.287-386.024 374.198-399.649l.206-.013zm-81.143 79.75l-4.112 1.362C271.1 237.943 176 364.092 176 511.5C176 697.344 326.656 848 512.5 848c148.28 0 274.938-96.192 319.453-230.41l.625-1.934l-.11.071c-47.18 29.331-102.126 45.755-159.723 46.26L670 662c-170.104 0-308-137.896-308-308c0-58.595 16.476-114.54 46.273-162.467z"/></svg>        </button>
                 </div>
             </div>
 
         </div>
         <!-- Sidebar-rooms -->
-        <div id="sidebar-rooms" class="flex flex-col w-md h-screen border-r-1 border-(--border) bg-white">
+        <div id="sidebar-rooms" class="sidebar-rooms">
 
-            <div id="sidebar-rooms-header" class="border-b-1 border-(--border) flex-none p-3">
+            <div id="sidebar-rooms-header" class="sidebar-rooms-header">
                 <input type="text" id="roomSearch" placeholder="Search rooms..." class="input placeholder:text-gray-500">
             </div>
 
-            <div id="sidebar-rooms-content" class=" p-3 grow overflow-auto">
+            <div id="sidebar-rooms-content" class="sidebar-rooms-content">
                 <div id="roomList" class="space-y-2">
                     <!-- Rooms will be loaded here -->
                 </div>
@@ -137,11 +138,11 @@
             <div class="chat-header">
                 <div class="flex justify-between items-center">
                     <div>
-                        <h2 id="roomName">Select a room</h2>
+                        <h2 id="roomName" class="">Select a room</h2>
                         <p id="roomDescription" class="text-light"></p>
                     </div>
                     <div id="roomActions" class="hidden">
-                        <button id="logoutRoomBtn" class="btn btn-secondary mr-2 !font-bold" title="Logout room">
+                        <button id="logoutRoomBtn" class="btn btn-secondary !font-bold" title="Logout room">
                             <i class="fi fi-br-leave"></i>
                         </button>
                         <button id="inviteUsersBtn" class="btn btn-secondary mr-2 !font-bold" title="Invite users">
@@ -156,6 +157,9 @@
 
             <!-- Messages -->
             <div class="messages-container">
+                <div id="messagesLoading" class="loading-more hidden">
+                    <i class="loading !text-lg fi fi-br-loading"></i>
+                </div>
                 <div id="messages" class="space-y-4">
                     <!-- Messages will be loaded here -->
                 </div>
@@ -164,14 +168,14 @@
             <!-- Message Input -->
             <div id="messageInputContainer" class="message-input-container hidden">
                 <form id="messageForm" class="flex gap-2">
-                    <input type="text" id="messageInput" placeholder="Type a message..." class="input flex-grow" autocomplete="off">
+                    <input type="text" id="messageInput" placeholder="Type a message..." class="input" autocomplete="off">
                     <button type="submit" class="btn btn-primary">
                         Send
                     </button>
                 </form>
             </div>
         </div>
-
+        <!-- joinPrivateRoomModal -->
         <div id="joinRoomModal" class="modal">
             <div class="modal-content">
                 <div class="modal-header">
@@ -193,7 +197,7 @@
                 </form>
             </div>
         </div>
-
+        <!-- inviteUsersModal -->
         <div id="inviteUsersModal" class="modal">
             <div class="modal-content">
                 <div class="modal-header">
@@ -209,15 +213,6 @@
                             </button>
                         </div>
                     </div>
-                    <div class="form-group mt-4">
-                        <label class="label">Invite by Username</label>
-                        <div class="flex">
-                            <input type="text" id="usernameInput" placeholder="Enter username" class="input flex-grow">
-                            <button id="inviteUserBtn" class="btn btn-primary ml-2">
-                                Invite
-                            </button>
-                        </div>
-                    </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" id="closeInviteModal" class="btn btn-secondary">
@@ -226,14 +221,14 @@
                 </div>
             </div>
         </div>
-        <!-- friendsModal -->
+        <!-- friendsListModal -->
         <div id="friendsModal" class="modal">
             <div class="modal-content">
                 <div class="modal-header">
                     <h2>Friends</h2>
                 </div>
                 <div class="p-4">
-                    <div id="pendingFriends" class="flex !hidden flex-col gap-2">
+                    <div id="pendingFriends" class="!hidden">
                         <div class="flex justify-between items-center mb-4">
                             <h3 class="text-lg font-semibold">Pending Friend</h3>
                         </div>
@@ -256,8 +251,7 @@
                 </div>
             </div>
         </div>
-
-        <!-- Модальное окно для добавления друзей -->
+        <!-- add/search-FriendsModal -->
         <div id="addFriendModal" class="modal">
             <div class="modal-content">
                 <div class="modal-header">
@@ -278,7 +272,7 @@
                 </div>
             </div>
         </div>
-
+        <!-- viewProfileModal -->
         <div id="profileModal" class="modal">
             <div class="modal-content">
                 <div class="modal-header">
@@ -286,11 +280,11 @@
                 </div>
                 <div class="p-4">
                     <div class="flex flex-col items-center mb-4">
-                        <div id="profileAvatar" class="message-avatar w-20 h-20 text-3xl flex items-center justify-center mb-2"></div>
-                        <h3 id="profileName" class="text-xl font-bold"></h3>
+                        <div id="profileAvatar" class="message-avatar"></div>
+                        <h3 id="profileName"></h3>
                         <div id="nameEditFields" class="hidden w-full">
                             <input type="text" id="newNameInput" class="input w-full mb-2" placeholder="New name">
-                            <input type="color" id="newColorInput" class="w-full h-10" title="Choose your color">
+                            <input type="color" id="newColorInput" class="w-full border-none h-10" title="Choose your color">
                         </div>
                         <span id="profileLink" class="text-gray-500"></span>
                     </div>
@@ -298,22 +292,22 @@
                     <div class="grid grid-cols-2 gap-4 mb-4">
                         <div>
                             <p class="text-gray-500 text-sm">Account created</p>
-                            <p id="profileCreatedAt" class="font-medium"></p>
+                            <p id="profileCreatedAt" class="dark:text-white font-medium"></p>
                         </div>
                         <div>
                             <p class="text-gray-500 text-sm">Status</p>
-                            <p id="profileStatus" class="font-medium"></p>
+                            <p id="profileStatus" class="dark:text-white font-medium"></p>
                         </div>
                     </div>
 
                     <div id="passwordChangeFields" class="hidden border-t border-gray-200 pt-4 mb-4">
                         <h4 class="font-medium mb-2">Change Password</h4>
-                        <input type="password" id="currentPassword" class="input placeholder:text-gray-500 w-full mb-2" placeholder="Current password">
-                        <input type="password" id="newPassword" class="input placeholder:text-gray-500 w-full mb-2" placeholder="New password">
-                        <input type="password" id="confirmPassword" class="input placeholder:text-gray-500 w-full" placeholder="Confirm new password">
+                        <input type="password" id="currentPassword" class="input mb-2" placeholder="Current password">
+                        <input type="password" id="newPassword" class="input mb-2" placeholder="New password">
+                        <input type="password" id="confirmPassword" class="input mb-2" placeholder="Confirm new password">
                     </div>
 
-                    <div class="border-t border-gray-200 pt-4">
+                    <div class="border-t border-gray-200 dark:border-gray-500 pt-4">
                         <h4 class="font-medium mb-2">Additional Information</h4>
                         <p id="profileEmailVerified" class="text-sm"></p>
                     </div>
@@ -322,7 +316,7 @@
                     <button type="button" id="closeProfileModal" class="btn btn-secondary">
                         Close
                     </button>
-                    <button type="button" id="editProfileBtn" class="btn btn-secondary ">
+                    <button type="button" id="editProfileBtn" class="btn btn-primary ">
                         <i class="fi fi-br-user-pen"></i> Edit Profile
                     </button>
                     <button type="button" id="cancelEditProfileBtn" class="btn btn-secondary !hidden">
@@ -337,7 +331,7 @@
                 </div>
             </div>
         </div>
-        <!-- Create Room Modal -->
+        <!-- CreateRoomModal -->
         <div id="createRoomModal" class="modal">
             <div class="modal-content">
                 <div class="modal-header">
@@ -379,7 +373,7 @@
                 </form>
             </div>
         </div>
-
+        <!-- searchPublicRoomsModal -->
         <div id="publicRoomsModal" class="modal">
             <div class="modal-content">
                 <div class="modal-header">
@@ -401,7 +395,7 @@
             </div>
         </div>
     </div>
-    <script id="v1.1.12">
+    <script id="v1.1.17">
         document.addEventListener('DOMContentLoaded', function() {
             const token = localStorage.getItem('token');
             const encodedToken = getCookie('XSRF-TOKEN');
@@ -414,9 +408,15 @@
             let userData = null;
             let isEditMode = false;
             let currentProfileData = null;
+            let currentMessagesPage = 1;
+            let hasMoreMessages = true;
+            let isLoadingMessages = false;
             const unreadRooms = {}
 
             // DOM элементы
+            const html = document.documentElement;
+            const moonBtn = document.getElementById('header__moon');
+            const sunBtn = document.getElementById('header__sun');
             const messagesContainer = document.getElementById('messages');
             const messageForm = document.getElementById('messageForm');
             const messageInput = document.getElementById('messageInput');
@@ -427,8 +427,65 @@
             // Инициализация приложения
             initApp();
 
+            function initTheme(){
+                // Проверяем сохраненную тему при загрузке
+                const savedTheme = localStorage.getItem('theme');
+                if (savedTheme) {
+                    setTheme(savedTheme);
+                } else {
+                    // Если нет сохраненной темы, используем системную
+                    setTheme(getSystemTheme());
+                }
+
+                // Слушаем изменения системной темы (опционально)
+                window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function(e) {
+                    // Меняем тему только если пользователь не выбрал явно свою
+                    if (!localStorage.getItem('theme')) {
+                        setTheme(e.matches ? 'dark' : 'light');
+                    }
+                });
+            }
+
+            // Функция для установки темы
+            function setTheme(theme) {
+                // Удаляем все классы тем
+                html.classList.remove('dark', 'light');
+
+                // Добавляем нужный класс
+                html.classList.add(theme);
+
+                // Сохраняем в localStorage
+                localStorage.setItem('theme', theme);
+
+                // Обновляем title кнопок
+                if (theme === 'dark') {
+                    sunBtn.title = 'Switch to light mode';
+                    sunBtn.classList.add('text-gray-500');
+                    sunBtn.classList.remove('text-yellow-500');
+                    moonBtn.title = 'Switch to dark theme';
+                    moonBtn.classList.add('text-blue-500');
+                    moonBtn.classList.remove('text-gray-500');
+                } else {
+                    sunBtn.title = 'Switch to light theme';
+                    sunBtn.classList.add('text-yellow-500');
+                    sunBtn.classList.remove('text-gray-500');
+                    moonBtn.title = 'Switch to dark mode';
+                    moonBtn.classList.add('text-gray-500');
+                    moonBtn.classList.remove('text-blue-500');
+                }
+            }
+
+            // Функция для получения системной темы
+            function getSystemTheme() {
+                if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                    return 'dark';
+                }
+                return 'light';
+            }
+
             async function initApp() {
                 initWebsockets();
+                initTheme();
                 await loadUser();
                 await loadRooms();
                 if (currentRoom) {
@@ -448,6 +505,7 @@
                         }
                         if (String(e.message.chat_room_id) !== localStorage.getItem('roomId')) {
                             unreadRooms[e.message.chat_room_id] = true;
+                            updateRoomMessageCount(e.message.chat_room_id, 1)
                             updateUnreadIndicators();
                         }
                         document.title = "Connecto-app (*)";
@@ -534,7 +592,6 @@
                 document.getElementById('logoutRoomBtn').addEventListener('click', logoutCurrentRoom);
                 document.getElementById('closeInviteModal').addEventListener('click', hideInviteUsersModal);
                 document.getElementById('copyInviteLinkBtn').addEventListener('click', copyInviteLink);
-                document.getElementById('inviteUserBtn').addEventListener('click', inviteUserByUsername);
 
                 // Обработчик для кнопки друзей
                 document.getElementById('friendsListBtn').addEventListener('click', showFriendsModal);
@@ -550,13 +607,24 @@
                 document.getElementById('sidebar-overlay').addEventListener('click', hideSidebar);
                 document.getElementById('openProfileBtn').addEventListener('click', showProfileModal);
                 document.getElementById('closeProfileModal').addEventListener('click', hideProfileModal);
+
+                // Обработчик скролла для подгрузки сообщений
+                document.querySelector('.messages-container').addEventListener('scroll', handleMessagesScroll);
+
                 document.querySelectorAll('.modal').forEach(modal => {
                     modal.addEventListener('click', (e) => {
                         if (e.target === modal) { // Проверяем, что кликнули именно на фон
                             hideAllModals();
                         }
                     });
-                });;
+                });
+                moonBtn.addEventListener('click', function() {
+                    setTheme('dark');
+                });
+
+                sunBtn.addEventListener('click', function() {
+                    setTheme('light');
+                });
 
 
 
@@ -594,6 +662,13 @@
                     if (e.target.closest('.accept-friend-btn')) {
                         const friendId = e.target.closest('.accept-friend-btn').dataset.friendId;
                         await acceptFriendRequest(friendId);
+                    }
+                });
+
+                document.addEventListener('click', async function(e) {
+                    if (e.target.closest('.deny-friend-btn')) {
+                        const friendId = e.target.closest('.deny-friend-btn').dataset.friendId;
+                        await denyFriendRequest(friendId);
                     }
                 });
 
@@ -642,6 +717,79 @@
                 setTimeout(() => {
                     hideEditProfileMode();
                 }, 200);
+            }
+
+            // Добавьте эту функцию для обработки скролла
+            function handleMessagesScroll() {
+                const messagesContainer = document.querySelector('.messages-container');
+                if (!messagesContainer || isLoadingMessages || !hasMoreMessages) return;
+
+                const scrollTop = Math.abs(messagesContainer.scrollTop);
+                const scrollHeight = messagesContainer.scrollHeight;
+                const clientHeight = messagesContainer.clientHeight;
+
+                // Для column-reverse: проверяем, насколько близко к НИЖНЕЙ границе
+                // scrollTop показывает смещение от нижней границы
+                const distanceFromBottom = scrollHeight - clientHeight - scrollTop;
+
+                // Загружаем больше сообщений, когда接近 нижней границы
+                if (distanceFromBottom < 100 && currentMessagesPage >= 1) {
+                    console.log('Loading more messages...');
+                    loadMoreMessages();
+                }
+            }
+
+            // Функция для загрузки дополнительных сообщений
+            async function loadMoreMessages() {
+                if (isLoadingMessages || !hasMoreMessages || !currentRoomId) return;
+
+                isLoadingMessages = true;
+                document.getElementById('messagesLoading').classList.remove('hidden');
+
+                try {
+                    const nextPage = currentMessagesPage + 1;
+                    console.log('page: ',nextPage);
+                    const response = await fetch(`/api/rooms/${currentRoomId}/messages?page=${nextPage}`, {
+                        headers: {
+                            'Authorization': 'Bearer ' + token,
+                            'Accept': 'application/json',
+                            'X-XSRF-TOKEN': decodedToken
+                        }
+                    });
+
+                    if (response.ok) {
+                        const messagesData = await response.json();
+
+                        if (messagesData.data && messagesData.data.length > 0) {
+                            // Сохраняем текущую позицию скролла
+                            const oldScrollHeight = messagesContainer.scrollHeight;
+                            const oldScrollTop = messagesContainer.scrollTop;
+
+                            // Добавляем сообщения в начало
+                            messagesData.data.forEach(message => {
+                                addMessageToUI(message, true); // prepend = true
+                            });
+
+                            // Восстанавливаем позицию скролла
+                            const newScrollHeight = messagesContainer.scrollHeight;
+                            messagesContainer.scrollTop = oldScrollTop + (newScrollHeight - oldScrollHeight);
+
+                            currentMessagesPage = nextPage;
+
+                            // Проверяем, есть ли еще страницы
+                            hasMoreMessages = messagesData.current_page < messagesData.last_page;
+                        } else {
+                            hasMoreMessages = false;
+                        }
+                    } else {
+                        console.error('Failed to load more messages');
+                    }
+                } catch (error) {
+                    console.error('Error loading more messages:', error);
+                } finally {
+                    isLoadingMessages = false;
+                    document.getElementById('messagesLoading').classList.add('hidden');
+                }
             }
 
             async function loadOtherUserProfile(userId) {
@@ -782,6 +930,8 @@
                         // Обновляем данные пользователя
                         await loadUser();
                         await loadUserProfile();
+                        await joinRoom(currentRoomId);
+                        //renderMessages(allMessages);
                         toggleEditMode();
                     } else {
                         const error = await response.json();
@@ -807,12 +957,11 @@
                 document.getElementById('profileCreatedAt').textContent = createdAt.toLocaleDateString();
 
                 document.getElementById('profileStatus').innerHTML = profile.is_blocked ? `<p class='text-rose-500'> Blocked </p>` : `<p class='text-lime-500'> Active </p>`;
-                document.getElementById('profileEmailVerified').textContent =
-                    profile.email_verified_at ? 'Email verified' : 'Email not verified';
+                document.getElementById('profileEmailVerified').innerHTML =
+                    profile.email_verified_at ? `<p class="text-lime-500">Email verified</p>` : `<p class="text-rose-500">Email not verified</p>`;
 
                 // Показываем кнопку отправки сообщения только если это не текущий пользователь
                 const isCurrentUser = profile.id === userData.id;
-                document.getElementById('sendMessageBtn').classList.toggle('!hidden', isCurrentUser);
                 document.getElementById('editProfileBtn').classList.toggle('!hidden', !isCurrentUser);
 
                 // Сбрасываем поля редактирования
@@ -826,7 +975,7 @@
             }
 
             function showSidebar() {
-                const sidebarContent = document.getElementById('sidebar-content');
+                const sidebarContent = document.getElementById('sidebar-main');
                 document.getElementById('sidebar-overlay').classList.remove('hidden');
 
                 document.getElementById('sidebar').classList.add('flex');
@@ -840,7 +989,7 @@
             function hideSidebar() {
                 const sidebar = document.getElementById('sidebar')
                 const overlay = document.getElementById('sidebar-overlay');
-                const sidebarContent = document.getElementById('sidebar-content');
+                const sidebarContent = document.getElementById('sidebar-main');
                 sidebarContent.classList.add('-translate-x-full');
                 sidebar.classList.remove('flex');
                 overlay.classList.add('hidden');
@@ -864,8 +1013,8 @@
                 document.getElementById('addFriendModal').classList.add('active');
                 document.getElementById('friendSearchInput').focus();
                 document.getElementById('friendSearchInput').value = '';
-
                 document.getElementById('searchResults').innerHTML = '';
+                searchGetAllUsers();
             }
 
             function hideAddFriendModal() {
@@ -898,6 +1047,25 @@
                 }
             }
 
+            async function searchGetAllUsers() {
+                try {
+                    const response = await fetch(`/api/users`, {
+                        headers: {
+                            'Authorization': 'Bearer ' + token,
+                            'Accept': 'application/json',
+                            'X-XSRF-TOKEN': decodedToken
+                        }
+                    });
+
+                    if (response.ok) {
+                        const data = await response.json();
+                        renderSearchResults(data.data);
+                    }
+                } catch (error) {
+                    console.error('Error searching users:', error);
+                }
+            }
+
             // Отображение результатов поиска
             function renderSearchResults(users) {
                 const resultsContainer = document.getElementById('searchResults');
@@ -910,7 +1078,7 @@
 
                 users.forEach(user => {
                     const userElement = document.createElement('div');
-                    userElement.className = 'flex items-center justify-between p-2 hover:bg-gray-100 rounded-md';
+                    userElement.className = 'friend-element';
                     userElement.innerHTML = `
             <div class="flex items-center gap-2">
                 <div class="message-avatar" style="background-color: ${user.name_color}">
@@ -995,7 +1163,7 @@
                     });
 
                     if (response.ok) {
-                        const alertToastMessage = {'type': 'success', 'message': 'Friend added'};
+                        const alertToastMessage = {'type': 'success', 'message': 'friendship request sent'};
                         callShowToast(alertToastMessage);
                         hideAddFriendModal();
                         await loadFriends(); // Обновляем список друзей
@@ -1013,15 +1181,43 @@
 
             async function acceptFriendRequest(userId) {
                 try {
-                    const response = await fetch(`api/friends/${userId}`, {
+                    const response = await fetch(`api/friends/${userId}/accept`, {
                         method: 'PUT',
                         headers: {
                             'Authorization': 'Bearer ' + token,
                             'Content-Type': 'application/json',
                             'Accept': 'application/json',
                             'X-XSRF-TOKEN': decodedToken
-                        },
-                        body: JSON.stringify({ friend_id: userId })
+                        }
+                    });
+
+                    if (response.ok) {
+                        const alertToastMessage = {'type': 'success', 'message': 'Friend accepted'};
+                        callShowToast(alertToastMessage);
+                        hideAddFriendModal();
+                        await loadFriends(); // Обновляем список друзей
+                    } else {
+                        const error = await response.json();
+                        const alertToastMessage = {'type': 'error', 'message': error.message || 'Failed to accepted friend'};
+                        callShowToast(alertToastMessage);
+                    }
+                } catch (error) {
+                    console.error('Error sending friend request:', error);
+                    const alertToastMessage = {'type': 'error', 'message': 'An error occurred'};
+                    callShowToast(alertToastMessage);
+                }
+            }
+
+            async function denyFriendRequest(userId) {
+                try {
+                    const response = await fetch(`api/friends/${userId}/deny`, {
+                        method: 'PUT',
+                        headers: {
+                            'Authorization': 'Bearer ' + token,
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json',
+                            'X-XSRF-TOKEN': decodedToken
+                        }
                     });
 
                     if (response.ok) {
@@ -1074,6 +1270,7 @@
             // Функция присоединения к публичной комнате
             async function joinPublicRoom(roomId) {
                 try {
+                    console.log(roomId);
                     hidePublicRoomsModal();
                     showLoadingMessages();
                     document.title = "Connecto-app";
@@ -1216,25 +1413,26 @@
                 rooms.forEach(room => {
                     const roomElement = document.createElement('div');
                     const publicRoomElement = document.createElement('div');
-
-                    roomElement.className = 'p-2 hover:bg-gray-100 rounded-md cursor-pointer';
+                    room.is_owner = room.created_by === userData.id;
+                    roomElement.className = 'room-item';
                     roomElement.dataset.roomId = room.id;
                     roomElement.innerHTML = `
   <div class="flex flex-col gap-1">
     <div class="flex items-baseline gap-2">
       <!-- Название комнаты с обрезкой длинного текста -->
-      <span class="font-medium text-gray-800 truncate flex-1 min-w-0">
-        ${room.name}
-      </span>
-
-      <!-- Бейдж типа комнаты -->
-      ${room.type === 'private'
-                        ? '<span class="text-xs bg-pink-100 border-1 border-pink-600/15 text-pink-600 px-2 py-0.5 rounded-full whitespace-nowrap">Private</span>'
-                        : '<span class="text-xs bg-blue-100 border-1 border-blue-600/15 text-blue-600 px-2 py-0.5 rounded-full whitespace-nowrap">Public</span>'
+      <span class="font-medium truncate flex-1 min-w-0">
+        ${room.name}${room.is_owner && room.type !== 'personal'
+                        ? '<span class="text-base text-yellow-500 px-2 py-0.5 rounded-full whitespace-nowrap"><i class="fi fi-br-user-key"></i></span>'
+                        : ' '
                     }
-
+      </span>
+      <!-- Бейдж типа комнаты -->
+      ${room.type === 'private' || room.type === 'personal'
+                        ? '<span class="private-chat">Private</span>'
+                        : '<span class="public-chat">Public</span>'
+                    }
       <!-- Счетчик новых сообщений (только если есть) -->
-      <span id="newMessagesSpan-${room.id}" class="${room.new_messages ? 'flex' : 'hidden'} items-center justify-center h-5 w-5 rounded-full bg-blue-500 text-white text-xs">
+      <span id="newMessagesSpan-${room.id}" class="">
         ${room.new_messages || ''}
       </span>
     </div>
@@ -1263,10 +1461,10 @@
                     const publicRoomElement = document.createElement('div');
 
                     if (room.type === 'public') {
-                        publicRoomElement.className = 'flex items-center justify-between p-2 hover:bg-gray-100 rounded-md';
+                        publicRoomElement.className = 'room-item';
                         publicRoomElement.dataset.roomId = room.id;
                         publicRoomElement.innerHTML = `
-                <h3 class="font-medium">${room.name} <span id="newMessagesSpan-${room.id}"></span> ${room.type === 'private' ? '<span class="private-chat">Private</span>' : '<span class="public-chat">Public</span>'}
+                <h3 class="flex justify-between">${room.name} <span id="newMessagesSpan-${room.id}"></span> ${room.type === 'private' ? '<span class="private-chat">Private</span>' : '<span class="public-chat">Public</span>'}
 </h3>
                 <p class="room-messages-count-${room.id} text-sm text-gray-500">${room.messages_count} messages</p>`;
                         publicRoomElement.addEventListener('click', () => joinPublicRoom(room.id));
@@ -1281,6 +1479,12 @@
                 try {
                     showLoadingMessages();
                     document.title = "Connecto-app";
+
+                    // Сбрасываем пагинацию
+                    currentMessagesPage = 1;
+                    hasMoreMessages = true;
+                    isLoadingMessages = false;
+
                     const [roomResponse, messagesResponse] = await Promise.all([
                         fetch(`/api/rooms/${roomId}`, {
                             headers: {
@@ -1289,7 +1493,7 @@
                                 'X-XSRF-TOKEN': decodedToken
                             }
                         }),
-                        fetch(`/api/rooms/${roomId}/messages`, {
+                        fetch(`/api/rooms/${roomId}/messages?page=1`, { // Добавляем page=1
                             headers: {
                                 'Authorization': 'Bearer ' + token,
                                 'Accept': 'application/json',
@@ -1310,7 +1514,13 @@
                     updateUnreadIndicators();
                     localStorage.setItem('roomId', roomId);
 
-                    updateRoomUI(room.room)
+                    updateRoomUI(room.room);
+                    //await loadRooms();
+
+                    // Обновляем информацию о пагинации
+                    currentMessagesPage = messages.current_page || 1;
+                    hasMoreMessages = messages.current_page < messages.last_page;
+
                     if (messages.data.length === 0){
                         showNopeMessages();
                     }
@@ -1324,6 +1534,7 @@
                     messagesContainer.innerHTML = `<div class="error-loading-room"><i class="fi fi-br-bug-slash"></i> Error loading room</div>`;
                 }
             }
+
 
             // Создание личного чата
             async function createPrivateChat(friendId) {
@@ -1404,7 +1615,7 @@
                 friends.forEach(friend => {
                     if (friend.pivot.status === 'accepted') {
                         const friendElement = document.createElement('div');
-                        friendElement.className = 'flex items-center justify-between p-2 hover:bg-gray-100 rounded-md';
+                        friendElement.className = 'friend-element';
                         friendElement.innerHTML = `
             <div class="flex items-center gap-2">
                 <div class="message-avatar" style="background-color: ${friend.name_color}">
@@ -1440,7 +1651,7 @@
                     if (friend.pivot.status === 'pending'){
                         pendingFriends.classList.remove('!hidden');
                         const pendingFriendElement = document.createElement('div');
-                        pendingFriendElement.className = 'flex items-center justify-between p-2 hover:bg-gray-100 rounded-md';
+                        pendingFriendElement.className = 'friend-element';
                         pendingFriendElement.innerHTML = `
             <div class="flex items-center gap-2">
                 <div class="message-avatar" style="background-color: ${friend.name_color}">
@@ -1449,10 +1660,10 @@
                 <span>${friend.name}</span>
             </div>
             <div>
-            <button class="btn !bg-green-200 !text-white !border-1 hover:!border-green-500/15 hover:!text-green-500 accept-friend-btn" data-friend-id="${friend.id}">
+            <button class="btn btn-apply accept-friend-btn" data-friend-id="${friend.id}">
                 <i class="fi fi-br-check"></i>
             </button>
-            <button class="btn !bg-rose-200 !text-white !border-1 hover:!border-rose-500/15 hover:!text-rose-500 deny-friend-btn" data-friend-id="${friend.id}">
+            <button class="btn btn-deny deny-friend-btn" data-friend-id="${friend.id}">
                 <i class="fi fi-br-cross"></i>
             </button>
 </div>
@@ -1495,12 +1706,19 @@
 
                 // Всегда показываем кнопку выхода
                 const logoutRoomBtn = document.getElementById('logoutRoomBtn');
-                logoutRoomBtn.classList.remove('hidden');
+                if (room.is_owner && room.type !== 'personal'){
+                    logoutRoomBtn.classList.add('hidden');
+                }
+                else {
+                    logoutRoomBtn.classList.remove('hidden');
+                }
 
                 // Кнопка приглашения - только для владельца приватной комнаты
                 const inviteUsersBtn = document.getElementById('inviteUsersBtn');
                 if (room.type === 'private' && room.is_owner && room.actions.invite !== 'none') {
                     inviteUsersBtn.classList.remove('hidden');
+                    const inviteLinkInput = document.getElementById('inviteLinkInput');
+                    inviteLinkInput.value = room.invite_code;
                 } else {
                     inviteUsersBtn.classList.add('hidden');
                 }
@@ -1699,6 +1917,7 @@
                     const alertToastMessage = {'type': 'error', 'message': message.error};
                     callShowToast(alertToastMessage);
                 }
+
                 const messageElement = document.createElement('div');
                 messageElement.addEventListener('contextmenu', (e) => {
                     e.preventDefault();
@@ -1708,6 +1927,7 @@
                 messageElement.className = `MSG ${prepend ? 'prepend-message' : ''}`;
                 messageElement.id = `message-${message.id}`;
                 removeShowNopeMessages();
+
                 // Формируем HTML для реакций
                 const reactionsHTML = message.reactions && Object.keys(message.reactions).length > 0
                     ? Object.entries(message.reactions).map(([type, count]) => {
@@ -1728,7 +1948,7 @@
         </div>
         <div class="message-content ${message.user_id === userData.id ? 'own-message' : 'other-message'}">
             <div class="message-header">
-                <span class="message-username">${message.user.name}</span>
+                <span class="message-username" style="color: ${message.user.name_color}">${message.user.name}</span>
                 <span class="message-time">${formatDate(message.created_at)}</span>
             </div>
             <p class="message-text">${message.content}</p>
@@ -1742,7 +1962,9 @@
                     messagesContainer.prepend(messageElement);
                 } else {
                     messagesContainer.appendChild(messageElement);
-                    scrollToBottom();
+                    if (!prepend) { // Не скроллим при добавлении старых сообщений
+                        scrollToBottom();
+                    }
                 }
 
                 // Обновляем обработчики кликов
@@ -1995,48 +2217,6 @@
                 }, 2000);
             }
 
-            async function inviteUserByUsername() {
-                const username = document.getElementById('usernameInput').value.trim();
-                if (!username || !currentRoomId) return;
-
-                const inviteBtn = document.getElementById('inviteUserBtn');
-                inviteBtn.disabled = true;
-                inviteBtn.textContent = 'Inviting...';
-
-                try {
-                    const response = await fetch('/api/rooms/invite', {
-                        method: 'POST',
-                        headers: {
-                            'Authorization': 'Bearer ' + token,
-                            'Content-Type': 'application/json',
-                            'Accept': 'application/json',
-                            'X-XSRF-TOKEN': decodedToken
-                        },
-                        body: JSON.stringify({
-                            room_id: currentRoomId,
-                            username: username
-                        })
-                    });
-
-                    if (response.ok) {
-                        const alertToastMessage = {'type': 'success', 'message': 'User invited successfully'};
-                        callShowToast(alertToastMessage);
-                        document.getElementById('usernameInput').value = '';
-                    } else {
-                        const error = await response.json();
-                        const alertToastMessage = {'type': 'success', 'message': error.message || 'Failed to invite user'};
-                        callShowToast(alertToastMessage);
-                    }
-                } catch (error) {
-                    console.error('Error inviting user:', error);
-                    const alertToastMessage = {'type': 'success', 'message': error.message || 'An error occurred while inviting user'};
-                    callShowToast(alertToastMessage);
-                } finally {
-                    inviteBtn.disabled = false;
-                    inviteBtn.textContent = 'Invite';
-                }
-            }
-
             async function logoutCurrentRoom() {
                 if (!currentRoomId || !confirm('Are you sure you want to logout this room?')) {
                     return;
@@ -2087,8 +2267,6 @@
 
                 const deleteBtn = document.getElementById('deleteRoomBtn');
                 deleteBtn.disabled = true;
-                deleteBtn.textContent = 'Deleting...';
-
                 try {
                     const response = await fetch(`/api/rooms/${currentRoomId}`, {
                         method: 'DELETE',
@@ -2121,7 +2299,6 @@
                     callShowToast(alertToastMessage);
                 } finally {
                     deleteBtn.disabled = false;
-                    deleteBtn.textContent = 'Delete Room';
                 }
             }
 
@@ -2231,16 +2408,16 @@
 
             function getReactionEmoji(reaction) {
                 const emojis = {
-                    'like': `<i class="fi fi-br-social-network"></i>`,
-                    'love': `<i class="fi fi-br-heart"></i>`,
-                    'laugh': `<i class="fi fi-br-grin-squint-tears"></i>`,
-                    'wow': '<i class="fi fi-br-surprise"></i>',
-                    'sad': '<i class="fi fi-br-sad-tear"></i>',
-                    'angry': '<i class="fi fi-br-face-swear"></i>',
-                    'fire': '<i class="fi fi-br-flame"></i>',
-                    'star': '<i class="fi fi-br-star"></i>',
-                    'clap': '<i class="fi fi-br-hands-clapping"></i>',
-                    'rocket': '<i class="fi fi-br-rocket-lunch"></i>'
+                    'like': `<i class=" fi fi-br-social-network"></i>`,
+                    'love': `<i class=" fi fi-br-heart"></i>`,
+                    'laugh': `<i class=" fi fi-br-grin-squint-tears"></i>`,
+                    'wow': '<i class=" fi fi-br-surprise"></i>',
+                    'sad': '<i class=" fi fi-br-sad-tear"></i>',
+                    'angry': '<i class=" fi fi-br-face-swear"></i>',
+                    'fire': '<i class=" fi fi-br-flame"></i>',
+                    'star': '<i class=" fi fi-br-star"></i>',
+                    'clap': '<i class=" fi fi-br-hands-clapping"></i>',
+                    'rocket': '<i class=" fi fi-br-rocket-lunch"></i>'
                 };
                 return emojis[reaction] || '';
             }

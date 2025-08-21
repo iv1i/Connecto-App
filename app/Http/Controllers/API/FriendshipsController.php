@@ -6,121 +6,47 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\UpdateFriendshipsRequest;
 use App\Models\Friendships;
 use App\Models\User;
+use App\Services\FriendshipsService;
+use Illuminate\Http\JsonResponse;
+
 
 class FriendshipsController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
+    public function __construct(private FriendshipsService $friendshipsService)
     {
-        try {
-            $friends = auth()->user()->acceptedFriends()->withPivot('status', 'created_at', 'updated_at')->get();
-
-            return response()->json([
-                'success' => true,
-                'data' => $friends,
-                'count' => $friends->count()
-            ]);
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Failed to fetch friends list',
-                'error' => $e->getMessage()
-            ], 500);
-        }
+    }
+    public function index(): JsonResponse
+    {
+        $friends = $this->friendshipsService->getFriends();
+        return response()->json($friends);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
+    public function store(User $user): JsonResponse
     {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(User $user)
-    {
-        $checkFriend = $user->acceptedFriends()->where('friend_id', auth()->user()->id)->exists();
-        if ($checkFriend) {
-            $friend = auth()->user()->acceptedFriends()->syncWithoutDetaching([
-                $user->id => ['status' => 'accepted']
-            ]);
-            return response()->json($friend);
-        }
-        $friend = auth()->user()->acceptedFriends()->syncWithoutDetaching([
-            $user->id => ['status' => 'pending']
-        ]);
+        $friend = $this->friendshipsService->storeFriends($user);
         return response()->json($friend);
     }
 
-    public function pending()
+    public function pending(): JsonResponse
     {
-
-        $pendingFriends = auth()->user()->pendingFriends()->withPivot('status', 'created_at', 'updated_at')->get();
-        return response()->json([
-            'success' => true,
-            'data' => $pendingFriends,
-            'count' => $pendingFriends->count()
-        ]);
+        $pendingFriend = $this->friendshipsService->getPendingFriends();
+        return response()->json($pendingFriend);
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(Friendships $friendships)
+    public function update(User $user, $command): JsonResponse
     {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Friendships $friendships)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(User $user)
-    {
-        $friendship = auth()->user()->friendshipsReceived()
-            ->where('user_id', $user->id)
-            ->first();
-        //dd(['v1.0.0',$friendship]);
-        if ($friendship) {
-            if ($friendship->status === 'pending') {
-                $friendship->status = 'accepted';
-                $friendship->save();
-                auth()->user()->acceptedFriends()->attach($user->id, ['status' => 'accepted']);
-                return response()->json($friendship->friend()->get());
-            }
+        $resp = $this->friendshipsService->updateFriends($user, $command);
+        if (isset($resp['error'])) {
+            return response()->json($resp, 404);
         }
-        else{
-            return response()->json(['error' => 'Friendships not found'], 404);
+        else {
+            return response()->json($resp);
         }
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(User $user)
+    public function destroy(User $user): JsonResponse
     {
-        // Удаляем запись у себя
-        auth()->user()->friendshipsInitiated()
-            ->where('friend_id', $user->id)
-            ->delete();
-
-        // Удаляем запись у друга
-        $user->friendshipsInitiated()
-            ->where('friend_id', auth()->user()->id)
-            ->delete();
-
-        return response()->json(['message' => 'Friend removed successfully'], 200);
+        $resp = $this->friendshipsService->deleteFriends($user);
+        return response()->json($resp);
     }
 }

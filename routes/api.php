@@ -23,7 +23,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/friends', [FriendshipsController::class, 'index']);
     Route::get('/friends/pending', [FriendshipsController::class, 'pending']);
     Route::post('/friends/{user}', [FriendshipsController::class, 'store']);
-    Route::put('/friends/{user}', [FriendshipsController::class, 'update']);
+    Route::put('/friends/{user}/{command}', [FriendshipsController::class, 'update']);
     Route::delete('/friends/{user}', [FriendshipsController::class, 'destroy']);
 
     // Персональные чаты
