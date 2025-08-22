@@ -5,7 +5,7 @@
 ### <p align="center">Минималистичный мессенджер</p>
 
 ## <img src="public/docs/icons/link.png" width="35" align="absmiddle"> Ссылки
-### [Технологии](#technologies) | [Описание](#description) | [Маршруты](#routes) | [Инициализация](#init)
+### [Технологии](#technologies) | [Описание](#description) | [Маршруты](#routes) | [Инициализация](#init) | [Галерея](#galery)
 
 ## <img src="public/docs/icons/tools.png" width="35" align="absmiddle"> Используемые технологии <a id='technologies'></a>[<img src="public/docs/icons/up.png" width="20" align="absmiddle">](#links)
 
@@ -165,3 +165,22 @@ docker compose exec app php artisan migrate
 ```
 ### После успешного запуска система будет доступна по адресу:
 ### `http://localhost`
+
+## <img src="public/docs/icons/flower.png" width="30" align="absmiddle"> Галерея <a id='galery'></a>[<img src="public/docs/icons/up.png" width="20" align="absmiddle">](#links)
+### Авторизация:
+<img src="public/docs/UI/1.png">
+<img src="public/docs/UI/2.png">
+
+### Чат:
+
+<img src="public/docs/UI/3.png">
+<img src="public/docs/UI/4.png">
+<img src="public/docs/UI/5.png">
+<img src="public/docs/UI/6.png">
+<img src="public/docs/UI/7.png">
+<img src="public/docs/UI/8.png">
+<img src="public/docs/UI/9.png">
+<img src="public/docs/UI/10.png">
+<img src="public/docs/UI/11.png">
+<img src="public/docs/UI/12.png">
+<img src="public/docs/UI/13.png">
