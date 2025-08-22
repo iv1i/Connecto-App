@@ -184,3 +184,5 @@ docker compose exec app php artisan migrate
 <img src="public/docs/UI/11.png">
 <img src="public/docs/UI/12.png">
 <img src="public/docs/UI/13.png">
+
+[<img src="public/docs/icons/up.png" width="20" align="absmiddle">](#links)
