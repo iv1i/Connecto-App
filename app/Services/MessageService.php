@@ -25,6 +25,7 @@ class MessageService
         $message = Message::create($data);
         $msg = $message->load('user');
         MessageSentEvent::dispatch($msg);
+
         return $msg;
     }
 
@@ -40,6 +41,7 @@ class MessageService
             ];
             MessageDellEvent::dispatch($msg);
             $message->delete();
+
             return ['message' => 'deleted'];
         }
 
@@ -65,6 +67,7 @@ class MessageService
             ->through(function ($message) use ($authUser) {
                 $message->user_reactions = $message->userReactions->pluck('reaction')->toArray();
                 unset($message->userReactions); // Удаляем relations, чтобы не дублировать данные
+
                 return $message;
             });
     }

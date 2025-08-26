@@ -59,6 +59,7 @@ class ChatRoomService
         }
 
         $room->update($data);
+
         return $room;
     }
 
@@ -80,12 +81,14 @@ class ChatRoomService
         if ($room->created_by === $authUserId) {
             $room->delete();
             RoomsEvent::dispatch(true);
+
             return ['message' => 'the room was successfully deleted'];
         }
+
         return ['error' => 'not enough rights'];
     }
 
-    public function getPublicRooms()
+    public function getPublicRooms(): LengthAwarePaginator
     {
         $authUser = auth()->user();
         $authUserId = $authUser->id;
@@ -202,6 +205,7 @@ class ChatRoomService
                 ];
             }
         }
+
         return [
             'message' => 'You are already joined this room',
             'room' => $room
@@ -223,6 +227,7 @@ class ChatRoomService
             // Если участников не осталось, удаляем комнату
             if ($remainingMembers === 0) {
                 $room->delete();
+
                 return ['message' => 'Successfully logged out and room deleted (no members left)'];
             }
 
@@ -231,12 +236,14 @@ class ChatRoomService
         $chekRooms = $authUser->chat_room_user()->where('chat_room_id', $room->id)->exists();
         if ($chekRooms && !$authUser->isOwnerRoom($room)) {
             $authUser->chatRooms()->detach($room);
+
             return ['message' => 'Successfully logged out'];
         }
+
         return ['error' => 'The user is not here'];
     }
 
-    public function getJoinedRooms()
+    public function getJoinedRooms(): array
     {
         $authUser = auth()->user();
 
@@ -245,6 +252,7 @@ class ChatRoomService
         if ($joinedRooms) {
             return $joinedRooms;
         }
+
         return ['message' => 'You don\'t have rooms'];
     }
 
@@ -263,6 +271,7 @@ class ChatRoomService
             }
             return ['error' => 'You are not in this room'];
         }
+
         return [
             'room' => $room
         ];

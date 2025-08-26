@@ -34,11 +34,13 @@ class FriendshipsService
             $friend = auth()->user()->acceptedFriends()->syncWithoutDetaching([
                 $user->id => ['status' => 'accepted']
             ]);
+
             return $friend;
         }
         $friend = auth()->user()->acceptedFriends()->syncWithoutDetaching([
             $user->id => ['status' => 'pending']
         ]);
+
         return $friend;
     }
 
@@ -46,6 +48,7 @@ class FriendshipsService
     {
 
         $pendingFriends = auth()->user()->pendingFriends()->withPivot('status', 'created_at', 'updated_at')->get();
+
         return [
             'success' => true,
             'data' => $pendingFriends,
@@ -65,6 +68,7 @@ class FriendshipsService
                     $friendship->status = 'accepted';
                     $friendship->save();
                     auth()->user()->acceptedFriends()->attach($user->id, ['status' => 'accepted']);
+
                     return $friendship->friend()->get();
                 }
             }

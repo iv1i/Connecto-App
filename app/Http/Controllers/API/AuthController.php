@@ -53,7 +53,6 @@ class AuthController extends Controller
     {
         $user = $request->user();
 
-        // Удаляем токен (если API)
         $user->currentAccessToken()->delete();
 
         return response()->json(['message' => 'logged out']);

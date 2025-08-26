@@ -55,6 +55,7 @@ class UserService
         }
 
         $user->update($data);
+
         return $user;
     }
 
@@ -88,12 +89,14 @@ class UserService
     public function blockUser(User $user): User
     {
         $user->update(['is_blocked' => true]);
+
         return $user;
     }
 
     public function unblockUser(User $user): User
     {
         $user->update(['is_blocked' => false]);
+
         return $user;
     }
 }

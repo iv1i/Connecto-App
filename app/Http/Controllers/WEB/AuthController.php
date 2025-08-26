@@ -42,6 +42,7 @@ class AuthController extends Controller
                 'redirect_url' => url("/chat"), // или ->intended() если нужно
             ]);
         }
+
         return response()->json(['error' => 'Unauthorized'], 401);
     }
 

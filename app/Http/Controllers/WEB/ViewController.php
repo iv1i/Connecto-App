@@ -12,6 +12,7 @@ class ViewController extends Controller
         if (auth()->check()) {
             return redirect()->route('chat.index');
         }
+
         return view('auth.login');
     }
 
@@ -20,6 +21,7 @@ class ViewController extends Controller
         if (auth()->check()) {
             return redirect()->route('chat.index');
         }
+
         return view('auth.register');
     }
 

@@ -20,18 +20,21 @@ class MessageController extends Controller
     public function index(ChatRoom $room): JsonResponse
     {
         $messages = $this->messageService->getRoomMessages($room);
+
         return response()->json($messages);
     }
 
     public function store(MessageRequest $request): JsonResponse
     {
         $message = $this->messageService->sendMessage($request, Auth::user());
+
         return response()->json($message, 201);
     }
 
     public function destroy(Message $message): JsonResponse
     {
         $resp = $this->messageService->deleteMessage($message);
+
         return response()->json($resp);
     }
 
