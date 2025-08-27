@@ -524,7 +524,6 @@ h3 {
 }
 
 .logout-button:active {
-    background: #f1f5f9;
     transform: translateY(1px);
 }
 

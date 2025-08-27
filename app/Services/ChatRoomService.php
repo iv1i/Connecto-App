@@ -7,6 +7,7 @@ use App\Http\Requests\ChatRoomRequest;
 use App\Http\Requests\UpdateChatRoomRequest;
 use App\Models\ChatRoom;
 use App\Models\User;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
 
@@ -243,7 +244,7 @@ class ChatRoomService
         return ['error' => 'The user is not here'];
     }
 
-    public function getJoinedRooms(): array
+    public function getJoinedRooms(): array|Collection
     {
         $authUser = auth()->user();
 
