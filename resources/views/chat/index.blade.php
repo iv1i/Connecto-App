@@ -1411,7 +1411,7 @@
                         if (e.message.user.id !== userData.id){
                             if (String(e.message.chat_room_id) === localStorage.getItem('roomId')){
                                 // Добавляем обработчик контекстного меню для новых сообщений
-                                changeRoomMessagesCount(e.message.chat_room_id, 1);
+                                updateRoomMessageCount(e.message.chat_room_id, 1);
                                 addMessageToUI(e.message);
                             }
                             if (String(e.message.chat_room_id) !== localStorage.getItem('roomId')) {
