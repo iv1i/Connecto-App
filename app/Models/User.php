@@ -105,12 +105,12 @@ class User extends Authenticatable
         return Friendships::where(function($query) use ($userId) {
             $query->where('user_id', $this->id)
                 ->where('friend_id', $userId)
-                ->where('status', 'confirmed');
+                ->where('status', 'accepted');
         })
             ->orWhere(function($query) use ($userId) {
                 $query->where('user_id', $userId)
                     ->where('friend_id', $this->id)
-                    ->where('status', 'confirmed');
+                    ->where('status', 'accepted');
             })
             ->exists();
     }
