@@ -6,11 +6,13 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\ChatRoomRequest;
 use App\Http\Requests\SearchRequest;
 use App\Http\Requests\UpdateChatRoomRequest;
+use App\Http\Resources\RoomsResource;
 use App\Models\ChatRoom;
 use App\Models\User;
 use App\Services\ChatRoomService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Support\Facades\Auth;
 
 
@@ -20,39 +22,43 @@ class ChatRoomController extends Controller
     {
     }
 
-    public function index(): JsonResponse
+    public function index(): AnonymousResourceCollection
     {
         $rooms = $this->chatRoomService->getPublicRooms();
 
-        return response()->json($rooms);
+        return RoomsResource::collection($rooms);
     }
 
-    public function joined(): JsonResponse
+    public function joined(): AnonymousResourceCollection
     {
         $rooms = $this->chatRoomService->getJoinedRooms();
 
-        return response()->json($rooms);
+        return RoomsResource::collection($rooms);
     }
 
-    public function store(ChatRoomRequest $request): JsonResponse
+    public function store(ChatRoomRequest $request): RoomsResource
     {
         $room = $this->chatRoomService->createRoom($request, Auth::user());
 
-        return response()->json($room, 201);
+        return new RoomsResource($room);
     }
 
-    public function show(ChatRoom $room): JsonResponse
+    public function show(ChatRoom $room): JsonResponse|RoomsResource
     {
         $resp = $this->chatRoomService->showRoom($room, Auth::user());
 
-        return response()->json($resp);
+        if ($resp['error']){
+            return response()->json($resp);
+        }
+
+        return new RoomsResource($room);
     }
 
-    public function update(UpdateChatRoomRequest $request, ChatRoom $room): JsonResponse
+    public function update(UpdateChatRoomRequest $request, ChatRoom $room): RoomsResource
     {
         $room = $this->chatRoomService->updateRoom($request, $room);
 
-        return response()->json($room);
+        return new RoomsResource($room);
     }
 
     public function destroy(ChatRoom $room): JsonResponse
@@ -62,26 +68,34 @@ class ChatRoomController extends Controller
         return response()->json($resp);
     }
 
-    public function join(ChatRoom $room)
+    public function join(ChatRoom $room): JsonResponse|RoomsResource
     {
-        $rooms = $this->chatRoomService->joinRoom($room);
+        $resp = $this->chatRoomService->joinRoom($room);
 
-        return response()->json($rooms);
+        if ($resp['error']){
+            return response()->json($resp);
+        }
+
+        return new RoomsResource($room);
     }
 
-    public function search(SearchRequest $request): JsonResponse
+    public function search(SearchRequest $request): AnonymousResourceCollection
     {
         $query = $request->input('query');
         $rooms = $this->chatRoomService->searchRooms($query);
 
-        return response()->json($rooms);
+        return RoomsResource::collection($rooms);
     }
 
-    public function invite(Request $request): JsonResponse
+    public function invite(Request $request): JsonResponse|RoomsResource
     {
-        $room = $this->chatRoomService->joinByInviteCode($request);
+        $resp = $this->chatRoomService->joinByInviteCode($request);
 
-        return response()->json($room);
+        if ($resp['message']) {
+            return response()->json($resp);
+        }
+
+        return new RoomsResource($resp);
     }
 
     public function logout(ChatRoom $room): JsonResponse
@@ -91,11 +105,11 @@ class ChatRoomController extends Controller
         return response()->json(['message' => 'Successfully logged out']);
     }
 
-    public function personal(User $user): JsonResponse
+    public function personal(User $user): RoomsResource
     {
         $room = $this->chatRoomService->createPersonalRoom($user);
 
-        return response()->json($room);
+        return new RoomsResource($room);
     }
 
 }

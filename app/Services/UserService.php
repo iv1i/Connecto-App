@@ -15,12 +15,16 @@ class UserService
     {
         return auth()->user();
     }
-    public function updateUser(UpdateUserRequest $request, User $user): User
+
+    public function updateUser(UpdateUserRequest $request, User $user): User|array
     {
         $authUser = auth()->user();
 
         if ($authUser->can('update', $user)) {
-            abort(403, 'No access');
+            return [
+                'error' => 'No access',
+                'status' => 403,
+            ];
         }
         $data = $request->validated();
 
@@ -33,12 +37,18 @@ class UserService
             if (!$authUser->isAdmin()) {
                 // Проверяем наличие current_password
                 if (!isset($data['current_password'])) {
-                    abort(403, 'Current password is required');
+                    return [
+                        'error' => 'Current password is required',
+                        'status' => 403,
+                    ];
                 }
 
                 // Проверяем соответствие текущего пароля
                 if (!Hash::check($data['current_password'], $user->password)) {
-                    abort(403, 'Current password does not match');
+                    return [
+                        'error' => 'Current password does not match',
+                        'status' => 403,
+                    ];
                 }
             }
 
@@ -50,7 +60,10 @@ class UserService
         }
         if (isset($data['role'])) {
             if ($data['role'] === 'admin' && !$authUser->isAdmin()) {
-                abort(403, 'Admin only');
+                return [
+                    'error' => 'Admin only',
+                    'status' => 403,
+                ];
             }
         }
 
@@ -61,10 +74,22 @@ class UserService
 
     public function searchUsers(string $query): LengthAwarePaginator
     {
-        return User::where('name', 'like', "%{$query}%")
+        $query = User::where('name', 'like', "%{$query}%")
             ->where('role', 'user')
-            ->where('is_blocked', 0)
-            ->paginate(10);
+            ->where('is_blocked', 0);
+
+        if (auth('sanctum')->check()){
+            $authUser = auth('sanctum')->user();
+            $authUserId = $authUser->id;
+
+            $friendIds = Friendships::where('user_id', $authUserId)
+                ->pluck('friend_id');
+
+            $query->whereNotIn('id', $friendIds)
+                ->where('id', '!=', $authUserId);
+        }
+
+        return $query->paginate(10);
     }
 
     public function getAllUsers(): LengthAwarePaginator

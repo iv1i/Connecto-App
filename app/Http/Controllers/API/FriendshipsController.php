@@ -4,10 +4,12 @@ namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\UpdateFriendshipsRequest;
+use App\Http\Resources\UsersResource;
 use App\Models\Friendships;
 use App\Models\User;
 use App\Services\FriendshipsService;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 
 class FriendshipsController extends Controller
@@ -15,37 +17,39 @@ class FriendshipsController extends Controller
     public function __construct(private FriendshipsService $friendshipsService)
     {
     }
-    public function index(): JsonResponse
+    public function index(): AnonymousResourceCollection
     {
         $friends = $this->friendshipsService->getFriends();
 
-        return response()->json($friends);
+        return UsersResource::collection($friends);
     }
 
     public function store(User $user): JsonResponse
     {
         $friend = $this->friendshipsService->storeFriends($user);
 
-        return response()->json($friend);
+        return new JsonResponse($friend);
     }
 
-    public function pending(): JsonResponse
+    public function pending(): AnonymousResourceCollection
     {
-        $pendingFriend = $this->friendshipsService->getPendingFriends();
+        $pendingFriends = $this->friendshipsService->getPendingFriends();
 
-        return response()->json($pendingFriend);
+        return UsersResource::collection($pendingFriends);
     }
 
-    public function update(User $user, $command): JsonResponse
+    public function update(User $user, $command): JsonResponse|UsersResource
     {
         $resp = $this->friendshipsService->updateFriends($user, $command);
 
         if (isset($resp['error'])) {
             return response()->json($resp, 404);
         }
-        else {
+        if (isset($resp['message'])) {
             return response()->json($resp);
         }
+
+        return new UsersResource($resp);
     }
 
     public function destroy(User $user): JsonResponse

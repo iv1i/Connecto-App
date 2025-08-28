@@ -295,11 +295,11 @@ h3 {
 }
 
 .own-message {
-    @apply justify-end flex rounded-[18px_18px_18px_4px] pt-2 px-3 bg-gray-300 dark:bg-gray-700/100 dark:text-white
+    @apply justify-end flex rounded-[18px_18px_18px_4px] pt-2 px-3 bg-gray-200 dark:bg-gray-700/100 dark:text-white
 }
 
 .other-message {
-    @apply flex mr-auto rounded-[18px_18px_18px_4px] pt-2 px-3 bg-gray-200 dark:bg-gray-700/30 dark:text-white
+    @apply flex mr-auto rounded-[18px_18px_18px_4px] pt-2 px-3 bg-gray-300 dark:bg-gray-700/30 dark:text-white
 }
 
 .message-avatar {

@@ -19,11 +19,14 @@ class MessageService
         $data['user_id'] = $user->id;
         $chatRoom = ChatRoom::find($data['chat_room_id']);
         $check = $chatRoom->members()->where('users.id', $user->id)->exists();
+
         if (!$check) {
             return ['error' => 'user not joined on chat room'];
         }
+
         $message = Message::create($data);
         $msg = $message->load('user');
+
         MessageSentEvent::dispatch($msg);
 
         return $msg;
@@ -39,6 +42,7 @@ class MessageService
                     'id' => $message->user_id,
                 ]
             ];
+
             MessageDellEvent::dispatch($msg);
             $message->delete();
 
@@ -54,6 +58,7 @@ class MessageService
         $authUserId = $authUser->id;
 
         $check = $room->isMember($authUserId);
+
         if (!$check) {
             return ['error' => 'user not joined on chat room'];
         }

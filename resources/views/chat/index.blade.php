@@ -45,7 +45,7 @@
                     <div class="sidebar-btn-container">
                         <button id="openProfileBtn" class="sidebar-btn">
                             <i class="fi fi-br-user"></i>
-                            <span>Мой Профиль</span>
+                            <span>Profile</span>
                         </button>
                     </div>
 
@@ -53,13 +53,13 @@
                         <!-- Друзья -->
                         <button id="friendsListBtn" class="sidebar-btn">
                             <i class="fi fi-br-users"></i>
-                            <span>Друзья</span>
+                            <span>Friends</span>
                         </button>
 
                         <!-- Найти друзей -->
                         <button id="addFriendBtn" class="sidebar-btn">
                             <i class="fi fi-br-user-add"></i>
-                            <span>Найти друзей</span>
+                            <span>Find friends</span>
                         </button>
                     </div>
 
@@ -67,7 +67,7 @@
                         <!-- Публичные комнаты -->
                         <button id="PublicRoomList" class="sidebar-btn">
                             <i class="fi fi-br-search"></i>
-                            <span>Публичные комнаты</span>
+                            <span>Public rooms</span>
                         </button>
                     </div>
                 </div>
@@ -396,7 +396,7 @@
         </div>
     </div>
 
-    <script id="v1.1.23">
+    <script id="v1.1.24">
         document.addEventListener('DOMContentLoaded', function() {
             const token = localStorage.getItem('token');
             const encodedToken = getCookie('XSRF-TOKEN');
@@ -768,7 +768,7 @@
                             currentMessagesPage = nextPage;
 
                             // Проверяем, есть ли еще страницы
-                            hasMoreMessages = messagesData.current_page < messagesData.last_page;
+                            hasMoreMessages = messagesData.meta.current_page < messagesData.meta.last_page;
                         } else {
                             hasMoreMessages = false;
                         }
@@ -795,7 +795,7 @@
 
                     if (response.ok) {
                         const profile = await response.json();
-                        renderProfile(profile);
+                        renderProfile(profile.data);
                     } else {
                         throw new Error('Failed to load profile');
                     }
@@ -818,7 +818,7 @@
 
                     if (response.ok) {
                         const profile = await response.json();
-                        renderProfile(profile);
+                        renderProfile(profile.data);
                     } else {
                         throw new Error('Failed to load profile');
                     }
@@ -1017,6 +1017,7 @@
                 const query = e.target.value.trim();
                 if (query.length < 2) {
                     document.getElementById('searchResults').innerHTML = '';
+                    searchGetAllUsers();
                     return;
                 }
 
@@ -1296,7 +1297,7 @@
                     updateUnreadIndicators();
                     localStorage.setItem('roomId', roomId);
 
-                    updateRoomUI(room.room);
+                    updateRoomUI(room.data);
                     await loadRooms();
                     if (messages.data.length === 0){
                         showNopeMessages();
@@ -1324,10 +1325,14 @@
                     });
 
                     if (response.ok) {
-                        userData = await response.json();
+                        user = await response.json()
+                        userData = user.data;
                         document.getElementById('userAvatar').textContent = userData.name.charAt(0).toUpperCase();
+
                         document.getElementById('userAvatar').style.backgroundColor = userData.name_color; // Красный цвет
+
                         document.getElementById('userName').textContent = userData.name;
+
                         document.getElementById('userLink').textContent = userData.link_name;
                     } else {
                         throw new Error('Failed to load user data');
@@ -1351,7 +1356,7 @@
 
                     if (response.ok) {
                         const data = await response.json();
-                        renderRoomList(data);
+                        renderRoomList(data.data);
                         //renderPrivateChatsList(data.data.private_chats);
                     }
                 } catch (error) {
@@ -1526,12 +1531,12 @@
                     updateUnreadIndicators();
                     localStorage.setItem('roomId', roomId);
 
-                    updateRoomUI(room.room);
+                    updateRoomUI(room.data);
                     //await loadRooms();
 
                     // Обновляем информацию о пагинации
-                    currentMessagesPage = messages.current_page || 1;
-                    hasMoreMessages = messages.current_page < messages.last_page;
+                    currentMessagesPage = messages.meta.current_page || 1;
+                    hasMoreMessages = messages.meta.current_page < messages.meta.last_page;
 
                     if (messages.data.length === 0){
                         showNopeMessages();
@@ -1562,10 +1567,10 @@
                     });
 
                     if (response.ok) {
-                        const chat = await response.json();
+                        const room = await response.json();
                         hideFriendsModal();
                         hideSidebar();
-                        await joinRoom(chat.id);
+                        await joinRoom(room.data.id);
                         await loadRooms();
                     } else {
                         const error = await response.json();
@@ -2025,7 +2030,7 @@
                     if (response.ok) {
                         const result = await response.json();
                         // Добавляем новое сообщение с обработчиком контекстного меню
-                        addMessageToUI(result);
+                        addMessageToUI(result.data);
                         messageInput.value = '';
                         updateRoomMessageCount(currentRoomId, 1);
                     } else {

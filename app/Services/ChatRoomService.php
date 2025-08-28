@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Events\RoomsEvent;
 use App\Http\Requests\ChatRoomRequest;
 use App\Http\Requests\UpdateChatRoomRequest;
+use App\Http\Resources\RoomsResource;
 use App\Models\ChatRoom;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Collection;
@@ -91,15 +92,13 @@ class ChatRoomService
 
     public function getPublicRooms(): LengthAwarePaginator
     {
-        $authUser = auth()->user();
-        $authUserId = $authUser->id;
-
-        $query = ChatRoom::with(['creator', 'members'])
-            ->where('type', ChatRoom::TYPE_PUBLIC)
+        $query = ChatRoom::where('type', ChatRoom::TYPE_PUBLIC)
             ->withCount('messages');
 
         // Если пользователь авторизован, исключаем комнаты, где он создатель или участник
         if (auth('sanctum')->check()) {
+            $authUser = auth('sanctum')->user();
+            $authUserId = $authUser->id;
             $query->where('created_by', '!=', $authUserId)
                 ->whereDoesntHave('members', function($q) use ($authUserId) {
                     $q->where('user_id', $authUserId);
@@ -109,7 +108,7 @@ class ChatRoomService
         return $query->paginate(10);
     }
 
-    public function joinByInviteCode(Request $request): ChatRoom|array
+    public function joinByInviteCode(Request $request): array|RoomsResource
     {
         $authUser = auth()->user();
 
@@ -125,7 +124,7 @@ class ChatRoomService
             $room->id => ['joined_via' => 'invite_code']
         ]);
 
-        return $room;
+        return new RoomsResource($room);
     }
 
     public function createPersonalRoom(User $user): ChatRoom|array
@@ -184,7 +183,7 @@ class ChatRoomService
         }
     }
 
-    public function joinRoom(ChatRoom $room): array
+    public function joinRoom(ChatRoom $room): array|ChatRoom
     {
         $authUser = auth()->user();
 
@@ -195,10 +194,8 @@ class ChatRoomService
                 $authUser->chatRooms()->attach(
                     $room->id, ['joined_via' => 'click_join']
                 );
-                return [
-                    'message' => 'You have successfully joined the room',
-                    'room' => $room
-                ];
+
+                return $room;
             }
             else {
                 return [
@@ -207,10 +204,7 @@ class ChatRoomService
             }
         }
 
-        return [
-            'message' => 'You are already joined this room',
-            'room' => $room
-        ];
+        return $room;
     }
 
     public function logoutRoom(ChatRoom $room): array
@@ -257,7 +251,7 @@ class ChatRoomService
         return ['message' => 'You don\'t have rooms'];
     }
 
-    public function showRoom(ChatRoom $room, User $user): array
+    public function showRoom(ChatRoom $room, User $user): array|ChatRoom
     {
         $authUser = auth()->user();
         $authUserId = $authUser->id;
@@ -265,17 +259,13 @@ class ChatRoomService
         if ($room->isPrivate() || $room->isPersonal()) {
             $member = $room->isMember($authUserId);
             if ($member) {
-                return [
-                    'message' => 'access is allowed',
-                    'room' => $room,
-                ];
+                return $room;
             }
+
             return ['error' => 'You are not in this room'];
         }
 
-        return [
-            'room' => $room
-        ];
+        return $room;
     }
 
 

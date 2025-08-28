@@ -4,90 +4,93 @@ namespace App\Services;
 
 use App\Models\Friendships;
 use App\Models\User;
+use Illuminate\Database\Eloquent\Collection;
 use Symfony\Component\HttpFoundation\JsonResponse;
 
 class FriendshipsService
 {
-    public function getFriends(): array
+    public function getFriends(): Collection
     {
-        try {
-            $friends = auth()->user()->acceptedFriends()->withPivot('status', 'created_at', 'updated_at')->get();
-
-            return [
-                'success' => true,
-                'data' => $friends,
-                'count' => $friends->count()
-            ];
-        } catch (\Exception $e) {
-            return [
-                'success' => false,
-                'message' => 'Failed to fetch friends list',
-                'error' => $e->getMessage()
-            ];
-        }
+        return auth()->user()->acceptedFriends()->withPivot('status', 'created_at', 'updated_at')->get();
     }
 
-    public function storeFriends(User $user): User
+    public function storeFriends(User $user): array
     {
-        $checkFriend = $user->acceptedFriends()->where('friend_id', auth()->user()->id)->exists();
-        if ($checkFriend) {
-            $friend = auth()->user()->acceptedFriends()->syncWithoutDetaching([
-                $user->id => ['status' => 'accepted']
-            ]);
+        // Проверяем существование любой дружбы (любого статуса)
+        $existingFriendship = auth()->user()->friendshipsInitiated()->where('friend_id', $user->id)->first();
 
-            return $friend;
+        if ($existingFriendship) {
+            if ($existingFriendship->status === 'pending') {
+                // Если запрос уже pending, возвращаем сообщение
+                return ['message' => 'Friend request already sent'];
+            } elseif ($existingFriendship->status === 'accepted') {
+                // Если уже друзья
+                return ['message' => 'Already friends'];
+            }
         }
-        $friend = auth()->user()->acceptedFriends()->syncWithoutDetaching([
-            $user->id => ['status' => 'pending']
-        ]);
+        auth()->user()->friends()->attach($user->id, ['status' => 'pending']);
 
-        return $friend;
+        return ['message' => 'Friend request sent'];
     }
 
-    public function getPendingFriends(): array
+    public function getPendingFriends(): Collection
     {
-
         $pendingFriends = auth()->user()->pendingFriends()->withPivot('status', 'created_at', 'updated_at')->get();
 
-        return [
-            'success' => true,
-            'data' => $pendingFriends,
-            'count' => $pendingFriends->count()
-        ];
+        return $pendingFriends;
     }
 
-    public function updateFriends(User $user, $command)
+    public function updateFriends(User $user, $command): array|User
     {
         if ($command === 'accept') {
             $friendship = auth()->user()->friendshipsReceived()
                 ->where('user_id', $user->id)
                 ->first();
-            //dd(['v1.0.0',$friendship]);
+
+            if (auth()->user()->isFriendWith($user)){
+                return ['error' => 'You can\'t accept a friend request if you\'re already friends'];
+            }
+
             if ($friendship) {
                 if ($friendship->status === 'pending') {
                     $friendship->status = 'accepted';
                     $friendship->save();
                     auth()->user()->acceptedFriends()->attach($user->id, ['status' => 'accepted']);
 
-                    return $friendship->friend()->get();
+                    return $friendship->friend()->get()[0];
                 }
             }
+
             else{
                 return ['error' => 'Friendships not found'];
             }
         }
+
         if ($command === 'deny') {
-            // Удаляем запись у себя
-            auth()->user()->friendshipsInitiated()
-                ->where('friend_id', $user->id)
-                ->delete();
+            $friendship = auth()->user()->friendshipsReceived()
+                ->where('user_id', $user->id)
+                ->first();
 
-            // Удаляем запись у друга
-            $user->friendshipsInitiated()
-                ->where('friend_id', auth()->user()->id)
-                ->delete();
+            if (auth()->user()->isFriendWith($user)){
+                return ['error' => 'You can\'t cancel a friend request if you\'re already friends'];
+            }
 
-            return ['message' => 'Friend deny successfully'];
+            if ($friendship) {
+                // Удаляем запись у себя
+                auth()->user()->friendshipsInitiated()
+                    ->where('friend_id', $user->id)
+                    ->delete();
+
+                // Удаляем запись у друга
+                $user->friendshipsInitiated()
+                    ->where('friend_id', auth()->user()->id)
+                    ->delete();
+
+                return ['message' => 'Friend deny successfully'];
+            }
+            else{
+                return ['error' => 'Friendships not found'];
+            }
         }
 
         return ['error' => 'Unknown command: ' . $command];
