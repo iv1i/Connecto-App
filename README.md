@@ -134,6 +134,9 @@ sudo apt update && sudo apt upgrade -y
 ### Установка зависимостей:
 ```bash
 composer install
+npm install
+npm audit fix (если будут ошибки)
+npm run build
 ```
 ### Настройка окружения
 ```bash
@@ -149,6 +152,7 @@ docker compose up -d --build
 ### Генерация ключа
 ```bash
 docker compose exec app php artisan key:generate
+docker compose exec app php artisan migrate
 ```
 ### Инициализация БД
 ```bash
