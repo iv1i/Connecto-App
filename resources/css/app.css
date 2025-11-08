@@ -224,7 +224,7 @@ h3 {
 }
 
 .sidebar-btn {
-    @apply w-full flex cursor-pointer items-center gap-3 p-3 dark:text-gray-100 dark:hover:bg-gray-700 hover:bg-gray-100 transition-colors
+    @apply w-full flex cursor-pointer items-center gap-3 p-3 dark:text-gray-100 dark:hover:bg-gray-700 hover:bg-gray-200 transition-colors
 }
 
 .sidebar-btn-container {
@@ -348,7 +348,7 @@ h3 {
 }
 
 .room-item:hover {
-    @apply bg-gray-100 dark:bg-gray-700
+    @apply bg-gray-200 dark:bg-gray-700
 }
 
 .room-item.active {
@@ -606,7 +606,7 @@ h3 {
 }
 
 .action-item:hover {
-    @apply bg-gray-100 dark:bg-gray-700
+    @apply bg-gray-200 dark:bg-gray-700
 }
 
 .action-item i {
