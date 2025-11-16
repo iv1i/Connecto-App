@@ -68,6 +68,13 @@ body {
     overflow: hidden;
 }
 
+html, body {
+    overflow: hidden !important;
+    position: fixed;
+    width: 100%;
+    height: 100%;
+}
+
 /* Typography */
 h1, h2, h3, h4 {
     @apply font-bold text-black dark:text-white;
@@ -230,6 +237,21 @@ h3 {
 .sidebar-btn-container {
     @apply py-1.5 border-gray-200  w-full
 }
+
+/* Для мобильных устройств */
+@media (max-width: 768px) {
+    .sidebar-main {
+        width: 100vw; /* На мобильных занимает всю ширину */
+        max-width: 320px; /* Но не больше 320px */
+    }
+
+    .sidebar-footer {
+        position: sticky;
+        bottom: 0;
+        background: inherit;
+    }
+}
+
 /* Sidebar-Rooms */
 .sidebar-rooms {
     @apply w-lg bg-gray-100 border-r-1 border-gray-50 flex flex-col h-screen sticky dark:bg-gray-800 dark:border-gray-900 dark:text-white;
@@ -247,17 +269,39 @@ h3 {
     @apply p-4 border-t-1;
 }
 
+/* Sidebar-left*/
+/* Для мобильных устройств */
+@media (max-width: 768px) {
+    #sidebar-left {
+        height: 100dvh;
+        max-height: -webkit-fill-available; /* Для iOS Safari */
+        z-index: 40;
+    }
+
+    /* Дополнительная защита от выезжающей клавиатуры */
+    @supports (padding: max(0px)) {
+        #sidebar-left-footer {
+            padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
+        }
+    }
+}
+
 /* Chat area */
 .chat-area {
-    @apply flex grow flex-col h-screen bg-gray-50 dark:bg-gray-900;
+    @apply flex grow flex-col bg-gray-50 dark:bg-gray-900;
+    height: 100dvh; /* Используем динамическую высоту */
+    max-height: 100dvh;
 }
 
 .chat-header {
     @apply p-2 bg-gray-100 sticky top-0 z-10 dark:bg-gray-800 dark:text-white;
+    flex-shrink: 0;
 }
 
 .messages-container {
     @apply grow p-4 overflow-y-auto flex flex-col-reverse;
+    flex: 1 1 auto;
+    min-height: 0; /* Важно для правильного flex поведения */
 }
 
 .messages-container::-webkit-scrollbar {
@@ -282,7 +326,44 @@ h3 {
 }
 
 .message-input-container {
-    @apply p-4 bg-gray-100 sticky bottom-0 dark:bg-gray-800;
+    @apply p-4 bg-gray-100 dark:bg-gray-800;
+    position: sticky;
+    bottom: 0;
+    flex-shrink: 0;
+    /* Защита от мобильных браузеров */
+    padding-bottom: calc(1rem + env(safe-area-inset-bottom));
+}
+
+/* Дополнительная защита для мобильных устройств */
+@supports (padding: max(0px)) {
+    .message-input-container {
+        padding-bottom: max(1rem, env(safe-area-inset-bottom));
+    }
+}
+
+/* Для iOS Safari и других мобильных браузеров */
+@media (max-width: 768px) {
+    .chat-area {
+        height: 100dvh;
+        max-height: -webkit-fill-available; /* Для iOS */
+    }
+
+    .message-input-container {
+        background: rgba(243, 244, 246, 0.95); /* Полупрозрачный для лучшего вида */
+        backdrop-filter: blur(10px);
+    }
+
+    .dark .message-input-container {
+        background: rgba(31, 41, 55, 0.95);
+    }
+
+    #messages {
+        @apply p-0;
+    }
+
+    .messages-container {
+        @apply p-0;
+    }
 }
 
 /* Messages */
@@ -327,7 +408,7 @@ h3 {
 }
 
 .message-text {
-    @apply m-0 p-0 dark:text-white break-all leading-[1.4]
+    @apply m-0 p-0 dark:text-white break-normal leading-[1.4]
 }
 
 .message-reactions {

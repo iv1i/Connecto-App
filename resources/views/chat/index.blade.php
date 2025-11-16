@@ -29,7 +29,6 @@
 
             </div>
 
-
             <!-- Сам сайдбар -->
             <div id="sidebar-main" class="sidebar-main -translate-x-full">
                 <!-- Контент сайдбара -->
@@ -133,13 +132,17 @@
         </div>
 
         <!-- Main Chat Area -->
-        <div class="chat-area">
+        <div class="chat-area hidden">
             <!-- Room Header -->
             <div class="chat-header">
                 <div class="flex justify-between items-center">
+                    <div id="btn-show-room-list" class="btn-show-room-list text-xl hidden">
+                        <i class="fi fi-br-arrow-left"></i>
+                    </div>
+
                     <div>
                         <h2 id="roomName" class="">Select a room</h2>
-                        <p id="roomDescription" class="text-light"></p>
+                        <p id="roomDescription" class="text-light line-clamp-1"></p>
                     </div>
                     <div id="roomActions" class="hidden">
                         <button id="logoutRoomBtn" class="btn btn-secondary !font-bold" title="Logout room">
@@ -396,9 +399,11 @@
         </div>
     </div>
 
-    <script id="v1.1.24">
+    <script id="v1.1.29">
         document.addEventListener('DOMContentLoaded', function() {
             const token = localStorage.getItem('token');
+            const device = localStorage.getItem('Device') ?? 'desktop';
+
             const encodedToken = getCookie('XSRF-TOKEN');
             const decodedToken = decodeURIComponent(encodedToken);
             const currentRoom = localStorage.getItem('roomId');
@@ -488,6 +493,7 @@
 
             async function initApp() {
                 await checkAuth();
+                transformFromDevice()
                 initWebsockets();
                 initTheme();
                 await loadUser();
@@ -523,6 +529,71 @@
                         updateMessageReactions(e.message.id, e.message.reactions);
                     }
                 });
+            }
+
+            function detectDevice() {
+                const userAgent = navigator.userAgent.toLowerCase();
+                const isIOS = /iphone|ipad|ipod/.test(userAgent);
+                const isAndroid = /android/.test(userAgent);
+                const isMobile = /mobile/.test(userAgent);
+                const screenWidth = window.screen.width;
+                const screenHeight = window.screen.height;
+                const hasTouch = 'ontouchstart' in window;
+
+                // Определение типа устройства
+                if (isIOS || isAndroid) {
+                    if (isMobile || screenWidth < 768) {
+                        return 'phone';
+                    } else {
+                        return 'tablet';
+                    }
+                }
+
+                // Для других устройств
+                if (hasTouch && screenWidth <= 1024) {
+                    return screenWidth >= 768 ? 'tablet' : 'phone';
+                }
+
+                return 'desktop';
+            }
+
+            function transformFromDevice(){
+                const thisDevice = detectDevice();
+                localStorage.setItem('Device', thisDevice);
+
+                if (thisDevice === 'phone') {
+                    const chat = document.querySelector('.chat-area');
+                    chat.classList.add('hidden');
+                    const btnShow = document.querySelector('.btn-show-room-list');
+                    btnShow.classList.remove('hidden');
+                }
+                else {
+                    const chat = document.querySelector('.chat-area');
+                    chat.classList.remove('hidden');
+                    const sidebarRooms = document.querySelector('.sidebar-rooms');
+                    sidebarRooms.classList.remove('hidden');
+                    const btnShow = document.querySelector('.btn-show-room-list');
+                    btnShow.classList.add('hidden');
+                }
+            }
+
+            function hideChat() {
+                if (device === 'phone') {
+                    const chat = document.querySelector('.chat-area');
+                    chat.classList.add('hidden');
+                    const sidebarRooms = document.querySelector('.sidebar-rooms');
+                    sidebarRooms.classList.remove('hidden');
+                    localStorage.removeItem('roomId');
+                }
+            }
+
+            function hideSidebarFromMobile(){
+                if (device === 'phone') {
+                    const sidebarRooms = document.querySelector('.sidebar-rooms');
+                    sidebarRooms.classList.add('hidden');
+                    const chat = document.querySelector('.chat-area');
+                    chat.classList.remove('hidden');
+                }
             }
 
             // Загрузка непрочитанных сообщений
@@ -665,6 +736,7 @@
                 document.getElementById('sidebar-overlay').addEventListener('click', hideSidebar);
                 document.getElementById('openProfileBtn').addEventListener('click', showProfileModal);
                 document.getElementById('closeProfileModal').addEventListener('click', hideProfileModal);
+                document.getElementById('btn-show-room-list').addEventListener('click', hideChat);
 
                 // Обработчик скролла для подгрузки сообщений
                 document.querySelector('.messages-container').addEventListener('scroll', handleMessagesScroll);
@@ -1332,6 +1404,7 @@
                     hidePublicRoomsModal();
                     hideSidebar();
                     showLoadingMessages();
+                    hideSidebarFromMobile();
                     document.title = "Connecto-app";
                     const [roomResponse, messagesResponse] = await Promise.all([
                         fetch(`/api/rooms/${roomId}/join`, {
@@ -1502,14 +1575,59 @@
                 }
             }
 
+            function reorderRoomsList() {
+                const roomList = document.getElementById('roomList');
+                const roomItems = Array.from(roomList.querySelectorAll('.room-item'));
+
+                // Сортируем комнаты по количеству непрочитанных сообщений
+                roomItems.sort((a, b) => {
+                    const roomIdA = a.dataset.roomId;
+                    const roomIdB = b.dataset.roomId;
+
+                    const unreadCountA = unreadCounts[roomIdA] || 0;
+                    const unreadCountB = unreadCounts[roomIdB] || 0;
+
+                    // Сначала комнаты с непрочитанными сообщениями
+                    if (unreadCountA > 0 && unreadCountB === 0) return -1;
+                    if (unreadCountA === 0 && unreadCountB > 0) return 1;
+
+                    // Если обе имеют непрочитанные, сортируем по количеству (по убыванию)
+                    if (unreadCountA !== unreadCountB) return unreadCountB - unreadCountA;
+
+                    // Сохраняем исходный порядок для комнат с одинаковым количеством непрочитанных
+                    return 0;
+                });
+
+                // Очищаем список и добавляем отсортированные элементы
+                roomList.innerHTML = '';
+                roomItems.forEach(item => roomList.appendChild(item));
+            }
+
             // Отображение списка комнат
+            // В функции renderRoomList замените текущий код на этот:
             function renderRoomList(rooms) {
                 const roomList = document.getElementById('roomList');
                 const publicRoomList = document.getElementById('publicRoomsList');
                 roomList.innerHTML = '';
                 publicRoomList.innerHTML = '';
 
-                rooms.forEach(room => {
+                // Сортируем комнаты: сначала с непрочитанными сообщениями, затем остальные
+                const sortedRooms = [...rooms].sort((a, b) => {
+                    const unreadA = unreadCounts[a.id] || 0;
+                    const unreadB = unreadCounts[b.id] || 0;
+
+                    // Сначала сортируем по наличию непрочитанных (по убыванию)
+                    if (unreadA > 0 && unreadB === 0) return -1;
+                    if (unreadA === 0 && unreadB > 0) return 1;
+
+                    // Если у обеих есть непрочитанные, сортируем по количеству (по убыванию)
+                    if (unreadA !== unreadB) return unreadB - unreadA;
+
+                    // Если количество непрочитанных одинаковое, сохраняем исходный порядок
+                    return 0;
+                });
+
+                sortedRooms.forEach(room => {
                     Echo.private(`send-messages.${room.id}`)
                         .stopListening('MessageSentEvent');
                     Echo.leave(`send-messages.${room.id}`);
@@ -1540,6 +1658,8 @@
 
                             // ОБНОВЛЯЕМ СЧЕТЧИК СООБЩЕНИЙ ДЛЯ КОМНАТЫ
                             updateRoomMessageCount(e.message.chat_room_id, 1);
+                            // ПЕРЕСОРТИРОВКА ПРИ НОВОМ СООБЩЕНИИ
+                            reorderRoomsList();
                         }
                         console.log('new message from other user!');
                     });
@@ -1574,6 +1694,7 @@
                     roomList.appendChild(roomElement);
                 });
             }
+
             function renderPublicRoomsList(rooms){
                 const publicRoomList = document.getElementById('publicRoomsList');
                 publicRoomList.innerHTML = '';
@@ -1605,7 +1726,7 @@
                 try {
                     showLoadingMessages();
                     document.title = "Connecto-app";
-
+                    hideSidebarFromMobile();
                     // Сбрасываем счетчик непрочитанных для этой комнаты
                     if (unreadCounts[roomId] > 0) {
                         await markRoomAsRead(roomId);
@@ -1651,7 +1772,7 @@
                     }
 
                     messageInputContainer.classList.remove('hidden');
-                    messageInput.focus();
+                    // messageInput.focus();
                 } catch (error) {
                     messagesContainer.innerHTML = `<div class="error-loading-room"><i class="fi fi-br-bug-slash"></i> Error loading room</div>`;
                 }
@@ -2380,6 +2501,7 @@
                     });
 
                     if (response.ok) {
+                        hideChat();
                         const alertToastMessage = {'type': 'success', 'message': 'Room logout successfully'};
                         callShowToast(alertToastMessage);
                         currentRoomId = null;

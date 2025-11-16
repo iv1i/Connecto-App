@@ -271,7 +271,7 @@ class ChatRoomService
 
     public function searchRooms(string $query): LengthAwarePaginator
     {
-        $authUser = auth()->user();
+        $authUser = auth()->guard('sanctum')->user();
         $authUserId = $authUser->id;
 
         $query = ChatRoom::where('name', 'like', "%{$query}%")
