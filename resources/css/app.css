@@ -622,6 +622,15 @@ h3 {
     transform: scale(1.2);
 }
 
+.unread-badge {
+    @apply hidden items-center pt-0.5 px-2 rounded-b-full text-xs  border-2 border-lime-400/80 text-lime-400 py-0.5 font-bold rounded-full whitespace-nowrap
+
+}
+
+.unread-badge.active {
+    @apply inline-block;
+}
+
 /* Invite link input */
 #inviteLinkInput {
     cursor: default;

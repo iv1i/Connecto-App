@@ -413,6 +413,8 @@
             let hasMoreMessages = true;
             let isLoadingMessages = false;
             const unreadRooms = {}
+            let unreadCounts = {};
+            let totalUnread = 0;
 
             // DOM элементы
             const html = document.documentElement;
@@ -485,9 +487,11 @@
             }
 
             async function initApp() {
+                await checkAuth();
                 initWebsockets();
                 initTheme();
                 await loadUser();
+                await loadUnreadCounts(); // Добавьте эту строку
                 await loadRooms();
                 if (currentRoom) {
                     await joinRoom(currentRoom);
@@ -523,20 +527,84 @@
                 });
             }
 
-            function updateUnreadIndicators() {
-                Object.keys(unreadRooms).forEach(roomId => {
-                    const span = document.getElementById(`newMessagesSpan-${roomId}`);
-                    if (span && unreadRooms[roomId]) {
-                        span.innerHTML = '<i id="" class="newMessages fi fi-br-envelope-dot"></i>';
+            // Загрузка непрочитанных сообщений
+            async function loadUnreadCounts() {
+                try {
+                    const response = await fetch('/api/unread-counts', {
+                        headers: {
+                            'Authorization': 'Bearer ' + token,
+                            'Accept': 'application/json',
+                            'X-XSRF-TOKEN': decodedToken
+                        }
+                    });
+
+                    if (response.ok) {
+                        const data = await response.json();
+                        unreadCounts = data;
+                        updateUnreadIndicators();
+                        updateDocumentTitle();
                     }
-                    if (span && !unreadRooms[roomId]) {
-                        const roomElement = document.getElementById(`newMessagesSpan-${roomId}`);
-                        const iconElement = roomElement.querySelector('i.newMessages');
-                        if (iconElement) {
-                            iconElement.remove();
+                } catch (error) {
+                    console.error('Error loading unread counts:', error);
+                }
+            }
+
+// Отметка комнаты как прочитанной
+            async function markRoomAsRead(roomId) {
+                try {
+                    const response = await fetch(`/api/rooms/${roomId}/mark-read`, {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': 'Bearer ' + token,
+                            'Accept': 'application/json',
+                            'X-XSRF-TOKEN': decodedToken
+                        }
+                    });
+
+                    if (response.ok) {
+                        unreadCounts[roomId] = 0;
+                        updateUnreadIndicators();
+                        updateDocumentTitle();
+                    }
+                } catch (error) {
+                    console.error('Error marking room as read:', error);
+                }
+            }
+
+            // Обновление индикаторов непрочитанных
+            function updateUnreadIndicators() {
+                Object.keys(unreadCounts).forEach(roomId => {
+                    const count = unreadCounts[roomId];
+                    const roomElement = document.querySelector(`[data-room-id="${roomId}"]`);
+
+                    if (roomElement) {
+                        let badge = roomElement.querySelector('.unread-badge');
+                        if (!badge) {
+                            badge = document.createElement('span');
+                            badge.className = 'unread-badge';
+                            roomElement.querySelector('.flex.items-baseline').appendChild(badge);
+                        }
+
+                        if (count > 0) {
+                            badge.textContent = count > 99 ? '99+' : count;
+                            badge.classList.add('active');
+                        } else {
+                            badge.classList.remove('active');
                         }
                     }
                 });
+
+                // Обновление общего количества
+                totalUnread = Object.values(unreadCounts).reduce((sum, count) => sum + count, 0);
+            }
+
+            // Обновление заголовка документа
+            function updateDocumentTitle() {
+                if (totalUnread > 0) {
+                    document.title = `(${totalUnread}) Connecto-app`;
+                } else {
+                    document.title = 'Connecto-app';
+                }
             }
 
             function changeRoomMessagesCount(roomId, change) {
@@ -1343,6 +1411,31 @@
                 }
             }
 
+            async function checkAuth() {
+                try {
+                    const response = await fetch('/api/check/auth', {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': 'Bearer ' + token ?? null,
+                            'Accept': 'application/json',
+                            'X-XSRF-TOKEN': decodedToken
+                        }
+                    });
+
+                    if (response.ok) {
+                        data = await response.json()
+                        if (!data.auth) {
+                            window.location.href = '/login';
+                        }
+                    } else {
+                        throw new Error('Failed to check auth');
+                    }
+                } catch (error) {
+                    const alertToastMessage = {'type': 'error', 'message': error};
+                    callShowToast(alertToastMessage);
+                }
+            }
+
             // Загрузка комнат
             async function loadRooms() {
                 try {
@@ -1413,19 +1506,24 @@
                         .stopListening('MessageSentEvent');
                     Echo.leave(`send-messages.${room.id}`);
                     Echo.private(`send-messages.${room.id}`).listen('MessageSentEvent', (e) => {
-                        if (e.message.user.id !== userData.id){
-                            if (String(e.message.chat_room_id) === localStorage.getItem('roomId')){
-                                // Добавляем обработчик контекстного меню для новых сообщений
-                                updateRoomMessageCount(e.message.chat_room_id, 1);
+                        if (e.message.user.id !== userData.id) {
+                            if (String(e.message.chat_room_id) === localStorage.getItem('roomId')) {
+                                // Сообщение в текущей комнате
                                 addMessageToUI(e.message);
-                            }
-                            if (String(e.message.chat_room_id) !== localStorage.getItem('roomId')) {
-                                unreadRooms[e.message.chat_room_id] = true;
-                                updateRoomMessageCount(e.message.chat_room_id, 1)
+                                // Автоматически отмечаем как прочитанное
+                                if (unreadCounts[e.message.chat_room_id]) {
+                                    unreadCounts[e.message.chat_room_id] = 0;
+                                    updateUnreadIndicators();
+                                }
+                            } else {
+                                // Сообщение в другой комнате
+                                if (!unreadCounts[e.message.chat_room_id]) {
+                                    unreadCounts[e.message.chat_room_id] = 0;
+                                }
+                                unreadCounts[e.message.chat_room_id]++;
                                 updateUnreadIndicators();
+                                updateDocumentTitle();
                             }
-                            document.title = "Connecto-app (*)";
-                            console.log('new message!')
                         }
                     });
                     const roomElement = document.createElement('div');
@@ -1496,6 +1594,7 @@
                 try {
                     showLoadingMessages();
                     document.title = "Connecto-app";
+                    await markRoomAsRead(roomId);
 
                     // Сбрасываем пагинацию
                     currentMessagesPage = 1;

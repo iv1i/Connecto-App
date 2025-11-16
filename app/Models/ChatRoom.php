@@ -4,6 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class ChatRoom extends Model
@@ -53,16 +55,27 @@ class ChatRoom extends Model
         return $this->hasMany(Message::class);
     }
 
-    public function creator()
+    public function creator(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by');
     }
 
-    public function members()
+    public function members(): BelongsToMany
     {
         return $this->belongsToMany(User::class,'chat_room_users')
-            ->withPivot('joined_via', 'joined_at')
+            ->withPivot('joined_via', 'joined_at', 'last_read_at')
             ->withTimestamps();
+    }
+
+    public function unreadMessagesCountForUser($userId): int
+    {
+        $lastRead = $this->members()->where('user_id', $userId)->first()->pivot->last_read_at;
+
+        if (!$lastRead) {
+            return $this->messages()->count();
+        }
+
+        return $this->messages()->where('created_at', '>', $lastRead)->count();
     }
 
     public static function getRoomByInviteCode(string $code)

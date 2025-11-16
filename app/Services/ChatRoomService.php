@@ -289,4 +289,24 @@ class ChatRoomService
         return $query->paginate(10);
     }
 
+    public function markRoomAsRead(ChatRoom $room): array
+    {
+        $authUser = auth()->user();
+
+        if (!$room->isMember($authUser->id)) {
+            return ['error' => 'User is not a member of this room'];
+        }
+
+        $unreadService = new UnreadMessageService();
+        return $unreadService->markAsRead($room, $authUser);
+    }
+
+    public function getUnreadCounts(): array
+    {
+        $authUser = auth()->user();
+        $unreadService = new UnreadMessageService();
+
+        return $unreadService->getUnreadCounts($authUser);
+    }
+
 }

@@ -66,7 +66,7 @@
         document.getElementById('loginForm').addEventListener('submit', async function(e) {
             e.preventDefault();
 
-            const response = await fetch('/login', {
+            const response = await fetch('/api/login', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -80,13 +80,16 @@
                 })
             });
 
+            const data = await response.json();
+            console.log(data);
+
             if (response.ok) {
 
-                // Сохраняем токен
-                //localStorage.setItem('token', token);
-                //document.cookie = `token=${token}; path=/; max-age=${60 * 60 * 24}`;
+                //Сохраняем токен
+                localStorage.setItem('token', data.token);
+                document.cookie = `token=${data.token}; path=/; max-age=${60 * 60 * 24}`;
 
-                // Перенаправляем
+                //Перенаправляем
                 window.location.href = '/chat';
             } else {
                 const alertToastMessage = {'type': 'error', 'message': 'Login failed'};

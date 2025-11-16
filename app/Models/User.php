@@ -123,8 +123,26 @@ class User extends Authenticatable
     public function chatRooms(): BelongsToMany
     {
         return $this->belongsToMany(ChatRoom::class, 'chat_room_users', 'user_id', 'chat_room_id')
-            ->withPivot('joined_via', 'joined_at', 'user_id', 'chat_room_id')
+            ->withPivot('joined_via', 'joined_at','last_read_at', 'user_id', 'chat_room_id')
             ->withTimestamps();
+    }
+
+    public function unreadMessagesCount($roomId = null)
+    {
+        $query = Message::whereHas('chatRoom.members', function($q) {
+            $q->where('user_id', $this->id);
+        })->where('created_at', '>', function($query) {
+            $query->select('last_read_at')
+                ->from('chat_room_users')
+                ->whereColumn('chat_room_id', 'messages.chat_room_id')
+                ->where('user_id', $this->id);
+        });
+
+        if ($roomId) {
+            $query->where('chat_room_id', $roomId);
+        }
+
+        return $query->count();
     }
 
     // В App\Models\User

@@ -7,7 +7,6 @@ use Illuminate\Database\Eloquent\Model;
 
 class ChatRoomUser extends Model
 {
-    /** @use HasFactory<\Database\Factories\ChatRoomUserFactory> */
     use HasFactory;
     protected $fillable = [
         'user_id',
@@ -15,4 +14,8 @@ class ChatRoomUser extends Model
         'joined_via'
     ];
 
+    protected $casts = [
+        'joined_at' => 'datetime',
+        'last_read_at' => 'datetime',
+    ];
 }

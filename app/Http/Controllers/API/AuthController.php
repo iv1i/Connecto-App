@@ -49,6 +49,19 @@ class AuthController extends Controller
         ]);
     }
 
+    public function checkAuth(): JsonResponse
+    {
+        if (auth()->guard('sanctum')->check()) {
+            return response()->json([
+                'auth' => true,
+            ]);
+        } else {
+            return response()->json([
+                'auth' => false,
+            ]);
+        }
+    }
+
     public function logout(Request $request): JsonResponse
     {
         $user = $request->user();

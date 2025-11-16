@@ -4,6 +4,7 @@ use App\Http\Controllers\API\AuthController;
 use App\Http\Controllers\API\ChatRoomController;
 use App\Http\Controllers\API\FriendshipsController;
 use App\Http\Controllers\API\MessageController;
+use App\Http\Controllers\API\UnreadMessageController;
 use App\Http\Controllers\API\UserController;
 use Illuminate\Support\Facades\Route;
 
@@ -13,6 +14,8 @@ Route::get('/rooms/search', [ChatRoomController::class, 'search']);
 Route::get('/users/search', [UserController::class, 'search']);
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
+Route::post('/check/auth', [AuthController::class, 'checkAuth']);
+
 
 // Protected routes
 Route::middleware('auth:sanctum')->group(function () {
@@ -42,6 +45,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/messages/{message}/react/{reaction}', [MessageController::class, 'addReaction']);
     Route::delete('/messages/{message}', [MessageController::class, 'destroy']);
     Route::delete('/messages/{message}/react/{reaction}', [MessageController::class, 'delReaction']);
+    
+    // Unread Messages
+    Route::post('/rooms/{room}/mark-read', [UnreadMessageController::class, 'markAsRead']);
+    Route::get('/unread-counts', [UnreadMessageController::class, 'getUnreadCounts']);
+    Route::get('/total-unread', [UnreadMessageController::class, 'getTotalUnreadCount']);
 
     // Users
     Route::get('/profile', [UserController::class, 'profile']);

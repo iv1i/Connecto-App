@@ -14,6 +14,7 @@ return new class extends Migration
             $table->foreignId('chat_room_id')->constrained()->onDelete('cascade');
             $table->string('joined_via')->nullable()->comment('Метод присоединения: invite_code, direct_join и т.д.');
             $table->timestamp('joined_at')->useCurrent();
+            $table->timestamp('last_read_at')->nullable();
             $table->timestamps();
 
             $table->unique(['user_id', 'chat_room_id']); // Уникальная пара пользователь-комната
