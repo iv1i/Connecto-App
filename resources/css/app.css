@@ -327,7 +327,7 @@ h3 {
 }
 
 .message-text {
-    @apply m-0 p-0 dark:text-white break-normal leading-[1.4]
+    @apply m-0 p-0 dark:text-white break-all leading-[1.4]
 }
 
 .message-reactions {

@@ -491,7 +491,7 @@
                 initWebsockets();
                 initTheme();
                 await loadUser();
-                await loadUnreadCounts(); // Добавьте эту строку
+                //await loadUnreadCounts();
                 await loadRooms();
                 if (currentRoom) {
                     await joinRoom(currentRoom);
@@ -500,8 +500,6 @@
             }
 
             function initWebsockets(){
-
-
                 Echo.private(`deleted-message`).listen('MessageDellEvent', (e) => {
                     if (e.message.user.id !== userData.id){
                         updateRoomMessageCount(e.message.chat_room_id, -1)
@@ -542,14 +540,13 @@
                         const data = await response.json();
                         unreadCounts = data;
                         updateUnreadIndicators();
-                        updateDocumentTitle();
                     }
                 } catch (error) {
                     console.error('Error loading unread counts:', error);
                 }
             }
 
-// Отметка комнаты как прочитанной
+            // Отметка комнаты как прочитанной
             async function markRoomAsRead(roomId) {
                 try {
                     const response = await fetch(`/api/rooms/${roomId}/mark-read`, {
@@ -573,29 +570,31 @@
 
             // Обновление индикаторов непрочитанных
             function updateUnreadIndicators() {
+                let totalUnread = 0;
+
+                // Обновляем бейджи для всех комнат
                 Object.keys(unreadCounts).forEach(roomId => {
                     const count = unreadCounts[roomId];
-                    const roomElement = document.querySelector(`[data-room-id="${roomId}"]`);
+                    totalUnread += count;
 
-                    if (roomElement) {
-                        let badge = roomElement.querySelector('.unread-badge');
-                        if (!badge) {
-                            badge = document.createElement('span');
-                            badge.className = 'unread-badge';
-                            roomElement.querySelector('.flex.items-baseline').appendChild(badge);
-                        }
-
+                    const badge = document.getElementById(`unread-badge-${roomId}`);
+                    if (badge) {
                         if (count > 0) {
-                            badge.textContent = count > 99 ? '99+' : count;
                             badge.classList.add('active');
+                            badge.textContent = count > 99 ? '99+' : count;
                         } else {
                             badge.classList.remove('active');
+                            badge.textContent = '';
                         }
                     }
                 });
 
-                // Обновление общего количества
-                totalUnread = Object.values(unreadCounts).reduce((sum, count) => sum + count, 0);
+                // Обновляем заголовок
+                if (totalUnread > 0) {
+                    document.title = `(${totalUnread}) Connecto-app`;
+                } else {
+                    document.title = 'Connecto-app';
+                }
             }
 
             // Обновление заголовка документа
@@ -1330,7 +1329,6 @@
             // Функция присоединения к публичной комнате
             async function joinPublicRoom(roomId) {
                 try {
-                    console.log(roomId);
                     hidePublicRoomsModal();
                     hideSidebar();
                     showLoadingMessages();
@@ -1439,18 +1437,30 @@
             // Загрузка комнат
             async function loadRooms() {
                 try {
-                    const response = await fetch('/api/rooms/joined', {
-                        headers: {
-                            'Authorization': 'Bearer ' + token,
-                            'Accept': 'application/json',
-                            'X-XSRF-TOKEN': decodedToken
-                        }
-                    });
+                    const [roomsResponse, unreadResponse] = await Promise.all([
+                        fetch('/api/rooms/joined', {
+                            headers: {
+                                'Authorization': 'Bearer ' + token,
+                                'Accept': 'application/json',
+                                'X-XSRF-TOKEN': decodedToken
+                            }
+                        }),
+                        fetch('/api/unread-counts', {
+                            headers: {
+                                'Authorization': 'Bearer ' + token,
+                                'Accept': 'application/json',
+                                'X-XSRF-TOKEN': decodedToken
+                            }
+                        })
+                    ]);
 
-                    if (response.ok) {
-                        const data = await response.json();
-                        renderRoomList(data.data);
-                        //renderPrivateChatsList(data.data.private_chats);
+                    if (roomsResponse.ok && unreadResponse.ok) {
+                        const roomsData = await roomsResponse.json();
+                        const unreadData = await unreadResponse.json();
+
+                        unreadCounts = unreadData;
+                        renderRoomList(roomsData.data);
+                        updateUnreadIndicators();
                     }
                 } catch (error) {
                     console.error(error);
@@ -1458,7 +1468,6 @@
                     callShowToast(alertToastMessage);
                 }
             }
-
             // Поиск комнат
             async function searchRooms(e) {
                 const query = e.target.value.trim().toLowerCase();
@@ -1499,60 +1508,63 @@
                 const publicRoomList = document.getElementById('publicRoomsList');
                 roomList.innerHTML = '';
                 publicRoomList.innerHTML = '';
-                //renderPublicRoomsList(rooms);
 
                 rooms.forEach(room => {
                     Echo.private(`send-messages.${room.id}`)
                         .stopListening('MessageSentEvent');
                     Echo.leave(`send-messages.${room.id}`);
+
                     Echo.private(`send-messages.${room.id}`).listen('MessageSentEvent', (e) => {
-                        if (e.message.user.id !== userData.id) {
-                            if (String(e.message.chat_room_id) === localStorage.getItem('roomId')) {
-                                // Сообщение в текущей комнате
-                                addMessageToUI(e.message);
-                                // Автоматически отмечаем как прочитанное
-                                if (unreadCounts[e.message.chat_room_id]) {
-                                    unreadCounts[e.message.chat_room_id] = 0;
-                                    updateUnreadIndicators();
-                                }
-                            } else {
-                                // Сообщение в другой комнате
-                                if (!unreadCounts[e.message.chat_room_id]) {
-                                    unreadCounts[e.message.chat_room_id] = 0;
-                                }
-                                unreadCounts[e.message.chat_room_id]++;
-                                updateUnreadIndicators();
-                                updateDocumentTitle();
-                            }
+                        // Игнорируем собственные сообщения полностью
+                        if (e.message.user.id === userData.id) {
+                            return;
                         }
+
+                        if (String(e.message.chat_room_id) === localStorage.getItem('roomId')) {
+                            // Сообщение в текущей комнате - добавляем и обновляем счетчик
+                            updateRoomMessageCount(e.message.chat_room_id, 1);
+                            addMessageToUI(e.message);
+
+                            // Если мы в этой комнате, не считаем сообщение непрочитанным
+                            if (unreadCounts[e.message.chat_room_id] > 0) {
+                                unreadCounts[e.message.chat_room_id] = 0;
+                                updateUnreadIndicators();
+                            }
+                        } else {
+                            // Сообщение в другой комнате - увеличиваем счетчик непрочитанных
+                            if (!unreadCounts[e.message.chat_room_id]) {
+                                unreadCounts[e.message.chat_room_id] = 0;
+                            }
+                            unreadCounts[e.message.chat_room_id]++;
+                            updateUnreadIndicators();
+
+                            // ОБНОВЛЯЕМ СЧЕТЧИК СООБЩЕНИЙ ДЛЯ КОМНАТЫ
+                            updateRoomMessageCount(e.message.chat_room_id, 1);
+                        }
+                        console.log('new message from other user!');
                     });
+
+                    const unreadCount = unreadCounts[room.id] || 0;
                     const roomElement = document.createElement('div');
-                    const publicRoomElement = document.createElement('div');
-                    room.is_owner = room.created_by === userData.id;
                     roomElement.className = 'room-item';
                     roomElement.dataset.roomId = room.id;
                     roomElement.innerHTML = `
   <div class="flex flex-col gap-1">
     <div class="flex items-baseline gap-2">
-      <!-- Название комнаты с обрезкой длинного текста -->
       <span class="font-medium truncate flex-1 min-w-0">
         ${room.name}${room.is_owner && room.type !== 'personal'
                         ? '<span class="text-base text-yellow-500 px-2 py-0.5 rounded-full whitespace-nowrap"><i class="fi fi-br-user-key"></i></span>'
                         : ' '
                     }
       </span>
-      <!-- Бейдж типа комнаты -->
       ${room.type === 'private' || room.type === 'personal'
                         ? '<span class="private-chat">Private</span>'
                         : '<span class="public-chat">Public</span>'
                     }
-      <!-- Счетчик новых сообщений (только если есть) -->
-      <span id="newMessagesSpan-${room.id}" class="">
-        ${room.new_messages || ''}
+      <span id="unread-badge-${room.id}" class="unread-badge ${unreadCount > 0 ? 'active' : ''}">
+        ${unreadCount > 0 ? (unreadCount > 99 ? '99+' : unreadCount) : ''}
       </span>
     </div>
-
-    <!-- Счетчик сообщений -->
     <p class="text-sm text-gray-500">
       ${room.messages_count} ${room.messages_count === 1 ? 'message' : 'messages'}
     </p>
@@ -1562,7 +1574,6 @@
                     roomList.appendChild(roomElement);
                 });
             }
-
             function renderPublicRoomsList(rooms){
                 const publicRoomList = document.getElementById('publicRoomsList');
                 publicRoomList.innerHTML = '';
@@ -1594,13 +1605,13 @@
                 try {
                     showLoadingMessages();
                     document.title = "Connecto-app";
-                    await markRoomAsRead(roomId);
 
-                    // Сбрасываем пагинацию
-                    currentMessagesPage = 1;
-                    hasMoreMessages = true;
-                    isLoadingMessages = false;
+                    // Сбрасываем счетчик непрочитанных для этой комнаты
+                    if (unreadCounts[roomId] > 0) {
+                        await markRoomAsRead(roomId);
+                    }
 
+                    // Остальная существующая логика...
                     const [roomResponse, messagesResponse] = await Promise.all([
                         fetch(`/api/rooms/${roomId}`, {
                             headers: {
@@ -1609,7 +1620,7 @@
                                 'X-XSRF-TOKEN': decodedToken
                             }
                         }),
-                        fetch(`/api/rooms/${roomId}/messages?page=1`, { // Добавляем page=1
+                        fetch(`/api/rooms/${roomId}/messages?page=1`, {
                             headers: {
                                 'Authorization': 'Bearer ' + token,
                                 'Accept': 'application/json',
@@ -1626,23 +1637,18 @@
                     const messages = await messagesResponse.json();
 
                     currentRoomId = roomId;
-                    unreadRooms[currentRoomId] = false;
-                    updateUnreadIndicators();
                     localStorage.setItem('roomId', roomId);
 
                     updateRoomUI(room.data);
-                    //await loadRooms();
 
-                    // Обновляем информацию о пагинации
                     currentMessagesPage = messages.meta.current_page || 1;
                     hasMoreMessages = messages.meta.current_page < messages.meta.last_page;
 
                     if (messages.data.length === 0){
                         showNopeMessages();
-                    }
-                    else {
+                    } else {
                         renderMessages(messages.data);
-                    }createPrivateChat
+                    }
 
                     messageInputContainer.classList.remove('hidden');
                     messageInput.focus();
@@ -1650,7 +1656,6 @@
                     messagesContainer.innerHTML = `<div class="error-loading-room"><i class="fi fi-br-bug-slash"></i> Error loading room</div>`;
                 }
             }
-
 
             // Создание личного чата
             async function createPrivateChat(friendId) {
@@ -2132,6 +2137,10 @@
                         addMessageToUI(result.data);
                         messageInput.value = '';
                         updateRoomMessageCount(currentRoomId, 1);
+
+                        // Сразу отмечаем комнату как прочитанную при отправке сообщения
+                        unreadCounts[currentRoomId] = 0;
+                        updateUnreadIndicators();
                     } else {
                         const error = await response.json();
                         const alertToastMessage = {'type': 'error', 'message': error.message || 'Failed to send message'};
@@ -2146,6 +2155,7 @@
                     submitBtn.textContent = 'Send';
                 }
             }
+
             // Удаление сообщения
             async function deleteMessage(messageId) {
                 try {
@@ -2178,15 +2188,32 @@
 
             // Обновление счетчика сообщений в комнате
             function updateRoomMessageCount(roomId, change = 0) {
-                const roomElement = document.querySelector(`#roomList > div[data-room-id="${roomId}"]`);
+                // Обновляем в основном списке комнат
+                const roomElement = document.querySelector(`[data-room-id="${roomId}"]`);
                 if (roomElement) {
-                    const countElement = roomElement.querySelector('p');
+                    const countElement = roomElement.querySelector('p.text-sm.text-gray-500');
                     if (countElement) {
                         const text = countElement.textContent;
                         const match = text.match(/(\d+)/);
                         if (match) {
                             const currentCount = parseInt(match[1]);
-                            countElement.textContent = text.replace(/\d+/, currentCount + change);
+                            const newCount = Math.max(0, currentCount + change);
+                            countElement.textContent = `${newCount} ${newCount === 1 ? 'message' : 'messages'}`;
+                        }
+                    }
+                }
+
+                // Обновляем в модальном окне публичных комнат
+                const publicRoomElement = document.querySelector(`#publicRoomsList [data-room-id="${roomId}"]`);
+                if (publicRoomElement) {
+                    const countElement = publicRoomElement.querySelector('p.text-sm.text-gray-500');
+                    if (countElement) {
+                        const text = countElement.textContent;
+                        const match = text.match(/(\d+)/);
+                        if (match) {
+                            const currentCount = parseInt(match[1]);
+                            const newCount = Math.max(0, currentCount + change);
+                            countElement.textContent = `${newCount} ${newCount === 1 ? 'message' : 'messages'}`;
                         }
                     }
                 }
@@ -2422,7 +2449,7 @@
             // Выход
             async function logout() {
                 try {
-                    const response = await fetch('/logout', {
+                    const response = await fetch('/api/logout', {
                         method: 'POST',
                         headers: {
                             'Authorization': 'Bearer ' + token,

@@ -297,8 +297,16 @@ class ChatRoomService
             return ['error' => 'User is not a member of this room'];
         }
 
-        $unreadService = new UnreadMessageService();
-        return $unreadService->markAsRead($room, $authUser);
+        // Обновляем время последнего прочтения
+        $authUser->chatRooms()->updateExistingPivot($room->id, [
+            'last_read_at' => now()
+        ]);
+
+        return [
+            'success' => true,
+            'message' => 'Room marked as read',
+            'unread_count' => 0
+        ];
     }
 
     public function getUnreadCounts(): array

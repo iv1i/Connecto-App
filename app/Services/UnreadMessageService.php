@@ -9,12 +9,18 @@ class UnreadMessageService
 {
     public function markAsRead(ChatRoom $room, User $user): array
     {
+        if (!$room->isMember($user->id)) {
+            return ['error' => 'User is not a member of this room'];
+        }
+
+        // Обновляем время последнего прочтения
         $user->chatRooms()->updateExistingPivot($room->id, [
             'last_read_at' => now()
         ]);
 
         return [
             'success' => true,
+            'message' => 'Room marked as read',
             'unread_count' => 0
         ];
     }

@@ -43,10 +43,10 @@
                 </div>
 
                 <div class="mb-[1rem]">
-                    <label for="remember" class="label">
-                        <i class="fi fi-br-bookmark"></i><span>Remember me</span>
-                        <input class="ml-auto" type="checkbox" id="remember" name="remember">
-                    </label>
+{{--                    <label for="remember" class="label">--}}
+{{--                        <i class="fi fi-br-bookmark"></i><span>Remember me</span>--}}
+{{--                        <input class="ml-auto" type="checkbox" id="remember" name="remember">--}}
+{{--                    </label>--}}
                 </div>
 
                 <button type="submit" class="btn btn-primary btn-block">
@@ -75,13 +75,12 @@
                 body: JSON.stringify({
                     email: document.getElementById('email').value,
                     password: document.getElementById('password').value,
-                    remember: document.getElementById('remember').value,
+                    // remember: document.getElementById('remember').value,
                     _token: "{{ csrf_token() }}"
                 })
             });
 
             const data = await response.json();
-            console.log(data);
 
             if (response.ok) {
 

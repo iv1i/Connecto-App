@@ -72,10 +72,15 @@ class ChatRoom extends Model
         $lastRead = $this->members()->where('user_id', $userId)->first()->pivot->last_read_at;
 
         if (!$lastRead) {
-            return $this->messages()->count();
+            // Если никогда не читал, считаем все сообщения кроме своих
+            return $this->messages()->where('user_id', '!=', $userId)->count();
         }
 
-        return $this->messages()->where('created_at', '>', $lastRead)->count();
+        // Считаем только сообщения других пользователей после last_read_at
+        return $this->messages()
+            ->where('created_at', '>', $lastRead)
+            ->where('user_id', '!=', $userId)
+            ->count();
     }
 
     public static function getRoomByInviteCode(string $code)

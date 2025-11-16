@@ -17,14 +17,14 @@ class MessageService
     {
         $data = $request->validated();
         $data['user_id'] = $user->id;
-        $chatRoom = ChatRoom::find($data['chat_room_id']);
+        $chatRoom = ChatRoom::query()->find($data['chat_room_id']);
         $check = $chatRoom->members()->where('users.id', $user->id)->exists();
 
         if (!$check) {
             return ['error' => 'user not joined on chat room'];
         }
 
-        $message = Message::create($data);
+        $message = Message::query()->create($data);
         $msg = $message->load('user');
 
         MessageSentEvent::dispatch($msg);
